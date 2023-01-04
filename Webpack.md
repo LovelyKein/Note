@@ -109,21 +109,33 @@
 >
 > `Loader` 加载器可以协助 webpack 处理打包特定的文件模块；
 >
+> [^Loader]:A loader is a node module exporting a function，是一个 node 导出的方法；
+>
 > ```javascript
 > module: {
->     rules: [
->        // 文件类型检测规则；loader 配置;
->        {
->          test: /\.css$/,
->          use: ['css-loader','style-loader']
->        }
->        // ......
->     ],
->       oneOf: [
->          // 规则......
->       ]
+>   rules: [
+>     // 文件类型检测规则；loader 配置;
+>     {
+>       test: /\.css$/,
+>       use: ['css-loader','style-loader']
+>     }
+>     // ......
+>   ],
+>     oneOf: [
+>       // 规则......
+>     ]
 > }
 > ```
+
+
+
+##### 使用方式
+
+> - [配置](https://doc.webpack-china.org/concepts/loaders/#configuration)（推荐）：在 `webpack.config.js` 文件中指定 `loader`；
+> - [内联](https://doc.webpack-china.org/concepts/loaders/#inline)：在每个 `import` 语句中显式指定 `loader`；
+> - [CLI](https://doc.webpack-china.org/concepts/loaders/#cli)：在 `shell` 命令中指定它们；
+>
+> 推荐使用第一种；
 
 
 

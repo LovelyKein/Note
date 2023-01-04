@@ -2,9 +2,11 @@
 
 >Node.js 不是一门语言，不是库，不是框架：
 >
->而是一个 JavaScript 运行时的环境（平台）；
+>一个基于Chrome V8 引擎的 JavaScript 运行环境（平台）；
 >
 >简单来说就是 Node.js 可以解析和执行 JavaScript 代码，可以代替浏览器；
+>
+>使用`C++`语言开发；
 
 
 
