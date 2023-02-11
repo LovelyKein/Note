@@ -3848,7 +3848,7 @@
 
   
 
-  * context.attrs
+  * attrs
 
     > 对象，包含**父组件传递过来，但是没在`props`中声明的属性**；
     >
@@ -3908,12 +3908,12 @@
 > 
 > ```javascript
 > setup(){
->  let person = reactive({
+>    let person = reactive({
 >        name: 'Kein',
 >        gender: 'Male'
->     })
->     let myName = toRef(person,'name')
->     return{myName}
+>      })
+>      let myName = toRef(person,'name')
+>      return{myName}
 >    }
 > ```
 
@@ -3927,11 +3927,11 @@
 > // toRefs() 与 reactive() 配合，解构变量，优化书写；
 > 
 > let { name, gender, list, age, enRich } = toRefs(reactive({
->   name: 'Kein',
->   gender: 'Male',
->   list: [22, 23, 24, 25],
->   age: 22,
->   enRich: true
+>     name: 'Kein',
+>     gender: 'Male',
+>     list: [22, 23, 24, 25],
+>     age: 22,
+>     enRich: true
 > }))
 > ```
 

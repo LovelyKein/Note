@@ -576,16 +576,16 @@
 >
 > ```javascript
 > function fn(callback){
->    setTimeout(function(){
+>      setTimeout(function(){
 >        var data = 'Hello World !';
 >        callback(data);
->    },1000);
+>      },1000);
 > }
 > 
 > // 如果要获取一个函数中异步操作的结果，则必须通过回调函数来获取；
 > // 回调函数
 > function receive(data){
->     console.log(data)
+>      console.log(data)
 > }
 > fn(receive)
 > ```

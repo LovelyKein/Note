@@ -95,7 +95,7 @@
 
 
 
-## 基本用法( Basic )
+## 组件( Component )
 
 > ```html
 > <body>
@@ -134,13 +134,13 @@
 
 
 
-#### 组件( Component )
+### 组件( Component )
 
 > 在 React 中面向组件化编程；
 
 
 
-###### 函数式( Function )
+#### 函数式( Function )
 
 > 编译渲染流程
 >
@@ -165,7 +165,7 @@
 
 
 
-###### 类式( Class )
+#### 类式( Class )
 
 > 编译渲染流程
 >
@@ -191,7 +191,7 @@
 
 
 
-#### 事件绑定( event )
+### 事件绑定( event )
 
 > ```jsx
 > class Weather extends React.Component {
@@ -229,7 +229,23 @@
 
 
 
-#### 组件简写
+### 组件标签
+
+> 组件标签可以**双标签**，也可以**单标签**；
+>
+> ```jsx
+> // 单标签
+> <MyComponent />
+> 
+> // 双标签
+> <MyComponent>内容</MyComponent>
+> 
+> // 如果是双标签，组件标签之间的内容会被当作属性 props.children 传递给自组件
+> ```
+
+
+
+### 组件简写
 
 > 利用类的赋值语句写法；
 >
@@ -258,17 +274,17 @@
 
 
 
-#### 卸载组件
+### 卸载组件
 
 > ```jsx
 > // 创建类式组件；
 > class ClassComponent extends React.Component {
 >   // 卸载组件的方法
 >   death = () => {
->     ReactDOM.unmountComponentAtNode(document.getElementById('demo'))
+>    ReactDOM.unmountComponentAtNode(document.getElementById('demo'))
 >   }
 >   render(){
->     return <h2>我是类式组件</h2>
+>    return <h2>我是类式组件</h2>
 >   }
 > }
 > ReactDOM.render(<ClassComponent/>, document.getElementById('demo'))
@@ -308,13 +324,17 @@
 ## 数据( state )
 
 > `state`是 React **组件实例对象**的 3 大核心属性之一；
->
+
+
+
+### state
+
 > 用来存储响应式数据；
 >
 > ```jsx
-> class Weather extends React.Component {
->      constructor(props) {
->        super(props)
+>class Weather extends React.Component {
+>   constructor(props) {
+>     super(props)
 >        // state 是组件实例对象的 3 大核心属性之一；
 >        // 初始化 state ；
 >        this.state = {
@@ -326,21 +346,23 @@
 >        const {isHot} = this.state;
 >        return <h2>今天的天气{isHot? '炎热':'寒冷'}</h2>
 >      }
-> }
-> ReactDOM.render(<Weather/>, document.getElementById('demo'))
+>    }
+>    ReactDOM.render(<Weather/>, document.getElementById('demo'))
 > ```
 
-[^Focus]: `state`中的数据不能直接更改，需要通过 `this.setState`，该方法在`React.Component`上；
+[^Focus]: `state`中的数据不能直接更改，需要通过 `this.setState`，否则视图不会更新，该方法在`React.Component`上；
 
 
 
-#### setState()
+### setState()
 
 > React 中是单向数据流，更新 state 中的数据，需要通过`this.setState()`方法去改变数据，才会引起页面的更新；
 
+[^Focus]:state 数据的改变是**异步**的，获取最新数据可以在`setState`方法的第二个回调函数中获取；
 
 
-###### 对象式
+
+#### 对象式
 
 > `this.setState(stateObject, callback)`；
 >
@@ -349,9 +371,9 @@
 >
 > ```jsx
 > this.setState({
->     isHot: true
+>      isHot: true
 > }, () => {
->     console.log(this.state.isHot) // true
+>      console.log(this.state.isHot) // true
 > })
 > 
 > // 改变状态需要一个过程，如果需要实时获取状态的更新数据，在 setState() 传递第二个回调函数参数，获取最新状态；
@@ -360,21 +382,21 @@
 
 
 
-###### 函数式
+#### 函数式
 
 > `this.setState(updater, callback)`；
 >
 > [^updater]:为返回 发生改变的属性的对象 的函数，可以接收到 state、props ；
 > [^callback]:**可选参数**，回调函数，在状态、页面更新完毕（`render()`调用后）才被执行；
 >
-> ```jsx
+> ```js
 > this.setState((state, props) => {
->   return {
->     isHot: true,
->     count: state.count + 1
->   }
+>     return {
+>        isHot: true,
+>        count: state.count + 1
+>     }
 > }, () => {
->   console.log('callback')
+>     console.log('callback')
 > })
 > ```
 
@@ -388,12 +410,10 @@
 >
 > 给组件传递外界的数据，在组件标签中通过书写标签属性传递；
 >
-> [^Important]:`props`属性是**只读**的，修改会报错；
->
 > ```jsx
-> class Weather extends React.Component {
->     render(){
->        // 从 props 中解构属性
+>class Weather extends React.Component {
+>  render(){
+>     // 从 props 中解构属性
 >        let {name, gender, age} = this.props
 >        return (
 >          <ul>
@@ -403,21 +423,23 @@
 >          </ul>
 >        )
 >     }
-> }
-> // 外界数据
+>    }
+>    // 外界数据
 > const person = {
->     name: 'LovelyKein',
->     gender: 'Male',
+>  name: 'LovelyKein',
+>  gender: 'Male',
 >     age: '22'
-> }
-> // 给组件 Weather 传递属性
+>    }
+>    // 给组件 Weather 传递属性
 > ReactDOM.render(<Weather name={person.name} gender={person.gender} age={person.age}/>,
->                    document.getElementById('demo'))
+>                 document.getElementById('demo'))
 > 
-> // 批量传递属性
+>    // 批量传递属性
 > // 要求：传递的属性名和组件中使用的属性名要一致！
 > ReactDOM.render(<Weather {...person} />, document.getElementById('demo'))
 > ```
+
+[^Focus]:`props`属性是**只读**的，修改会报错，在内容渲染之后修改 props ，页面不会更新视图；
 
 
 
@@ -425,33 +447,34 @@
 
 > ```jsx
 > class Person extends React.Component {
->      render(){
->        // 从 props 中解构属性
->        let {name, gender, age} = this.props
->        return (
->          <ul>
->            <li>{name}</li>
->            <li>{gender}</li>
->            <li>{age}</li>
->          </ul>
->        )
->      }
->      // 对 props 进行 类型、必要性 的限制（类的 静态属性 写法）
->      static propTypes = {
->        name: React.PropTypes.string.isRequired, // 字符串类型、必要性
->        gender: React.PropTypes.string, // 字符串类型
->        age: React.PropTypes.number // 数字类型
->      }
->      // 对 props 进行 默认值 的指定（类的 静态属性 写法）
->      static defaultProps = {
->        gender: 'Male',
->        age: 22
->      }
+>   render(){
+>     // 从 props 中解构属性
+>     let {name, gender, age} = this.props
+>     return (
+>       <ul>
+>         <li>{name}</li>
+>         <li>{gender}</li>
+>         <li>{age}</li>
+>       </ul>
+>     )
+>   }
+>   // 对 props 进行 类型、必要性 的限制（类的 静态属性 写法）
+>   static propTypes = {
+>     name: React.PropTypes.string.isRequired, // 字符串类型、必要性
+>     gender: React.PropTypes.string, // 字符串类型
+>     age: React.PropTypes.number // 数字类型
+>   }
+>   // 对 props 进行 默认值 的指定（类的 静态属性 写法）
+>   static defaultProps = {
+>     gender: 'Male',
+>     age: 22
+>   }
 > }
+> 
 > const person = {
->      name: 'LovelyKein',
->      gender: 'Male',
->      age: '22'
+>   name: 'LovelyKein',
+>   gender: 'Male',
+>   age: '22'
 > }
 > ReactDOM.render(<Person {...person} />, document.getElementById('demo')) // 批量传递属性
 > ```
@@ -2982,7 +3005,7 @@
 > export default class App extends Component {
 >     render() {
 >        return (
->          {/* Fragment 标签不会被渲染成 html 标签 */}
+>          {/* 空标签不会被编译渲染 */}
 >          <>
 >          <h1>Hooks</h1>
 >          <br />
