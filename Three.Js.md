@@ -1252,51 +1252,51 @@
 > // 给物体小球加上撞击的音效
 > const hitSound = new Audio("/sound/sound.mp3")
 > const playSound = (collision) => {
->   // collision 是 sphereBody 碰撞触发的函数传过来的参数
->   const impactStrength = collision.contact.getImpactVelocityAlongNormal()
->   if (impactStrength > 2.5) {
->     // 每次碰撞都从头播放音效
->     hitSound.currentTime = 0
->     hitSound.play()
->     // 更据冲击强度影响音量
->     hitSound.volume = impactStrength > 10 ? 1 : impactStrength * 0.1
->   }
+>     // collision 是 sphereBody 碰撞触发的函数传过来的参数
+>     const impactStrength = collision.contact.getImpactVelocityAlongNormal()
+>     if (impactStrength > 2.5) {
+>        // 每次碰撞都从头播放音效
+>        hitSound.currentTime = 0
+>        hitSound.play()
+>        // 更据冲击强度影响音量
+>        hitSound.volume = impactStrength > 10 ? 1 : impactStrength * 0.1
+>     }
 > }
 > 
 > // 每次点击 window 都生成一个物体小球，从空中落下
 > window.addEventListener("click", () => {
->   // 调用 createSphere 方法创建小球
->   createSphere(Math.random() * (1 - 0.2) + 0.2, {
->     x: (Math.random() - 0.5) * 8,
->     y: 8,
->     z: (Math.random() - 0.5) * 8,
->   })
+>     // 调用 createSphere 方法创建小球
+>     createSphere(Math.random() * (1 - 0.2) + 0.2, {
+>        x: (Math.random() - 0.5) * 8,
+>        y: 8,
+>        z: (Math.random() - 0.5) * 8,
+>     })
 > })
 > 
 > // 添加物理世界中的碰撞材料
 > const defaultMaterial = new CANNON.Material("default")
 > const defaultContactMaterial = new CANNON.ContactMaterial(
->   defaultMaterial,
->   defaultMaterial,
->   {
->     friction: 0.1, // 摩擦力
->     restitution: 0.6, // 弹力
->   }
+>     defaultMaterial,
+>     defaultMaterial,
+>     {
+>        friction: 0.1, // 摩擦力
+>        restitution: 0.6, // 弹力
+>     }
 > )
 > 
 > // 添加物理世界的地面，，默认位置是 position.y = 0
 > const floorShape = new CANNON.Plane()
 > const floorBody = new CANNON.Body({
->   // 质量
->   mass: 0,
->   // 材料
->   material: defaultMaterial,
+>     // 质量
+>     mass: 0,
+>     // 材料
+>     material: defaultMaterial,
 > })
 > floorBody.addShape(floorShape)
 > // 纠正方向，因为 three 的 plane 是经过旋转的
 > floorBody.quaternion.setFromAxisAngle(
->   new CANNON.Vec3(1, 0, 0),
->   -Math.PI / 2
+>     new CANNON.Vec3(1, 0, 0),
+>     -Math.PI / 2
 > )
 > // 在物理世界中加入地面
 > world.addBody(floorBody)
@@ -1305,9 +1305,9 @@
 > 
 > // 真实小球的材质
 > const sphereMaterial = new THREE.MeshStandardMaterial({
->   roughness: 0.3,
->   metalness: 0.1,
->   color: "#ffffff",
+>     roughness: 0.3,
+>     metalness: 0.1,
+>     color: "#ffffff",
 > })
 > // 真实小球的几何模型
 > const sphereGeometry = new THREE.SphereBufferGeometry(1, 32, 32)
@@ -1316,57 +1316,57 @@
 > 
 > // 创建小球的函数方法
 > function createSphere(radius, position) {
->   // 创建物理世界中的小球
->   const sphereBody = new CANNON.Body({
->     // 质量
->     mass: 1,
->     // 形状
->     shape: new CANNON.Sphere(radius),
->     // 材料
->     material: defaultMaterial,
->   })
->   // 设置物理世界的小球的初始位置
->   sphereBody.position.copy(position)
->   // 物理世界小球碰撞的事件
->   sphereBody.addEventListener(
->     // 世界类型
->     "collide",
->     // 要触发的方法函数
->     playSound
->   )
+>     // 创建物理世界中的小球
+>     const sphereBody = new CANNON.Body({
+>        // 质量
+>        mass: 1,
+>        // 形状
+>        shape: new CANNON.Sphere(radius),
+>        // 材料
+>        material: defaultMaterial,
+>     })
+>     // 设置物理世界的小球的初始位置
+>     sphereBody.position.copy(position)
+>     // 物理世界小球碰撞的事件
+>     sphereBody.addEventListener(
+>        // 世界类型
+>        "collide",
+>        // 要触发的方法函数
+>        playSound
+>     )
 > 
->   // 给物理小球施加一个 x 轴向的力，让球产生偏移，只施加一次
->   sphereBody.applyLocalForce(
->     // 力量的矢量
->     new CANNON.Vec3(400, 0, 0),
->     // 施加力量给物体的点的位置
->     new CANNON.Vec3(0, 0, 0)
->   )
->   // 在物理世界中添加一个全局的力，模拟风的作用，只施加一次
->   sphereBody.applyForce(
->     // 力量的矢量
->     new CANNON.Vec3(-100, 0, 0),
->     // 在物理世界的哪个位置施加力量
->     sphereBody.position
->   )
->   // 在物理世界中加入小球
->   world.addBody(sphereBody)
+>     // 给物理小球施加一个 x 轴向的力，让球产生偏移，只施加一次
+>     sphereBody.applyLocalForce(
+>        // 力量的矢量
+>        new CANNON.Vec3(400, 0, 0),
+>        // 施加力量给物体的点的位置
+>        new CANNON.Vec3(0, 0, 0)
+>     )
+>     // 在物理世界中添加一个全局的力，模拟风的作用，只施加一次
+>     sphereBody.applyForce(
+>        // 力量的矢量
+>        new CANNON.Vec3(-100, 0, 0),
+>        // 在物理世界的哪个位置施加力量
+>        sphereBody.position
+>     )
+>     // 在物理世界中加入小球
+>     world.addBody(sphereBody)
 >   
->   // 创建真实显示的小球
->   const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
->   // 复制函数第二个参数传递的 3 维向量
->   sphere.position.copy(position)
->   // 真实小球的随机尺寸
->   sphere.scale.set(radius, radius, radius)
->   // 开启真实小球投射阴影
->   sphere.castShadow = true
->   // 加入场景
->   scene.add(sphere)
->   // 将每次调用方法产生的真实小球、物理小球对象都放入空数组，记录空间位置
->   series.push({
->     sphere,
->     sphereBody,
->   })
+>     // 创建真实显示的小球
+>     const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
+>     // 复制函数第二个参数传递的 3 维向量
+>     sphere.position.copy(position)
+>     // 真实小球的随机尺寸
+>     sphere.scale.set(radius, radius, radius)
+>     // 开启真实小球投射阴影
+>     sphere.castShadow = true
+>     // 加入场景
+>     scene.add(sphere)
+>     // 将每次调用方法产生的真实小球、物理小球对象都放入空数组，记录空间位置
+>     series.push({
+>        sphere,
+>        sphereBody,
+>     })
 > }
 > 
 > // ThreeJS 中的时钟
@@ -1375,29 +1375,29 @@
 > 
 > // 帧动画
 > const frame = () => {
->   // 流逝的时间
->   let elapseTime = clock.getElapsedTime()
->   // augmentTime 是每一帧流逝的时间
->   let augmentTime = elapseTime - oldTime
->   oldTime = elapseTime
+>     // 流逝的时间
+>     let elapseTime = clock.getElapsedTime()
+>     // augmentTime 是每一帧流逝的时间
+>     let augmentTime = elapseTime - oldTime
+>     oldTime = elapseTime
 >   
->   // 每一帧都更新物理世界
->   // 规定物理世界每一步的时间大小
->   // 后面两个参数为可选；
->   world.step(1 / 60, augmentTime, 3)
->   // 球体用 position ，方块要用 quaternion，因为方块不是滚动
->   // 遍历数组
->   for (let item of series) {
->     // 每一帧都将物理小球的位置复制给真实小球
->     item.sphere.position.copy(item.sphereBody.position)
->   }
+>     // 每一帧都更新物理世界
+>     // 规定物理世界每一步的时间大小
+>     // 后面两个参数为可选；
+>     world.step(1 / 60, augmentTime, 3)
+>     // 球体用 position ，方块要用 quaternion，因为方块不是滚动
+>     // 遍历数组
+>     for (let item of series) {
+>        // 每一帧都将物理小球的位置复制给真实小球
+>        item.sphere.position.copy(item.sphereBody.position)
+>     }
 > 
->   // 写在帧动画里，此时每一帧都会有一个负 x 轴向的世界力施加在物体上
->   sphereBody.applyForce(new CANNON.Vec3(-1, 0, 0), sphereBody.position)
+>     // 写在帧动画里，此时每一帧都会有一个负 x 轴向的世界力施加在物体上
+>     sphereBody.applyForce(new CANNON.Vec3(-1, 0, 0), sphereBody.position)
 > 
->   // 渲染画面
->   renderer.render(scene, camera)
->   window.requestAnimationFrame(frame)
+>     // 渲染画面
+>     renderer.render(scene, camera)
+>     window.requestAnimationFrame(frame)
 > }
 > frame()
 > ```
@@ -2184,26 +2184,20 @@
 > 
 > // 物体
 > const cube = new THREE.Mesh(
->     new THREE.BoxBufferGeometry(1, 1, 1, 2, 2, 2),
->     new THREE.MeshStandardMaterial({ color: '#fafafa' })
+>      new THREE.BoxBufferGeometry(1, 1, 1, 2, 2, 2),
+>      new THREE.MeshStandardMaterial({ color: '#fafafa' })
 > )
 > 
 > // 使用 gsap
 > window.addEventListener("scroll", () => {
->     // 开始动画过渡
->     gsap.to(cube.rotation, {
+>      // 开始动画过渡
+>      gsap.to(cube.rotation, {
 >        duration: 1.5,
 >        x: "+=4",
 >        y: "+=3",
->     })
+>      })
 > })
 > ```
-
-
-
-
-
-
 
 
 
