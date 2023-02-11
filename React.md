@@ -349,9 +349,9 @@
 >
 > ```jsx
 > this.setState({
->     isHot: true
+>    isHot: true
 > }, () => {
->     console.log(this.state.isHot) // true
+>    console.log(this.state.isHot) // true
 > })
 > 
 > // 改变状态需要一个过程，如果需要实时获取状态的更新数据，在 setState() 传递第二个回调函数参数，获取最新状态；
@@ -377,6 +377,8 @@
 >   console.log('callback')
 > })
 > ```
+
+[^Focus]: 更新复杂`state`的时候必须传给它一个全新的对象，而不是复制了它引用地址再修改的对象；
 
 
 
@@ -854,7 +856,7 @@
 >
 > ```jsx
 > this.forceUpdate()
-> // 回调用 componentWillUpdate 、 render 、 componentDidUpdate 三个生命周期函数
+> // 会调用 componentWillUpdate 、 render 、 componentDidUpdate 三个生命周期函数
 > ```
 
 
@@ -1249,60 +1251,60 @@
 > 
 > // 祖组件
 > export default class Ancestor extends Component {
->   // 状态数据
->   state = {
->     person: {
->       name: "Kein",
->       gender: "Male",
->     },
->   };
+>     // 状态数据
+>     state = {
+>        person: {
+>          name: "Kein",
+>          gender: "Male",
+>        },
+>     };
 > 
->   render() {
->     const { person } = this.state;
->     return (
->       <div className="Ancestor">
->         <h2>我是 Ancestor 组件</h2>
->         <span>名字：{person.name}</span>
->         <span>性别：{person.gender}</span>
->         {/* 用 Provider 标案包裹子组件，则后代组件都可以接收到 value 中的数据 */}
->         <Provider value={person}>
->           <Son person={person} />
->         </Provider>
->       </div>
->     );
->   }
+>     render() {
+>        const { person } = this.state;
+>        return (
+>          <div className="Ancestor">
+>            <h2>我是 Ancestor 组件</h2>
+>            <span>名字：{person.name}</span>
+>            <span>性别：{person.gender}</span>
+>            {/* 用 Provider 标签包裹子组件，则后代组件都可以接收到 value 中的数据 */}
+>            <Provider value={person}>
+>              <Son person={person} />
+>            </Provider>
+>          </div>
+>        );
+>     }
 > }
 > 
 > // 子组件
 > class Son extends Component {
->   render() {
->     const { person } = this.props;
->     return (
->       <div className="Son">
->         <h2>我是 Son 组件</h2>
->         <span>名字：{person.name}</span>
->         <span>性别：{person.gender}</span>
->         <Descendant />
->       </div>
->     );
->   }
+>     render() {
+>        const { person } = this.props;
+>        return (
+>          <div className="Son">
+>            <h2>我是 Son 组件</h2>
+>            <span>名字：{person.name}</span>
+>            <span>性别：{person.gender}</span>
+>            <Descendant />
+>          </div>
+>        );
+>     }
 > }
 > 
 > // 后代组件
 > class Descendant extends Component {
->   // 声明接收 Context
->   static contextType = MyContext;
+>     // 声明接收 Context
+>     static contextType = MyContext;
 > 
->   render() {
->     const { name, gender } = this.context;
->     return (
->       <div className="Descendant">
->         <h2>我是 Descendant 组件</h2>
->         <span>名字：{name}</span>
->         <span>性别：{gender}</span>
->       </div>
->     );
->   }
+>     render() {
+>        const { name, gender } = this.context;
+>        return (
+>          <div className="Descendant">
+>            <h2>我是 Descendant 组件</h2>
+>            <span>名字：{name}</span>
+>            <span>性别：{gender}</span>
+>          </div>
+>        );
+>     }
 > }
 > ```
 
@@ -2124,11 +2126,12 @@
 >
 > ```javascript
 > {
->     type: 'ADD_STUDENT', // 动作标识
->     data: { // 动作数据
->        name: 'kein',
->        age: 22,
->        gender: 'Male'
+>   type: 'ADD_STUDENT', // 动作标识
+>     data: {
+>       // 动作数据
+>       name: 'kein',
+>       age: 22,
+>       gender: 'Male'
 >     }
 > }
 > ```
@@ -2812,17 +2815,19 @@
 
 ## Hooks
 
+> 钩子（Hooks）；
+>
 > React 16.8.0 版本新增加的特性/语法；
 >
 > **可以使得在函数组件中使用 state 以及其他的 React 特性**；
 
 
 
-#### state Hooks
+### useState
 
 > `React.useState()`；
 >
-> 让**函数组件**也可以拥有 state 状态数据，并进行状态数据的读写操作；
+> 让**函数组件**也可以拥有 state 状态数据，并进行状态数据的读写操作，是**异步**进行的；
 >
 > 语法：`const [value, changeValue] = React.useState(initValue)`；
 >
@@ -2834,33 +2839,35 @@
 > import React from "react";
 > 
 > export default function useState() {
->     // 使用 useState() 钩子
->     const [count, setCount] = React.useState(0);
+>      // 使用 useState() 钩子
+>      const [count, setCount] = React.useState(0);
 > 
->     // 点击 Add 的回调函数，直接赋值改变状态数据
->     function addCount() {
+>      // 点击 Add 的回调函数，直接赋值改变状态数据
+>      function addCount() {
 >        setCount(count + 1);
->     }
+>      }
 > 
->     // 通过 函数改变，接收原本的值，返回新的状态值
->     function addCountByFunction() {
+>      // 通过 函数改变，接收原本的值，返回新的状态值
+>      function addCountByFunction() {
 >        setCount((value) => {
->          // newvalue
+>          // newValue
 >          return value + 1
 >        });
->     }
->     return (
+>      }
+>      return (
 >        <div>
 >          <h3>当前的 Count 值：{count}</h3>
 >          <button onClick={addCount}>Add</button>
 >        </div>
->     );
+>      );
 > }
 > ```
 
+[^Focus]:函数组件在每次渲染时都会形成**闭包**，拥有自己的 state 、props 和事件处理函数，每次渲染时会更新数据；
 
 
-#### effect Hooks
+
+### useEffect
 
 > `React.useEffect()`；
 >
@@ -2871,9 +2878,9 @@
 > [^callback]:回调函数，在 钩子 被触发时会被调用；
 > [^params]:**可选参数**；
 >
-> > [^不传递 pramas]:任何状态发生改变，都会触发 钩子；
-> > [^params = [\]]:不监测任何状态，只会在挂载完成时触发一次，相当于类式组件的`componentDidMount`；
-> > [^params = [name, count\]]:数组中写需要被监测的状态，则被监测的状态发生改变时，钩子 会被触发；
+> > [^不传 pramas]:任何状态发生改变，组件重新渲染时，都会触发回调；
+> > [^`params = [\]`]:不监测任何状态，只会在挂载完成时触发一次，相当于类式组件的`componentDidMount`；
+> > [^params = [name, count\]`]:数组中写需要被监测的状态，被监测的状态发生改变时触发回调，类似于监听；
 >
 > ```jsx
 > import React from "react";
@@ -2892,10 +2899,11 @@
 >   // 使用 useEffect 钩子
 >   React.useEffect(() => {
 >     console.log('@')
->     
+>     // componentDidMount 时执行
+> 
 >     return () => {
->       // useEffect 可以拥有返回值，此函数相当于类式组件的 componentWillUnmount；
->       // 会在组件 将要被卸载时 被执行；
+>       // useEffect 可以拥有返回值
+>       // return 的函数会在组件 将要被卸载时 被执行；
 >     }
 >   }, [name])
 > 
@@ -2912,7 +2920,7 @@
 
 
 
-#### ref Hooks
+### useRef
 
 > `React.useRef()`；
 >
@@ -2922,25 +2930,289 @@
 >
 > [^mayRef]:保存的标签对象；
 >
-> ```jsx
+> ```react
 > import React from "react";
 > 
 > export default function useRef() {
->     // 使用 useRef 钩子
->     const keyword = React.useRef();
+>   // 使用 useRef 钩子
+>   const keyword = React.useRef();
 > 
->     function showValue() {
->        console.log(keyword.current.value);
->     }
+>   function showValue() {
+>     console.log(keyword.current.value);
+>   }
+>   
+>   // function tip() {
+>   //   // 错误，使用 useRef 直接更新数据，不会引起页面的更新
+>   //	 // 变更 .current 属性不会引发组件重新渲染
+>   //   keyword.current = keyword.current + 1
+>   // }
 > 
->     return (
->        <div>
->          <input ref={keyword} placeholder="请输入文字" />
->          <button onClick={showValue}>Tip</button>
->        </div>
->     );
+>   return (
+>     <div>
+>       {/** 将 ref 绑定到目标标签上**/}
+>       <input ref={keyword} placeholder="请输入文字" />
+>       <button onClick={showValue}>Tip</button>
+>     </div>
+>   );
 > }
 > ```
+
+
+
+### useImperativeHandle
+
+> **作用**：可以让**父组件**使用**子组件**中定义的状态和函数；
+>
+> 结合`useRef`和`forwardRef`钩子一起使用；
+>
+> ```tsx
+> import React, {
+>   useImperativeHandle,
+>   forwardRef,
+>   useRef,
+>   useState,
+> } from "react";
+> 
+> // 类型
+> interface childRef {
+>   addNum: Function;
+>   reduceNum: Function,
+>   num: number
+> }
+> 
+> // 父组件
+> export default function Parent() {
+>   // 在 父组件 中给 子组件 绑定 ref，传递到 useImperativeHandle 中
+>   const childRef = useRef<childRef>()
+> 
+>   // 在父组件中使用子组件的数据和函数
+>   const addByParent = () => {
+>     // console.log(childRef.current)
+>     childRef.current?.addNum()
+>     // console.log(childRef.current?.num)
+>   }
+>   const reduceByParent = () => {
+>     childRef.current?.reduceNum();
+>   }
+>   
+>   return (
+>     <div>
+>       <button onClick={addByParent}>增加</button>
+>       <button onClick={reduceByParent}>减少</button>
+>       <Children ref={childRef} />
+>     </div>
+>   );
+> }
+> 
+> // 子组件，需要使用 forwardRef 包裹
+> const Children = forwardRef((props, ref) => {
+>   const [num, setNum] = useState<number>(0);
+> 
+>   const addNum = (): void => {
+>     setNum(num + 1)
+>   }
+> 
+>   const reduceNum = (): void => {
+>     setNum(num - 1)
+>   }
+> 
+>   // 使用 useImperativeHandle 钩子，将 子组件 的数据和函数提供给 父组件 使用
+>   // useImperativeHandle 第三个参数为 依赖列表，可选参数
+>   useImperativeHandle(ref, (): childRef => ({
+>     addNum,
+>     reduceNum,
+>     num
+>   }), [num]);
+> 
+>   return (
+>     <p>
+>       Number: <span>{num}</span>
+>     </p>
+>   );
+> });
+> ```
+
+
+
+### useContext
+
+> 避免属性的逐层传递，实现`祖先组件 --> 后代组件`之间的组件通信；
+>
+> 在**函数类**组件中实现**类组件**的`static contextType`属性；
+>
+> ```tsx
+> import React, { useContext, useState } from "react";
+> 
+> // 类型
+> interface Person {
+>   name: string;
+>   gender: string;
+>   age: number;
+> }
+> 
+> // 创建 Context 对象
+> const MyContext = React.createContext<Person>({
+>   name: '',
+>   gender: '',
+>   age: 0
+> })
+> const { Provider } = MyContext
+> 
+> // 祖先组件
+> export default function Ancestor() {
+>   const [person, setPerson] = useState<Person>({
+>     name: "Kein",
+>     gender: 'Female',
+>     age: 24
+>   })
+> 
+>   const changeAge = () => {
+>     setPerson((value) => {
+>       // 通过数据解构来创建一个新的数据引用地址，再返回新的数据，才会引起 DOM 的更新
+>       // 用于更新 对象 或 数组 的内的值
+>       const newValue = {...value}
+>       newValue.age ++
+>       return newValue
+>     })
+>   }
+> 
+>   return (
+>     <div>
+>       <h2>Ancestor name: {person.name} gender: {person.gender} age: {person.age}</h2>
+>       <button onClick={changeAge}>+</button>
+>       <br />
+>       {/* 在状态提供的根组件中用 Provider 将内容包裹，后代组件通过 useContext 使用数据 */}
+>       <Provider value={person}>
+>         <Son {...person} />
+>       </Provider>
+>     </div>
+>   )
+> }
+> 
+> // 子组件
+> function Son(props: Person) {
+>   // console.log(props)
+>   const {name, gender, age} = props
+>   return (
+>     <div>
+>       <h3>Son name: {name} gender: {gender} age: {age}</h3>
+>       <br />
+>       <Descendant />
+>     </div>
+>   )
+> }
+> 
+> // 后代组件
+> function Descendant() {
+>   // 声明接收 祖先组件的状态数据， useContext 接收一个 context 对象作为参数
+>   const {name, gender, age} = useContext(MyContext)
+>   return (
+>     <div>
+>       <h3>
+>         Descendant name: {name} gender: {gender} age: {age}
+>       </h3>
+>     </div>
+>   );
+> }
+> ```
+
+
+
+### useReducer
+
+> [`useState`](https://zh-hans.reactjs.org/docs/hooks-reference.html#usestate) 的替代方案；
+>
+> 接收一个形如 `(state, action) => newState` 的 reducer 函数；
+>
+> 并返回当前的 state 以及与其配套的 `dispatch` 方法；
+>
+> ```tsx
+> import { useReducer } from "react"
+> 
+> // reducer 函数
+> // 第一个参数：数据之前的值和状态
+> // 第二个参数：操作状态的行为信息
+> function reducer(state: Info, action: Action) {
+>   switch (action.type) {
+>     case "increment":
+>       return { count: state.count + 1 } // 返回一个新对象
+>     case "decrement":
+>       return { count: state.count - 1 };
+>     case 'evaluation':
+>       return { count: action.value ? action.value : 0 };
+>     default:
+>       throw new Error();
+>   }
+> }
+> 
+> // 类型
+> interface Info {
+>   count: number
+> }
+> interface Action {
+>   type: string,
+>   value?: number
+> }
+> 
+> // 状态初始值
+> const info = {
+>   count: 0
+> }
+> 
+> export default function Counter() {
+>   // 使用 useReducer， 接收一个 reducer 函数，第二个参数为状态初始值
+>   const [state, dispatch] = useReducer(reducer, info);
+> 
+>   // 直接赋值
+>   const evaluation = () => {
+>     dispatch({
+>       type: "evaluation",
+>       value: 10
+>     });
+>   }
+> 
+>   return (
+>     <div>
+>       Count: {state.count}
+>       <button onClick={() => dispatch({ type: "decrement" })}>-</button>
+>       <button onClick={() => dispatch({ type: "increment" })}>+</button>
+>       <button onClick={evaluation}>Evaluation</button>
+>     </div>
+>   );
+> }
+> ```
+
+
+
+### 自定义 Hook
+
+> React 规定所有的 Hook 都要以`use`开头；
+>
+> `Hook`就是一个函数，可以支持传参、返回值，也可以没有返回值；
+>
+> 建议自定义的`Hooks`都放在`src/hooks`目录下，方便管理，使用时直接引入；
+
+
+
+#### useTitle
+
+> 自定义`Hook`：给网页设置标题；
+>
+> ```tsx
+> import { useEffect } from 'react'
+> 
+> export default function useTitle(newTitle) {
+>   const preTitle = document.title // 保存之前的标题
+>   
+>   // 生命周期
+>   useEffect(() => {
+>     document.title = newTitle // 组件挂载时执行
+>     
+>     return () => {
+>       document.title = preTitle // 组件卸载时执行
+>     }
+>   })
+> }
 
 
 
@@ -2952,7 +3224,7 @@
 >
 > 在被编译的时候，会被去除该标签；
 >
-> [^Important]:该标签允许切只有一个标签属性`key`；
+> [^Important]:该标签允许且只有一个标签属性`key`；
 >
 > ```jsx
 > import "./App.css";
@@ -3049,6 +3321,70 @@
 > 
 > // 祖组件
 > export default class Ancestor extends Component {
+>      // 状态数据
+>      state = {
+>        person: {
+>          name: "Kein",
+>          gender: "Male",
+>        },
+>      };
+> 
+>      render() {
+>        const { person } = this.state;
+>        return (
+>          <div className="Ancestor">
+>            <h2>我是 Ancestor 组件</h2>
+>            <span>名字：{person.name}</span>
+>            <span>性别：{person.gender}</span>
+>            <Son
+>              person={person}
+>              // 通过传递 render 属性，值为一个函数，返回一个组件标签
+>              render={(person) => <Descendant person={person} />}
+>              />
+>          </div>
+>        );
+>      }
+> }
+> 
+> // 子组件
+> class Son extends Component {
+>      render() {
+>        const { person } = this.props;
+>        return (
+>          <div className="Son">
+>            <h2>我是 Son 组件</h2>
+>            <span>名字：{person.name}</span>
+>            <span>性别：{person.gender}</span>
+>            {/* 组件中预留的位置，动态确定内容 */}
+>            {this.props.render(person)}
+>          </div>
+>        );
+>      }
+> }
+> 
+> // 后代组件
+> class Descendant extends Component {
+>      render() {
+>        const { person } = this.props;
+>        return (
+>          <div className="Descendant">
+>            <h2>我是 Descendant 组件</h2>
+>            <span>名字：{person.name}</span>
+>            <span>性别：{person.gender}</span>
+>          </div>
+>        );
+>      }
+> }
+> ```
+>
+> 利用**标签体内容是一个特殊的属性，可以从`this.props.children`获取标签体内容**特性；
+>
+> ```jsx
+> import React, { Component } from "react";
+> import "./renderProps.css";
+> 
+> // 祖组件
+> export default class Ancestor extends Component {
 >     // 状态数据
 >     state = {
 >        person: {
@@ -3064,11 +3400,10 @@
 >            <h2>我是 Ancestor 组件</h2>
 >            <span>名字：{person.name}</span>
 >            <span>性别：{person.gender}</span>
->            <Son
->              person={person}
->              // 通过传递 render 属性，值为一个函数，返回一个组件标签
->              render={(person) => <Descendant person={person} />}
->              />
+>            <Son person={person}>
+>              {/* 此时，传递不了 Son 组件的数据， 只能传递当前组件的数据，即 Ancestor 组件 */}
+>              <Descendant person={person} />
+>            </Son>
 >          </div>
 >        );
 >     }
@@ -3078,13 +3413,14 @@
 > class Son extends Component {
 >     render() {
 >        const { person } = this.props;
+>        // console.log(this.props.children)
 >        return (
 >          <div className="Son">
 >            <h2>我是 Son 组件</h2>
 >            <span>名字：{person.name}</span>
 >            <span>性别：{person.gender}</span>
->            {/* 组件中预留的位置，动态确定内容 */}
->            {this.props.render(person)}
+>            {/* this.props.children 可以获取标签体内容，此时标签体内容为一个组件标签 */}
+>            {this.props.children}
 >          </div>
 >        );
 >     }
@@ -3102,70 +3438,6 @@
 >          </div>
 >        );
 >     }
-> }
-> ```
->
-> 利用**标签体内容是一个特殊的属性，可以从`this.props.children`获取标签体内容**特性；
->
-> ```jsx
-> import React, { Component } from "react";
-> import "./renderProps.css";
-> 
-> // 祖组件
-> export default class Ancestor extends Component {
->   // 状态数据
->   state = {
->     person: {
->       name: "Kein",
->       gender: "Male",
->     },
->   };
-> 
->   render() {
->     const { person } = this.state;
->     return (
->       <div className="Ancestor">
->         <h2>我是 Ancestor 组件</h2>
->         <span>名字：{person.name}</span>
->         <span>性别：{person.gender}</span>
->         <Son person={person}>
->           {/* 此时，传递不了 Son 组件的数据， 只能传递当前组件的数据，即 Ancestor 组件 */}
->           <Descendant person={person} />
->         </Son>
->       </div>
->     );
->   }
-> }
-> 
-> // 子组件
-> class Son extends Component {
->   render() {
->     const { person } = this.props;
->     // console.log(this.props.children)
->     return (
->       <div className="Son">
->         <h2>我是 Son 组件</h2>
->         <span>名字：{person.name}</span>
->         <span>性别：{person.gender}</span>
->         {/* this.props.children 可以获取标签体内容，此时标签体内容为一个组件标签 */}
->         {this.props.children}
->       </div>
->     );
->   }
-> }
-> 
-> // 后代组件
-> class Descendant extends Component {
->   render() {
->     const { person } = this.props;
->     return (
->       <div className="Descendant">
->         <h2>我是 Descendant 组件</h2>
->         <span>名字：{person.name}</span>
->         <span>性别：{person.gender}</span>
->       </div>
->     );
->   }
 > }
 > ```
 
@@ -3245,7 +3517,7 @@
 
 
 
-#### Routes
+### Routes
 
 > 用来代替之前版本的`<Switch>`标签的作用；
 >
@@ -3271,7 +3543,7 @@
 
 
 
-#### Navigate
+### Navigate
 
 > 只要`<Navigate>`组件被渲染，就会根据组件中的`to`属性去修改路由路径，切换视图；
 >
@@ -3297,7 +3569,7 @@
 
 
 
-#### Outlet
+### Outlet
 
 > 类似于 Vue 路由中的`<router-view>`组件；
 >
@@ -3317,7 +3589,7 @@
 
 
 
-#### useRoutes
+### useRoutes
 
 > **路由表**，可以已数组包裹对象的形式，书写路由；
 >
@@ -3369,7 +3641,7 @@
 
 
 
-#### useNavigate
+### useNavigate
 
 > React-Router 6.0 版本中更方便的**编程式路由导航**方式；
 >

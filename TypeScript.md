@@ -520,8 +520,8 @@
 > type PersonInfo = { name: string; age: number }
 > 
 > let zs: PersonInfo = {
->   name: "张三",
->   age: 20
+>     name: "张三",
+>     age: 20
 > }
 > ```
 
@@ -543,19 +543,19 @@
 > 
 > // 2. 交叉类型
 > type SectionType = { name: string; age: number } & {
->   height: number;
->   name: string;
+>     height: number;
+>     name: string;
 > }
 > let zs: SectionType = {
->   name: "张三",
->   age: 20,
->   height: 180
+>     name: "张三",
+>     age: 20,
+>     height: 180
 > }
 > 
 > // 3. 提取接口中属性的类型
 > interface PersonInfo {
->   name: string;
->   height: number;
+>     name: string;
+>     height: number;
 > }
 > type PersonHeight = PersonInfo["height"]
 > let altitude: PersonHeight = 8848

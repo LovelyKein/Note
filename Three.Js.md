@@ -1,10 +1,10 @@
 ## ThreeJS ?
 
-> 是 JavaScript 编写的`WebGL`第三方库，提供了非常多的3D显示功能；
+> 是 JavaScript 编写的`WebGL`第三方库，提供了非常多的 3D 显示功能；
 
 
 
-#### WebGL
+### WebGL
 
 > `Web Graphics Library`
 >
@@ -361,7 +361,7 @@
 
 
 
-#### FullScreen
+### 全屏( FullScreen )
 
 > 双击全屏事件；
 >
@@ -391,7 +391,7 @@
 
 
 
-#### Resize
+### 尺寸( Resize )
 
 > 画布场景大小跟随浏览器视口大小而变化；
 >
@@ -694,7 +694,7 @@
 
 
 
-#### Modules
+### Modules
 
 > 需要另外引入加载模块文件；
 >
@@ -707,7 +707,7 @@
 
 
 
-#### Use
+### Use
 
 > 使用加载器和构造器；
 >
@@ -765,7 +765,7 @@
 
 
 
-#### AmbientLight
+### AmbientLight
 
 > **环境光照**；
 >
@@ -779,7 +779,7 @@
 
 
 
-#### HemisphereLight
+### HemisphereLight
 
 > **半球光照**；
 >
@@ -800,7 +800,7 @@
 
 
 
-#### PointLight
+### PointLight
 
 > **点光源**，从一个点向各个方向发光，类似一个灯泡；
 >
@@ -817,7 +817,7 @@
 
 
 
-#### DirectionalLight
+### DirectionalLight
 
 > **方向光**，向特定方向发射光，发出的光线都是平行的；
 >
@@ -833,7 +833,7 @@
 
 
 
-#### SpotLight
+### SpotLight
 
 > **聚光灯**，光线从一个方向上的一个点发射出来，沿着一个锥形区域；
 >
@@ -856,7 +856,7 @@
 
 
 
-#### RectAreaLight
+### RectAreaLight
 
 > **区域光**，在一个矩形平面上均匀地发出光，可以模拟明亮窗户的光源；
 >
@@ -969,30 +969,30 @@
 
 
 
-#### Geometry Vertex
+### Geometry Vertex
 
 > 通过提供一个几何体，在每个顶点上生成一个粒子；
 >
 > ```javascript
 > const particles = new THREE.Points(
->   // 提供一个几何体模型，在其定点上生成粒子
->   new THREE.SphereBufferGeometry(4, 32, 32),
->   // 粒子的材质
->   new THREE.PointsMaterial({
->     // 粒子的尺寸
->     size: 0.2,
->     // 开启粒子尺寸的根据视觉来衰减
->     sizeAttenuation: true,
->   })
+>     // 提供一个几何体模型，在其定点上生成粒子
+>     new THREE.SphereBufferGeometry(4, 32, 32),
+>     // 粒子的材质
+>     new THREE.PointsMaterial({
+>        // 粒子的尺寸
+>        size: 0.2,
+>        // 开启粒子尺寸的根据视觉来衰减
+>        sizeAttenuation: true,
+>     })
 > )
 > scene.add(particles)
 > ```
 
 
 
-#### setAttribute
+### BufferGeometry
 
-> 通过随机生成点坐标来生成粒子；
+> 通过生成点坐标的浮点数据来生成粒子；
 >
 > ```javascript
 > // 粒子的基本模型
@@ -1005,43 +1005,43 @@
 > const colors = new Float32Array(amount * 3)
 > // for 循环，生成每个数组元素的值
 > for (let i = 0; i < amount * 3; i++) {
->   positions[i] = (Math.random() - 0.5) * 100
->   colors[i] = Math.random()
+>      positions[i] = (Math.random() - 0.5) * 100
+>      colors[i] = Math.random()
 > }
 > 
 > particleGeometry.setAttribute(
->   // 给粒子基本模型设置 position 属性
->   "position",
->   // 读取坐标数组所有的值
->   new THREE.BufferAttribute(positions, 3)
+>      // 给粒子基本模型设置 position 属性
+>      "position",
+>      // 读取坐标数组所有的值
+>      new THREE.BufferAttribute(positions, 3)
 > )
 > particleGeometry.setAttribute(
->   // 给粒子基本模型设置 color 属性
->   "color",
->   // 读取颜色数组所有的值
->   new THREE.BufferAttribute(colors, 3)
+>      // 给粒子基本模型设置 color 属性
+>      "color",
+>      // 读取颜色数组所有的值
+>      new THREE.BufferAttribute(colors, 3)
 > )
 > 
 > const particles = new THREE.Points(
->   // 粒子的模型
->   particleGeometry,
->   // 粒子材质
->   new THREE.PointsMaterial({
->     size: 0.4,
->     sizeAttenuation: true,
->     // 粒子的颜色
->     color: "#2f73af",
->     // 开启透明模式
->     transparent: true,
->     // 关闭深度测试，会让粒子穿过其他物体
->     depthTest: false,
->     // resolve particle across others substance question
->     depthWrite: false, 
->     // 开启颜色之间允许添加混合
->     blending: THREE.AdditiveBlending,
->     // 开启顶点颜色，让随机的颜色生效
->     vertexColors: true
->   })
+>      // 粒子的模型
+>      particleGeometry,
+>      // 粒子材质
+>      new THREE.PointsMaterial({
+>        size: 0.4,
+>        sizeAttenuation: true,
+>        // 粒子的颜色
+>        color: "#2f73af",
+>        // 开启透明模式
+>        transparent: true,
+>        // 关闭深度测试，会让粒子穿过其他物体
+>        depthTest: false,
+>        // resolve particle across others substance question
+>        depthWrite: false, 
+>        // 开启颜色之间允许添加混合
+>        blending: THREE.AdditiveBlending,
+>        // 开启顶点颜色，让随机的颜色生效
+>        vertexColors: true
+>      })
 > )
 > scene.add(particles)
 > ```
@@ -1216,13 +1216,13 @@
 
 
 
-#### Cannon.js
+### Cannon.js
 
 > 一个在网页中实现物理效果的 JavaScript 库；
 
 
 
-###### Install
+#### Install
 
 > ```shell
 > npm install cannon --save
@@ -1230,7 +1230,7 @@
 
 
 
-###### Import
+#### Import
 
 > ```javascript
 > import CANNON from "cannon"
@@ -1238,7 +1238,7 @@
 
 
 
-###### Use
+#### Use
 
 > ```javascript
 > // 创建物理世界
@@ -1414,13 +1414,13 @@
 
 
 
-#### GLTF / GLB
+### GLTF / GLB
 
 > 加载`GLTF / GLB`文件格式的三维模型；
 
 
 
-###### Import
+#### Import
 
 > 引入`gltf`格式外部模型加载器；
 >
@@ -1433,7 +1433,7 @@
 
 
 
-###### Use
+#### Use
 
 > ```javascript
 > // 使用压缩器
@@ -1468,13 +1468,13 @@
 
 
 
-#### FBX
+### FBX
 
 > 加载`FBX`文件格式的三维模型；
 
 
 
-###### Import
+#### Import
 
 > ```javascript
 > // 引入 fbx 格式外部模型加载器
@@ -1483,7 +1483,7 @@
 
 
 
-###### Use
+#### Use
 
 > ```javascript
 > const fbxLoader = new FBXLoader()
@@ -1570,7 +1570,7 @@
 
 
 
-#### Webpack
+### Webpack
 
 > 在`webpack`中打包着色器的`GLSL`文件；
 >
@@ -1591,7 +1591,7 @@
 
 
 
-#### Vertex / Fragment
+### Vertex / Fragment
 
 > 着色器材质需要指定两种不同类型的 shaders ；
 >
@@ -1634,7 +1634,7 @@
 
 
 
-###### Vertex
+#### Vertex
 
 > 顶点着色器`Vertex`首先运行；
 >
@@ -1721,7 +1721,7 @@
 
 
 
-###### Fragment
+#### Fragment
 
 > 片段着色器`Fragment`后运行；
 >
@@ -1741,25 +1741,25 @@
 > 
 > void main()
 > {
->     vec4 textureColor = texture2D(uTexture, vUv);
->     textureColor.rgb *= vElevation * 0.3 + 0.7;
->     gl_FragColor = textureColor;
->     // 设置片段颜色
->     // vec4(Red, Green, Blue, Alpha);
->     // gl_FragColor = vec4(1.0, 0.5, 0.0, 1.0);
->     // gl_FragColor = vec4(uColor, 1.0);
+>      vec4 textureColor = texture2D(uTexture, vUv);
+>      textureColor.rgb *= vElevation * 0.3 + 0.7;
+>      gl_FragColor = textureColor;
+>      // 设置片段颜色
+>      // vec4(Red, Green, Blue, Alpha);
+>      // gl_FragColor = vec4(1.0, 0.5, 0.0, 1.0);
+>      // gl_FragColor = vec4(uColor, 1.0);
 > }
 > ```
 
 
 
-#### Variable
+### Variable
 
 > 着色器中存储数据的**变量**；
 
 
 
-###### uniform
+#### uniform
 
 > 所有**顶点**都具有相同值的变量； 
 >
@@ -1776,15 +1776,15 @@
 > ```javascript
 > // 创建着色器材质
 > const cubeMaterial = new THREE.RawShaderMaterial({
->     vertexShader: vertexShader,
->     fragmentShader: fragmentShader,
->     // 着色器中的 uniform 变量
->     uniforms: {
+>      vertexShader: vertexShader,
+>      fragmentShader: fragmentShader,
+>      // 着色器中的 uniform 变量
+>      uniforms: {
 >        // 自定义一个 uniform 的属性，可以在 vertex.glsl 文件中使用这个属性
 >        uFrequency: { value: new THREE.Vector2(0.8, 0.8) },
 >        // 在 fragment.glsl 文件中使用这个属性
 >        uColor: { value: new THREE.Color("orange") },
->     },
+>      },
 > })
 > ```
 >
@@ -1803,7 +1803,7 @@
 
 
 
-###### attribute
+#### attribute
 
 > 与每个顶点关联的变量；
 >
@@ -1820,7 +1820,7 @@
 
 
 
-###### varying
+#### varying
 
 > 是从顶点着色器`Vertex`传递到片段着色器`Fragment`的变量；
 >
@@ -1833,14 +1833,14 @@
 > 
 > void main()
 > {
->     // 给 vUv 赋值
->     vUv = uv;
+>      // 给 vUv 赋值
+>      vUv = uv;
 > }
 > ```
 
 
 
-#### Pattern
+### Pattern
 
 > 利用**片段着色器**实现丰富的颜色变化；
 >
@@ -1856,77 +1856,77 @@
 > 
 > void main()
 > {
->     // 设置片段颜色
->     // vec4(Red, Green, Blue, Alpha);
+>      // 设置片段颜色
+>      // vec4(Red, Green, Blue, Alpha);
 > 
->     // // pattern_1
->     // gl_FragColor = vec4(vUv, 1.0, 1.0);
+>      // // pattern_1
+>      // gl_FragColor = vec4(vUv, 1.0, 1.0);
 > 
->     // pattern_2
->     gl_FragColor = vec4(vUv.y, vUv.x, 0.5, 1.0);
+>      // pattern_2
+>      gl_FragColor = vec4(vUv.y, vUv.x, 0.5, 1.0);
 > 
->     // pattern_3
->     // gl_FragColor = vec4(vUv.y, vUv.y, vUv.y, 1.0);
+>      // pattern_3
+>      // gl_FragColor = vec4(vUv.y, vUv.y, vUv.y, 1.0);
 > 
->     // pattern_4
->     // gl_FragColor = vec4(vUv.y * 5.0, vUv.y * 5.0, vUv.y * 5.0, 1.0);
+>      // pattern_4
+>      // gl_FragColor = vec4(vUv.y * 5.0, vUv.y * 5.0, vUv.y * 5.0, 1.0);
 > 
->     // pattern_5
->     // float strength = mod(vUv.y * 5.0, 1.0);// 取模运算
->     // gl_FragColor = vec4(strength, strength, strength, 1.0);
+>      // pattern_5
+>      // float strength = mod(vUv.y * 5.0, 1.0);// 取模运算
+>      // gl_FragColor = vec4(strength, strength, strength, 1.0);
 > 
->     // pattern_6
->     // float strength = mod(vUv.y * 5.0, 1.0);
->     // if(strength < 0.5){
->     //   strength = 0.0;
->     // } else {
->     //   strength = 1.0;
->     // }
->     // gl_FragColor = vec4(strength, strength, strength, 1.0);
+>      // pattern_6
+>      // float strength = mod(vUv.y * 5.0, 1.0);
+>      // if(strength < 0.5){
+>      //   strength = 0.0;
+>      // } else {
+>      //   strength = 1.0;
+>      // }
+>      // gl_FragColor = vec4(strength, strength, strength, 1.0);
 > 
->     // pattern_7
->     // float barX = step(0.4, mod(vUv.x * 10.0, 1.0));
->     // barX *= step(0.8, mod(vUv.y * 10.0 + 0.2, 1.0));
+>      // pattern_7
+>      // float barX = step(0.4, mod(vUv.x * 10.0, 1.0));
+>      // barX *= step(0.8, mod(vUv.y * 10.0 + 0.2, 1.0));
 > 
->     // float barY = step(0.8, mod(vUv.x * 10.0 + 0.2, 1.0));
->     // barY *= step(0.4, mod(vUv.y * 10.0, 1.0));
+>      // float barY = step(0.8, mod(vUv.x * 10.0 + 0.2, 1.0));
+>      // barY *= step(0.4, mod(vUv.y * 10.0, 1.0));
 > 
->     // float strength = barX + barY;
->     // gl_FragColor = vec4(strength, strength, strength, 1.0);
+>      // float strength = barX + barY;
+>      // gl_FragColor = vec4(strength, strength, strength, 1.0);
 > 
->     // pattern_8
->     // float strength = abs(vUv.x - 0.5);
->     // gl_FragColor = vec4(strength, strength, strength, 1.0);
+>      // pattern_8
+>      // float strength = abs(vUv.x - 0.5);
+>      // gl_FragColor = vec4(strength, strength, strength, 1.0);
 > 
->     // pattern_9
->     // float strength = min(abs(vUv.x - 0.5), abs(vUv.y - 0.5));// 取最小值
->     // float strength = max(abs(vUv.x - 0.5), abs(vUv.y - 0.5));// 取最大值
->     // gl_FragColor = vec4(strength, strength, strength, 1.0);
+>      // pattern_9
+>      // float strength = min(abs(vUv.x - 0.5), abs(vUv.y - 0.5));// 取最小值
+>      // float strength = max(abs(vUv.x - 0.5), abs(vUv.y - 0.5));// 取最大值
+>      // gl_FragColor = vec4(strength, strength, strength, 1.0);
 > 
->     // pattern_10
->     // float strength = step(0.2, max(abs(vUv.x - 0.5), abs(vUv.y - 0.5)));
->     // gl_FragColor = vec4(strength, strength, strength, 1.0);
+>      // pattern_10
+>      // float strength = step(0.2, max(abs(vUv.x - 0.5), abs(vUv.y - 0.5)));
+>      // gl_FragColor = vec4(strength, strength, strength, 1.0);
 > 
->     // pattern_11
->     // float strength = floor(vUv.x * 10.0) / 10.0;// 向下取整
->     // gl_FragColor = vec4(strength, strength, strength, 1.0);
+>      // pattern_11
+>      // float strength = floor(vUv.x * 10.0) / 10.0;// 向下取整
+>      // gl_FragColor = vec4(strength, strength, strength, 1.0);
 > 
->     // pattern_12
->     // float strength = floor(vUv.x * 10.0) / 10.0;
->     // strength *= floor(vUv.y * 10.0) / 10.0;
->     // gl_FragColor = vec4(strength, strength, strength, 1.0);
+>      // pattern_12
+>      // float strength = floor(vUv.x * 10.0) / 10.0;
+>      // strength *= floor(vUv.y * 10.0) / 10.0;
+>      // gl_FragColor = vec4(strength, strength, strength, 1.0);
 > 
->     // pattern_13
->     // float strength = length(vUv);
->     // gl_FragColor = vec4(strength, strength, strength, 1.0);
+>      // pattern_13
+>      // float strength = length(vUv);
+>      // gl_FragColor = vec4(strength, strength, strength, 1.0);
 > 
->     // pattern_14
->     // float strength = 0.02 / distance(vUv, vec2(0.5));
->     // gl_FragColor = vec4(strength, strength, strength, 1.0);
+>      // pattern_14
+>      // float strength = 0.02 / distance(vUv, vec2(0.5));
+>      // gl_FragColor = vec4(strength, strength, strength, 1.0);
 > 
->     // // pattern_15
->     // float strength = abs(distance(vUv, vec2(0.5)) - 0.25);
->     // gl_FragColor = vec4(strength, strength, strength, 1.0);
+>      // // pattern_15
+>      // float strength = abs(distance(vUv, vec2(0.5)) - 0.25);
+>      // gl_FragColor = vec4(strength, strength, strength, 1.0);
 > }
 > ```
 
@@ -1940,7 +1940,7 @@
 
 
 
-#### Config
+### Config
 
 > 引入效果处理模块；
 >
@@ -1973,13 +1973,13 @@
 
 
 
-#### Pass
+### Pass
 
 > 引入不同的效果模块文件，实现不同的效果；
 
 
 
-###### DotScreenPass
+#### DotScreenPass
 
 > 像素点效果；
 >
@@ -1995,7 +1995,7 @@
 
 
 
-###### GlitchPass
+#### GlitchPass
 
 > 画面故障效果；
 >
@@ -2012,7 +2012,7 @@
 
 
 
-###### ShaderPass
+#### ShaderPass
 
 > 着色器效果；
 >
@@ -2029,7 +2029,7 @@
 
 
 
-###### UnrealBloomPass
+#### UnrealBloomPass
 
 > 不真实环境效果；
 >
