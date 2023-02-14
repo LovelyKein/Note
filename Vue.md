@@ -3748,11 +3748,66 @@
 
 
 
-#### 路径简写
+### 路径简写
 
 > 在 Vue 的配置中，路径中的`@`符号代表`src`文件夹，可以用`@`符号代替书写；
 
 [^Focus]:在**样式文件**中也可以使用`@`符号，但是前面要加`~`，例如`~@`；
+
+
+
+### 页面刷新
+
+> 在 Vue 中刷新页面的方案；
+>
+> 1. 通过`location.reload()`或者`$router.go(0)`，相当于按下`F5`键；
+>
+> ```js
+> refreshPage() {
+>   this.$router.go(0)
+>   // window.location.reload()
+> }
+> // 缺点：会出现空白页面，体验感较差
+> ```
+>
+> 2. 通过一个空白页面来过渡；
+>
+> ```js
+> // 要刷新的页面
+> this.$router.replace('/blank?redirect=' + this.$route.path)
+> 
+> // 空白页面
+> this.$router.replace(this.$route.query.redirect)
+> 
+> // 缺点：浏览器地址栏会有一个切换的过程
+> ```
+>
+> 3. 通过让`<router-view>`组件快速地销毁然后初始化；
+>
+> ```vue
+> <template>
+> 	<router-view v-if='isShow' />
+> </template>
+> 
+> <script>
+>   export default {
+>     data() {
+>       return {
+>         isShow: true // 通过变量控制组件的销毁和初始化
+>       }
+>     },
+>     methods: {
+>       refreshPage() {
+>         this.isShow = false
+>         setTimeout(() => {
+>           this.isShow = true
+>         }, 50)
+>       }
+>     }
+>   }
+> </script>
+> <!-- 推荐使用 -->
+> ```
 
 
 
@@ -3764,7 +3819,7 @@
 
 
 
-#### setup()
+### setup()
 
 > vue3 中一个新的配置项，是一个函数；
 >
@@ -3830,7 +3885,7 @@
 
 
 
-###### parameter
+#### parameter
 
 > `setup(props,context)`接受两个参数；
 
@@ -3872,7 +3927,7 @@
 
 
 
-#### ref()
+### ref()
 
 > 用来在 Vue3 中定义**响应式**的数据；
 >
@@ -3880,7 +3935,7 @@
 
 
 
-###### Import
+#### Import
 
 > `ref()`方法需要从 vue 文件中引入；
 >
@@ -3890,7 +3945,7 @@
 
 
 
-###### Use
+#### Use
 
 > 语法：`const xxx = ref(Value)`；
 >
@@ -3900,7 +3955,7 @@
 
 
 
-#### toRef()
+### toRef()
 
 > 创建一个 ref 实例对象，其 value 值指向另一个对象中的某个属性；
 >
@@ -3919,7 +3974,7 @@
 
 
 
-#### toRefs()
+### toRefs()
 
 > toRefs() 与 toRef() 功能一致，但可以创建多个 ref 实例对象；
 >
@@ -3937,7 +3992,7 @@
 
 
 
-#### reactive()
+### reactive()
 
 > 定义一个**对象或数组类型**的响应数据，基本类型不要用它；
 >
@@ -3945,7 +4000,7 @@
 
 
 
-###### Import
+#### Import
 
 > `reactive()`函数需要从 vue 文件中引入；
 >
@@ -3955,7 +4010,7 @@
 
 
 
-###### Use
+#### Use
 
 > 语法：`const 代理对象 = reactive(源对象)`；
 >
@@ -3991,7 +4046,7 @@
 
 
 
-#### Proxy/Reflect
+### Proxy/Reflect
 
 > ES6 中的`Proxy`与`Reflect`是 Vue3 数据响应式的原理；
 >
@@ -4031,13 +4086,13 @@
 
 
 
-#### computed()
+### computed()
 
 > Vue3 中提供的计算属性；
 
 
 
-###### Import
+#### Import
 
 > ```javascript
 > import { computed } from 'vue'
@@ -4045,7 +4100,7 @@
 
 
 
-###### use
+#### use
 
 > ```javascript
 > let number = ref(1);
@@ -4070,13 +4125,13 @@
 
 
 
-#### watch()
+### watch()
 
 > Vue3 中的数据监视函数；
 
 
 
-###### Focus
+#### Focus
 
 > 监视`reactive()`定义的数据时，`oldValue`无法获取，且强制开启**深度监视**；
 >
@@ -4084,7 +4139,7 @@
 
 
 
-###### Import
+#### Import
 
 > `watch()`函数需要从 vue 文件中引入；
 >
@@ -4094,7 +4149,7 @@
 
 
 
-###### Use
+#### Use
 
 > ```javascript
 > setup(){
@@ -4148,7 +4203,7 @@
 
 
 
-#### watchEffect()
+### watchEffect()
 
 > Vue3 中新增的监视函数；**需要引入**；
 >
@@ -4166,7 +4221,7 @@
 
 
 
-#### shallowReactive()
+### shallowReactive()
 
 > 需引入；
 >
@@ -4174,7 +4229,7 @@
 
 
 
-#### shallowRef()
+### shallowRef()
 
 > 需引入；
 >
@@ -4182,7 +4237,7 @@
 
 
 
-#### readonly()
+### readonly()
 
 > 需引入；
 >
@@ -4199,7 +4254,7 @@
 
 
 
-#### toRaw()
+### toRaw()
 
 > 需引入；
 >
@@ -4217,7 +4272,7 @@
 
 
 
-#### customRef()
+### customRef()
 
 > 创建自定义的 ref ，并对其依赖项跟踪和更新触发进行显式控制；
 >
@@ -4269,7 +4324,7 @@
 
 
 
-#### Provide / Inject
+### Provide / Inject
 
 > 需要引入；
 >
@@ -4309,7 +4364,7 @@
 
 
 
-#### teleport
+### teleport
 
 > `teleport`标签能让其包裹的 html 结构移动到指定的文档位置；
 >
@@ -4325,7 +4380,7 @@
 
 
 
-#### router
+### router
 
 > 在 Vue3 中使用**路由**；
 >
@@ -4368,27 +4423,29 @@
 
 
 
-#### TypeScript
+
+
+## TypeScript
 
 > 在 Vue3 中使用 TS 开发；
 
 
 
-##### 路径别名
+### 路径别名
 
 > 目前 ts 对`@`指向`src`目录的提示是不支持的，vite 默认也是不支持的，需要手动配置 @ 符号的指向；
 >
 > ```json
 > // tsconfig.json 文件
 > {
->   "compilerOptions": {
->     "baseUrl": "./",
->     "paths": {
->       "@/*": ["src/*"],
->       "#/*": ["types/*"]
->     }
->   },
->   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
+>     "compilerOptions": {
+>        "baseUrl": "./",
+>        "paths": {
+>          "@/*": ["src/*"],
+>          "#/*": ["types/*"]
+>        }
+>     },
+>     "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
 > }
 > ```
 >
@@ -4398,13 +4455,13 @@
 > // vite.config.ts 文件
 > import path from 'path';
 > export default defineConfig({
->     plugins: [vue()],
->     resolve: {
+>      plugins: [vue()],
+>      resolve: {
 >        alias: {
 >          "@": path.join(__dirname, 'src'),
 >          "#": path.join(__dirname, 'types')
 >        }
->     }
+>      }
 > })
 > ```
 

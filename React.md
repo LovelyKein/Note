@@ -7,20 +7,14 @@
 > 将**数据**渲染为**HTML视图**的开源库；
 >
 > 由 Facebook 开发；
+>
+> 1. **组件化**开发，**声明式编码**，提高效率和复用率；
+> 2. 利用`React Native`可以进行移动端开发；
+> 3. `VDOM`+`Diffing`，尽量减少与真实 DOM 的交互；
 
 
 
-#### 特点( Features )
-
-1. **组件化**开发，**声明式编码**，提高效率和复用率；
-2. 利用`React Native`可以进行移动端开发；
-3. `VDOM`+`Diffing`，尽量减少与真实 DOM 的交互；
-
-
-
-
-
-## 虚拟 DOM
+### 虚拟 DOM
 
 > React 的优势就在于不会直接操作**真实 DOM**，性能更好；
 >
@@ -31,27 +25,20 @@
 > ```jsx
 > // 虚拟 DOM
 > const vDom = <h1>Hello React</h1>；
-> // true
-> console.log(vDom instanceof Obiect);
+> console.log(vDom instanceof Obiect) // true
 > ```
 
 
 
-
-
-## JSX
+### JSX
 
 > 全称`JavaScript XML`；
 >
 > 是 React 定义的一种类似 XML 的 JavaScript 扩展语法；
 >
 > 本质是`React.createElement()`的语法糖；
-
-
-
-#### 作用( Function )
-
-> 用来**简化**创建虚拟 DOM ；
+>
+> 用来**简化创建虚拟 DOM **；
 
 
 
@@ -69,7 +56,7 @@
 >
 > 6. 标签必须闭合；
 >
-> 7. 自定义标签
+> 7. 自定义标签；
 >
 > > 首字母小写，转为 html 标签元素，没有则报错；
 > >
@@ -134,9 +121,9 @@
 
 
 
-### 组件( Component )
+### 类型
 
-> 在 React 中面向组件化编程；
+> 在 React 中有**函数组件**和**类式组件**；
 
 
 
@@ -191,45 +178,7 @@
 
 
 
-### 事件绑定( event )
-
-> ```jsx
-> class Weather extends React.Component {
->      constructor(props) {
->        super(props)
->        this.state = {
->          isHot: false,
->        }
->        // 改变 changeWeather() 的指向问题；
->        // 利用 bind 改变 this 指向 Weather ，生成一个新函数，复制给 this.haveDemo ；
->        this.haveDemo = this.changeWeather.bind(this)
->      }
->      render() {
->        // 读取 state 中的属性；
->        const { isHot } = this.state;
->        return (
->          <h2 onClick={this.haveDemo}>今天的天气{isHot ? "炎热" : "寒冷"}</h2>
->        );
->      }
->      changeWeather() {
->        // changeWeather() 方法在 Weather 的原型对象上，供实例对象使用；
->        // changeWeather() 此时被 <h2> 作为点击的回调函数直接调用，而不是被实例对象使用；
->        // 类中默认开启了局部的严格模式，所以此处 this 指向 undefined ；
->        console.log(this)
->        // 需要通过 setState 改变状态（state）中的数据；
->        // 且是一种合并更新，不是替换；
->        const isHot = this.state.isHot
->        this.setState({
->          isHot: !isHot
->        })
->      }
-> }
-> ReactDOM.render(<Weather />, document.getElementById("demo"));
-> ```
-
-
-
-### 组件标签
+### 标签
 
 > 组件标签可以**双标签**，也可以**单标签**；
 >
@@ -245,7 +194,7 @@
 
 
 
-### 组件简写
+### 简写
 
 > 利用类的赋值语句写法；
 >
@@ -274,27 +223,25 @@
 
 
 
-### 卸载组件
+### 卸载
 
 > ```jsx
 > // 创建类式组件；
 > class ClassComponent extends React.Component {
->   // 卸载组件的方法
->   death = () => {
->    ReactDOM.unmountComponentAtNode(document.getElementById('demo'))
->   }
->   render(){
->    return <h2>我是类式组件</h2>
->   }
+>     // 卸载组件的方法
+>     death = () => {
+>        ReactDOM.unmountComponentAtNode(document.getElementById('demo'))
+>     }
+>     render(){
+>        return <h2>我是类式组件</h2>
+>     }
 > }
 > ReactDOM.render(<ClassComponent/>, document.getElementById('demo'))
 > ```
 
 
 
-
-
-## 构造器( constructor )
+### constructor
 
 > 在 React 的类式组件中，constructor 可以不写，也可以写，区别在读取 props 的方式；
 >
@@ -305,7 +252,8 @@
 >   constructor(props) {
 >     super(props)
 >     this.haveDemo = this.changeWeather.bind(this)
->     // 当需要在 constructor 中通过实例对象读取 props 属性，则需要给 constructor()、super() 传递 props ;
+>     // 当需要在 constructor 中通过实例对象读取 props 属性
+>     // 则需要给 constructor()、super() 传递 props ;
 >     console.log(this.props)
 >   }
 >   render() {
@@ -316,6 +264,44 @@
 > ```
 
 [^Focus]: `constructor`尽量不用写；
+
+
+
+### 事件绑定( event )
+
+> ```jsx
+> class Weather extends React.Component {
+>   constructor(props) {
+>     super(props)
+>     this.state = {
+>       isHot: false,
+>     }
+>     // 改变 changeWeather() 的指向问题；
+>     // 利用 bind 改变 this 指向 Weather ，生成一个新函数，复制给 this.haveDemo ；
+>     this.haveDemo = this.changeWeather.bind(this)
+>   }
+>   render() {
+>     // 读取 state 中的属性；
+>     const { isHot } = this.state;
+>     return (
+>       <h2 onClick={this.haveDemo}>今天的天气{isHot ? "炎热" : "寒冷"}</h2>
+>     );
+>   }
+>   changeWeather() {
+>     // changeWeather() 方法在 Weather 的原型对象上，供实例对象使用；
+>     // changeWeather() 此时被 <h2> 作为点击的回调函数直接调用，而不是被实例对象使用；
+>     // 类中默认开启了局部的严格模式，所以此处 this 指向 undefined ；
+>     console.log(this)
+>     // 需要通过 setState 改变状态（state）中的数据；
+>     // 且是一种合并更新，不是替换；
+>     const isHot = this.state.isHot
+>     this.setState({
+>       isHot: !isHot
+>     })
+>   }
+> }
+> ReactDOM.render(<Weather />, document.getElementById("demo"));
+> ```
 
 
 
@@ -333,8 +319,8 @@
 >
 > ```jsx
 >class Weather extends React.Component {
->   constructor(props) {
->     super(props)
+>     constructor(props) {
+>        super(props)
 >        // state 是组件实例对象的 3 大核心属性之一；
 >        // 初始化 state ；
 >        this.state = {
@@ -350,13 +336,15 @@
 >    ReactDOM.render(<Weather/>, document.getElementById('demo'))
 > ```
 
-[^Focus]: `state`中的数据不能直接更改，需要通过 `this.setState`，否则视图不会更新，该方法在`React.Component`上；
+[^Focus]: `state`中的数据不能直接更改，需要通过 `this.setState`，否则视图不会更新；
 
 
 
 ### setState()
 
-> React 中是单向数据流，更新 state 中的数据，需要通过`this.setState()`方法去改变数据，才会引起页面的更新；
+> React 中是单向数据流；
+>
+> 更新 state 中的数据，需要通过`this.setState()`方法去改变数据，才会引起页面的更新；
 
 [^Focus]:state 数据的改变是**异步**的，获取最新数据可以在`setState`方法的第二个回调函数中获取；
 
@@ -445,65 +433,67 @@
 
 
 
-#### 限制属性
+### 限制属性
 
 > ```jsx
 > class Person extends React.Component {
->   render(){
->     // 从 props 中解构属性
->     let {name, gender, age} = this.props
->     return (
->       <ul>
->         <li>{name}</li>
->         <li>{gender}</li>
->         <li>{age}</li>
->       </ul>
->     )
->   }
->   // 对 props 进行 类型、必要性 的限制（类的 静态属性 写法）
->   static propTypes = {
->     name: React.PropTypes.string.isRequired, // 字符串类型、必要性
->     gender: React.PropTypes.string, // 字符串类型
->     age: React.PropTypes.number // 数字类型
->   }
->   // 对 props 进行 默认值 的指定（类的 静态属性 写法）
->   static defaultProps = {
->     gender: 'Male',
->     age: 22
->   }
+> render(){
+>  // 从 props 中解构属性
+>  let {name, gender, age} = this.props
+>  return (
+>    <ul>
+>      <li>{name}</li>
+>      <li>{gender}</li>
+>      <li>{age}</li>
+>    </ul>
+>  )
+> }
+> // 对 props 进行 类型、必要性 的限制（类的 静态属性 写法）
+> static propTypes = {
+>  name: React.PropTypes.string.isRequired, // 字符串类型、必要性
+>  gender: React.PropTypes.string, // 字符串类型
+>  age: React.PropTypes.number // 数字类型
+> }
+> // 对 props 进行 默认值 的指定（类的 静态属性 写法）
+> static defaultProps = {
+>  gender: 'Male',
+>  age: 22
+> }
 > }
 > 
 > const person = {
->   name: 'LovelyKein',
->   gender: 'Male',
->   age: '22'
+> name: 'LovelyKein',
+> gender: 'Male',
+> age: '22'
 > }
-> ReactDOM.render(<Person {...person} />, document.getElementById('demo')) // 批量传递属性
+> // 批量传递属性
+> ReactDOM.render(<Person {...person} />, document.getElementById('demo'))
 > ```
 
 [^Focus]:15 版本为`React.PropTypes`，16 版本考虑性能原因，变为`PropTypes`，但要引入单独的 js 依赖文件；
 
 
 
-#### 函数组件使用 props
+### 函数组件使用 props
 
 > 在 **函数式组件**中使用`props`属性；
 >
+> 函数接收的参数为父组件传递的 props 属性对象；
+>
 > ```jsx
-> // 函数接收的参数为传递的 props 属性对象；
 > function Person(props) {
->      return(
->        <ul>
->          <li>姓名：{ props.name }</li>
->          <li>性别：{ props.gender }</li>
->          <li>年龄：{ props.age }</li>
->        </ul>
->      )
+>   return(
+>     <ul>
+>       <li>姓名：{ props.name }</li>
+>       <li>性别：{ props.gender }</li>
+>       <li>年龄：{ props.age }</li>
+>     </ul>
+>   )
 > }
 > const person = {
->      name: 'LovelyKein',
->      gender: 'Male',
->      age: '22'
+>   name: 'LovelyKein',
+>   gender: 'Male',
+>   age: '22'
 > }
 > ReactDOM.render(<Person {...person} />, document.getElementById('demo'))
 > ```
@@ -522,7 +512,7 @@
 
 
 
-#### 字符串
+### 字符串
 
 > 字符串类型的`ref`标签；
 >
@@ -552,7 +542,7 @@
 
 
 
-#### 回调函数
+### 回调函数
 
 > 回调函数类型的`ref`标签；
 >
@@ -593,7 +583,7 @@
 
 
 
-#### React.createRef()
+### React.createRef()
 
 > 通过`React.createRef()`来创建 ref **标签容器**；
 >
@@ -630,7 +620,7 @@
 
 
 
-#### on
+### on
 
 > 通过`on`+`Click（事件触发类型）`来指定时间处理函数；
 >
@@ -661,7 +651,7 @@
 
 
 
-#### event.target
+### event.target
 
 > 可以通过`event.target`获取发生事件的 DOM 元素；
 >
@@ -684,7 +674,7 @@
 
 
 
-#### 表单( Form )
+### 表单( Form )
 
 > 给表单绑定 React 中的 state 状态数据；
 >
@@ -813,7 +803,7 @@
 
 
 
-#### 钩子函数
+### 钩子函数
 
 > ```jsx
 > class Count extends React.Component {
@@ -873,7 +863,7 @@
 
 
 
-#### forceUpdate
+### forceUpdate
 
 > 不受 `shouldComponentUpdate`**控制阀门**的影响，强制更新页面；
 >
@@ -884,7 +874,7 @@
 
 
 
-#### 接收属性
+### 接收属性
 
 > 组件**将要接受属性**时调用的生命周期函数；
 >
@@ -931,7 +921,7 @@
 
 
 
-#### 新版周期
+### 新版周期
 
 > 在 React 最新版中，丢弃了 `componentWillMount`、`componentWillReceiveProps`、`componentWillUpdate`；
 >
@@ -973,7 +963,7 @@
 
 
 
-#### key
+### key
 
 > key 是**虚拟 DOM**对象的标识；
 >
@@ -985,7 +975,7 @@
 
 
 
-#### 规则
+### 规则
 
 > [^A]:新旧 **虚拟 DOM**中有 相同的 key；
 >
@@ -999,7 +989,7 @@
 
 
 
-#### 问题
+### 问题
 
 > 用循环遍历中的 index 做为 key 值，可能会出现问题；
 >
@@ -1020,7 +1010,7 @@
 
 
 
-#### 创建
+### 创建
 
 > ```shell
 > # 全局安装脚手架库
@@ -1031,13 +1021,13 @@
 
 
 
-#### 结构
+### 结构
 
 > 脚手架会创建一个项目的工程目录；
 
 
 
-###### public/index.html
+#### public/index.html
 
 > ```html
 > <!DOCTYPE html>
@@ -1068,7 +1058,7 @@
 
 
 
-###### src/index.js
+#### src/index.js
 
 > ```jsx
 > // 引入 react 核心库
@@ -1094,7 +1084,7 @@
 
 
 
-#### 组件
+### 组件
 
 > 在 React 脚手架中定义一个最简单的组件；
 >
@@ -1140,13 +1130,13 @@
 
 
 
-#### css 样式模块化
+### css 模块化
 
 > 如果不模块化，会造成全局下相同类名的样式会被后面的覆盖掉；
 >
 > ```jsx
 > // 第一种方法
-> // 使用 less 或 scss 这种嵌套关系的样式标，则不会产生冲突，因为父层级不一样；
+> // 使用 less 或 scss 这种嵌套关系的样式，则不会产生冲突，因为父层级不一样；
 > 
 > 
 > // 第二种方法
@@ -1169,7 +1159,7 @@
 
 
 
-#### props
+### props
 
 > 可以实现`父组件 <===> 子组件`组件的双向通信；
 >
@@ -1202,7 +1192,7 @@
 
 
 
-#### 发布订阅
+### 发布订阅
 
 > `PubSubJs`，适用于**任意组件间通信**；
 >
@@ -1210,7 +1200,7 @@
 
 
 
-###### 特点( Features )
+#### 特点( Features )
 
 * 无依赖；
 * 同步解耦；
@@ -1221,7 +1211,7 @@
 
 
 
-###### 安装( Install )
+#### 安装( Install )
 
 > 引入模块包；
 >
@@ -1234,7 +1224,7 @@
 
 
 
-###### 使用( Use )
+#### 使用( Use )
 
 > ```javascript
 > // 创建一个方法用来订阅主题；
@@ -1260,7 +1250,7 @@
 
 
 
-#### Context
+### Context
 
 > 一种组件的通信方式，常用于`祖组件 ===> 后代组件`之间的通信；
 >
@@ -1335,39 +1325,35 @@
 
 
 
-## React Ajax
+## 代理( Proxy )
 
 > 在 React 中发送 Ajax 网络请求；
+>
+> Ajax 网络请求存在**同源策略**，需要解决请求跨域的问题；
 
 
 
-#### 配置代理
-
-> 因为 Ajax 网络请求存在**同源策略**，需要解决请求跨域的问题；
-
-
-
-###### package.json
+### package.json
 
 > 在 package.json 文件中添加一个 `proxy` 选项，配置需要进行代理的目标服务器；
 >
-> [^Focus]:如果请求的资源在前端存在，则不会转发到目标服务器，直接返回前端端口存在的资源；
->
 > ```json
-> {
+>{
 >   "proxy": :"http://localhost: 5000"
 > }
-> 
+>   
 > // 优点：配置简单，前端的请求路径中不用加任何前缀；
 > // 缺点：不能配置多个代理；
-> // 特点：优先匹配前端资源，如果请求资源在前端中不存在，才会将请求转发给代理目标服务器‘
+> // 特点：优先匹配前端资源，如果请求资源在前端中不存在，才会将请求转发给代理目标服务器
 > ```
 
+[^Tip]:如果请求的资源在前端存在，则不会转发到目标服务器，直接返回前端端口存在的资源；
 
 
-###### setupProxy.js
 
-> 在 src 目录喜下新建`setupProxy.js`配置文件，在此文件中进行代理的配置；
+### setupProxy.js
+
+> 在 src 目录下新建`setupProxy.js`配置文件，在此文件中进行代理的配置；
 >
 > ```js
 > // 在该文件中进行 网络请求 的 代理配置
@@ -1402,7 +1388,7 @@
 
 
 
-#### 单选框
+### 单选框
 
 > ```jsx
 > // 单选框选中属性有两个 defaultChecked checked，类似的还有 defaultValue value
@@ -1415,7 +1401,7 @@
 
 
 
-#### 连续解构
+### 连续解构
 
 > ```javascript
 > const list = {
@@ -1448,7 +1434,7 @@
 
 
 
-#### 路由原理
+### 原理
 
 > React 的路由跳转原理是浏览器`BOM`对象的`history`属性；
 >
@@ -1503,7 +1489,7 @@
 
 
 
-#### 安装
+### 安装
 
 > react-router 有三个版本，`dom`、`native`、`anywhere`，此处下载的为`dom`版本；
 >
@@ -1515,7 +1501,7 @@
 
 
 
-#### 基本使用
+### 使用
 
 > ```jsx
 > import "./App.css";
@@ -1554,7 +1540,7 @@
 
 
 
-#### 点击高亮
+### 点击高亮
 
 > 实现点击哪个路由导航标签，就动态增加一个样式类名；
 >
@@ -1581,7 +1567,7 @@
 
 
 
-#### Switch
+### Switch
 
 > 禁止 **路由链接`Route`**向下匹配，导致**一个路由链接展示多个组件内容**；
 >
@@ -1624,7 +1610,7 @@
 
 
 
-#### 样式丢失
+### 样式丢失
 
 > 解决在类似`/admin/editor/`这样的多层级路由链接下刷新页面，外部引入的本地样式文件会样式丢失的问题；
 >
@@ -1640,7 +1626,7 @@
 
 
 
-#### 匹配模式
+### 匹配模式
 
 > 在 React 的路由链接中有**模糊匹配**和**精准匹配**两个模式，默认是**模糊匹配**；
 >
@@ -1666,11 +1652,11 @@
 > <Route exact path={"/about"} component={About} />
 > ```
 
-[^Important]:**精准模式**要谨慎使用（**可能会导致无法匹配二级路由**），尽量在**模糊匹配**出现问题时在考虑使用；
+[^Focus]:**精准模式**要谨慎使用（**可能会导致无法匹配二级路由**），尽量在**模糊匹配**出现问题时再考虑使用；
 
 
 
-#### 重定向( Redirect )
+### 重定向( Redirect )
 
 > 当路由链接没有匹配的组件内容时使用；
 >
@@ -1686,9 +1672,9 @@
 
 
 
-#### 嵌套路由
+### 嵌套路由
 
-> 在一个路由组件中还存在这嵌套的二级路由；
+> 在一个路由组件中还存在着嵌套的二级路由；
 >
 > ```jsx
 > // 在 '/about' 组件内容中，存在这二级路由
@@ -1733,13 +1719,13 @@
 
 
 
-#### 路由传参
+### 路由传参
 
 > 路由跳转的同时携带参数；
 
 
 
-###### params
+#### params
 
 > 在**路由链接**中携带参数`40px`；
 >
@@ -1780,7 +1766,7 @@
 
 
 
-###### search
+#### search
 
 > 相当于**网络请求**中的**查询字符串**，形如`?name=kein&age=22`；
 >
@@ -1873,7 +1859,7 @@
 
 
 
-###### state
+#### state
 
 > 特点：地址栏中看不到传递的 state 参数；
 >
@@ -1909,7 +1895,7 @@
 
 
 
-#### 编程式导航
+### 编程式导航
 
 > 不借助 NavLink 路由链接进行路由的跳转；
 >
@@ -1917,7 +1903,7 @@
 
 
 
-###### push
+#### push
 
 > 使用 push 模式进行路由跳转；
 >
@@ -1943,7 +1929,7 @@
 
 
 
-###### replace
+#### replace
 
 > 使用 replace 模式进行路由跳转；
 >
@@ -1969,7 +1955,7 @@
 
 
 
-###### goBack
+#### goBack
 
 > 向后退一步；
 >
@@ -1979,7 +1965,7 @@
 
 
 
-###### goForward
+#### goForward
 
 > 前进一步；
 >
@@ -1989,7 +1975,7 @@
 
 
 
-###### go
+#### go
 
 > 前进或后退指定的步数；
 >
@@ -2002,7 +1988,7 @@
 
 
 
-#### withRouter
+### withRouter
 
 > 只有**路由组件**才能使用`this.props.history`对象上的方法；
 >
@@ -2027,7 +2013,7 @@
 
 
 
-#### HashRouter
+### HashRouter
 
 > 使用的是 URL 的哈希值；
 >
@@ -2047,7 +2033,7 @@
 
 
 
-#### 原本写法
+### 原本写法
 
 > ```jsx
 > import React, { Component } from "react";
@@ -2079,7 +2065,7 @@
 
 
 
-#### 懒加载
+### 懒加载写法
 
 > ```jsx
 > // 组件懒加载
@@ -2134,11 +2120,11 @@
 
 
 
-#### 核心概念
+### 核心概念
 
 
 
-###### action
+#### action
 
 > 动作对象；
 >
@@ -2161,7 +2147,7 @@
 
 
 
-###### reducer
+#### reducer
 
 > 用于初始化状态，改变状态，**纯函数**；
 >
@@ -2171,7 +2157,7 @@
 
 
 
-###### store
+#### store
 
 > 将`state/action/reducer`联系在一起的对象；
 >
@@ -2186,7 +2172,7 @@
 
 
 
-#### 基本使用
+### 使用
 
 > src 目录下建立 redux 文件夹；
 >
@@ -2344,7 +2330,7 @@
 
 
 
-#### 异步 action
+### 异步 action
 
 > 延迟异步的动作不想交给组件本身，想交给 action；
 >
@@ -2364,7 +2350,7 @@
 
 
 
-#### Install
+### Install
 
 > ```shell
 > # yarn
@@ -2376,7 +2362,7 @@
 
 
 
-#### 概念
+### 概念
 
 > [^UI 组件]:不使用任何 redux 的 api 或方法，只负责页面内容的呈现、交互；
 > [^容器组件]:负责和 redux 通信，将结果传递给**UI 组件**；
@@ -2385,7 +2371,7 @@
 
 
 
-###### 纯函数
+#### 纯函数
 
 > 一类特别的函数；
 >
@@ -2403,13 +2389,13 @@
 
 
 
-###### 高阶函数
+#### 高阶函数
 
 > 参数是**函数**，返回值是**函数**；
 
 
 
-#### 基本使用
+### 使用
 
 > App.js
 >
@@ -2538,15 +2524,11 @@
 
 
 
-#### Provider
+### Provider
 
 > react-redux 官方提供的优化、简写的方式；
 >
 > 避免在有很多**容器组件**时，需要手动多次的书写`store={store}`给**容器组件**传递 store ；
-
-
-
-###### 书写方式
 
 > Index.js
 >
@@ -2595,7 +2577,7 @@
 
 
 
-#### 合并 容器/UI
+### 合并 容器/UI
 
 > 优化代码，将**UI 组件**和**容器组件**合并到一个文件中；
 >
@@ -2664,13 +2646,13 @@
 
 
 
-#### 多个状态
+### 多个状态
 
 > 在 react-redux 的使用中，更多的是将不同的数据都储存在 redux 中；
 
 
 
-###### 文件格式
+#### 文件格式
 
 > ```tex
 > - src
@@ -2686,7 +2668,7 @@
 
 
 
-###### 基本书写
+#### 基本书写
 
 > countAction.js
 >
@@ -2811,9 +2793,9 @@
 > )(CountUI);
 > ```
 
+#### 
 
-
-#### Redux DevTools
+### Redux DevTools
 
 > redux 的开发辅助工具；
 >
@@ -2901,9 +2883,9 @@
 > [^callback]:回调函数，在 钩子 被触发时会被调用；
 > [^params]:**可选参数**；
 >
-> > [^不传 pramas]:任何状态发生改变，组件重新渲染时，都会触发回调；
-> > [^`params = [\]`]:不监测任何状态，只会在挂载完成时触发一次，相当于类式组件的`componentDidMount`；
-> > [^params = [name, count\]`]:数组中写需要被监测的状态，被监测的状态发生改变时触发回调，类似于监听；
+> > [^pramas = 'no pass']:不传递该参数，任何状态发生改变导致组件重新渲染时，都会触发回调；
+> > [^params = '[\]']:不监测任何状态，只会在挂载完成时触发一次，相当于类式组件的`componentDidMount`；
+> > [^params = '[name, count\]']:数组中写需要被监测的状态，被监测的状态发生改变时触发回调，类似于监听；
 >
 > ```jsx
 > import React from "react";
@@ -2975,6 +2957,46 @@
 >       {/** 将 ref 绑定到目标标签上**/}
 >       <input ref={keyword} placeholder="请输入文字" />
 >       <button onClick={showValue}>Tip</button>
+>     </div>
+>   );
+> }
+> ```
+
+
+
+### useMemo
+
+> 减少**函数组件**重新渲染时不必要的数据计算，可以用来性能优化；
+>
+> 类似于 Vue 中的 computed 计算属性；
+>
+> ```tsx
+> import { useState, useMemo } from "react";
+> 
+> export default function App() {
+>   const [numA, setNumA] = useState(0);
+>   const [numB, setNumB] = useState(2);
+> 
+>   // 根据 numA 和 numB 计算出一个 数据
+>   const sum = useMemo(() => {
+>     console.log('update')
+>     return  numA + numB
+>   }, [numA, numB])
+>   // 如果此时 useMemo 的第二个参数只传递 numA， 则 sum 只会在 numA 更新时触发
+> 
+>   const addA = () => {
+>     setNumA(numA + 1)
+>   }
+>   const addB = () => {
+>     setNumB(numB + 1)
+>   };
+> 
+>   return (
+>     <div>
+>       <p>numA: {numA} <button onClick={addA}>A+</button></p>
+>       <p>numB: {numB} <button onClick={addB}>B+</button></p>
+>       <br />
+>       <p>sum: {sum}</p>
 >     </div>
 >   );
 > }
@@ -3614,7 +3636,7 @@
 
 ### useRoutes
 
-> **路由表**，可以已数组包裹对象的形式，书写路由；
+> **路由表**，可以以数组包裹对象的形式，书写路由；
 >
 > ```jsx
 > // 引入
@@ -3705,4 +3727,93 @@
 >   }
 > }
 > ```
+
+
+
+### useLocation
+
+> 返回当前页面位置的**路由对象**，**可以用来获取路由参数**；
+>
+> ```tsx
+> import { useLocation, matchRoutes } from 'react-router-dom'
+> 
+> export default function Login() {
+>   const location = useLocation()
+>   console.log(location)
+>   /*
+>   	location: { 
+>   		hash: '', key: 'defaule', pathname: '/login', search: '', state: null
+>   	}
+>   */
+>   return (
+>     <div className='login'>Login</div>
+>   )
+> }
+> ```
+>
+> 与`matchRoutes`匹配使用；
+>
+> 针对给定位置的一组路由去匹配，以查看哪些路由(如果有)匹配；
+>
+> 如果找到匹配，则返回一个`RouteMatch`对象数组；
+>
+> ```tsx
+> const routes = matchRoutes(router, location.pathname)
+> console.log(routes)
+> ```
+
+
+
+### useSearchParams
+
+> 用来获取形似`/about?name=Kein&age=22&gender=Female`的**查询字符串参数**；
+>
+> 返回数据和`useState`一样返回一个数组，包含一个路径参数的对象，和改变路径参数的方法；
+>
+> ```tsx
+> import { useSearchParams } from "react-router-dom"
+> const [searchParams, setSearchParams] = useSearchParams()
+> 
+> // 获取参数
+> const name = searchParams.get('name') // 获取 name 的键值
+> 
+> // 判断参数是否存在
+> const exist = searchParams.has('id') // false
+> 
+> // 修改参数
+> setSearchParams({"age": 24})
+
+
+
+### useParams
+
+> 用来获取获取形如`/:params`的路由参数的钩子；
+>
+> 返回值就是一个对象，key 是路由组件的占位符的名字；
+>
+> ```tsx
+> import { useNavigate, useParams } from 'react-router-dom'
+> 
+> // const route = <Route path='/hello/:id'element={ <Hello /> } />
+> useNavigate(`/hello/${10}`)
+> 
+> const params = useParams() // 返回一个对象，参数在其中
+> // console.log(params.id)
+> ```
+
+
+
+### useMatch
+
+> 返回给定路径上相对于当前位置路由的匹配数据；
+>
+> ```tsx
+> import { useMatch } from 'react-router-dom'
+> const match = useMatch()
+> // console.log(match)
+> ```
+
+
+
+
 
