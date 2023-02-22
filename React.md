@@ -929,6 +929,12 @@
 >
 > 如果一定要使用，加上`UNSAFE_`前缀；
 >
+> React 组件的生命周期可分成三个状态：
+>
+> * Mounting(挂载)：已插入真实 DOM；
+> * Updating(更新)：正在被重新渲染；
+> * Unmounting(卸载)：已移出真实 DOM；
+>
 > <img src="imags/react_lifecircel_new.png" alt="react_lifecircel_new" style="zoom:50%;" />
 >
 > ```jsx
@@ -937,17 +943,17 @@
 > // 静态方法，只提供给 类 本身使用；
 > // 谨慎使用，会造成代码冗余，难以维护；
 > static getDerivedStateFromProps(props, state) {
->     console.log(props) // 来自外界传递的属性 props
->     console.log(state) // 组件本身的状态 state
->     // 需要返回一个状态对象，以提供给组件使用
->     return props
+>  console.log(props) // 来自外界传递的属性 props
+>  console.log(state) // 组件本身的状态 state
+>  // 需要返回一个状态对象，以提供给组件使用
+>  return props
 > }
 > 
 > 
 > // 获取 在页面完成更新之前的快照（信息），再将数据传递给 componentDidUpdate 的第三个参数中；
 > getSnapshotBeforeUpdate() {
->     // 需要返回一个 快照值，可以是任何信息；
->     return 'message'
+>  // 需要返回一个 快照值，可以是任何信息；
+>  return 'message'
 > }
 > ```
 
@@ -1135,11 +1141,11 @@
 > 如果不模块化，会造成全局下相同类名的样式会被后面的覆盖掉；
 >
 > ```jsx
-> // 第一种方法
+> // 1
 > // 使用 less 或 scss 这种嵌套关系的样式，则不会产生冲突，因为父层级不一样；
 > 
 > 
-> // 第二种方法
+> // 2
 > // 模块化引入 样式文件
 > // 1、模块化命名样式文件：加 .module
 > // hello.module.css
@@ -1147,6 +1153,14 @@
 > // import hello from './hello.module.css'
 > // 3、使用模块化类名
 > // <h3 className={hello.title}>Hello React</h3>
+> 
+> 
+> // 3
+> // react.jss 第三方包  npm install react.jss
+> 
+> 
+> // 4
+> // styled-components
 > ```
 
 
@@ -2120,30 +2134,28 @@
 
 
 
-### 核心概念
+### 核心
 
 
 
 #### action
 
-> 动作对象；
->
-> 包含两个属性
+> 动作对象，包含两个属性
 >
 > [^type]:标识属性，值为字符串，唯一且必要属性；
-> [^data]:数据属性，值为**任意类型**，可选属性；
->
+>[^data]:数据属性，值为**任意类型**，可选属性；
+> 
 > ```javascript
-> {
+>{
 >   type: 'ADD_STUDENT', // 动作标识
->     data: {
->       // 动作数据
+>   data: {
+>      // 动作数据
 >       name: 'kein',
 >       age: 22,
 >       gender: 'Male'
 >     }
-> }
-> ```
+>    }
+>    ```
 
 
 
@@ -2153,7 +2165,7 @@
 >
 > 不仅可以进行加工状态，还可以进行初始化状态（未被初始化的状态值为`undefinded`）；
 >
->  `reducer`是改变状态时，根据旧的 state 和 动作对象 action 产生新的 state 的**纯函数**；
+> `reducer`改变状态时，根据旧的 state 和 动作对象 action 产生**新的 state **；
 
 
 
@@ -2303,15 +2315,21 @@
 > 
 > // 组件内容
 > export default class Home extends Component {
+>   unsubscribe = null
 >   // 组件挂载
 >   componentDidMount() {
 >     // redux 中 store 的数据不是响应式的，发生变化并不会引起页面的更新；
 >     // 使用 store 对象上的 subscribe() 方法来监听 store 中 的状态;
->     // 只要发生变化，就会触发 subscribe() 方法，再去 调用 render
->     store.subscribe(() => {
+>     // 只要发生变化，就会触发 subscribe() 方法，再去更新状态
+>     unsubscribe = store.subscribe(() => {
 >       // 更新状态导致页面更新内容
 >       this.setState({});
 >     });
+>   }
+>   // 组件将要卸载
+>   componentWillUnmount() {
+>     // 取消订阅，防止多次更改数据产生的多从订阅，每次都取消之前的订阅
+>     unsubscribe()
 >   }
 >   render() {
 >     return (
@@ -2328,41 +2346,217 @@
 > }
 > ```
 
+[^Tip]:redux 中**取消订阅**是将`store.subscribe()`执行后的返回值作为函数去执行，则是取消当前订阅；
 
 
-### 异步 action
 
-> 延迟异步的动作不想交给组件本身，想交给 action；
+### 原理
+
+> 模拟一个最简单的 redux；
 >
-> 何时需要异步 action ？想要对状态进行操作但是具体的数据需要靠异步操作返回；
+> ```js
+> // 将原本的
+> const store = createStore(countReducer)
+> // 更换成
+> const store = createMyStore(countReducer)
+> ```
 >
-> **异步 action 不是必须的，可以等待异步任务的结果再去分发同步 action**；
+> ```js
+>  function createMyStore(reducer){
+>    const callbackList = []
+>    const state = reducer(undefined, {})
+>    function subscribe(callback){
+>      // 订阅，在数据发生改变时要执行的回调函数
+>       callbackList.push(callback)
+>    }
+>    function dispatch(action){
+>      state = reducer(state, action) // 使用 reducer 更改数据
+>      // 数据发生改变时，遍历所有回调函数并执行
+>       for(let item of callbackList){
+>          item && item()
+>       }
+>    }
+>    // 使用 getState 获取最新数据
+>    function getState(){
+>       return state
+>    }
+>    return {
+>       subscribe,
+>       dispatch,
+>       getState
+>    }
+>  }
+> ```
 
 
 
+### 纯函数
+
+> 一类特别的函数；
+>
+> 遵守以下约束：
+>
+> * 不会改变传递的参数的数据，对外界变量数据没有副作用影响；
+> * 只要输入的（实参）是相同的，必定得倒相同的输出或返回值；
+> * 不会产生任何副作用、不确定作用，例如（网络请求 ...）；
+> * 不能在函数中使用`new Date().now()`或`Math.random()`等不纯的方法；
+>
+> 而 redux中的 reducer 必须是一个**纯函数**；
+
+[^Important]: reducer 的返回值会有浅比较，数据**引用地址**相同的不会被更新，需要总是返回一个新的数据，不改变`preState`的数据；
 
 
-## react-redux
+
+### 合并 reducer
+
+> 合并多个 reducer ，将不同类型的数据分开储存；
+>
+> ```js
+> // cityReducer
+> const cityReducer = (prevState = {cityName: "北京"}, action) => {
+>   const newState = {...prevState}
+>   switch (action.type) {
+>     case "change-city":
+>       newState.cityName = action.payload
+>       return newState
+>     default:
+>       return prevState
+>   }
+> }
+> 
+> // statusReducer
+> const statusReducer = (prevState = {show: true}, action) => {
+>   const newState = {...prevState}
+>   switch (action.type) {
+>     case "hide-panel":
+>       newState.show = false
+>       return newState
+>     case "show-panel":
+>       newState.show = true
+>       return newState
+>     default:
+>       return prevState
+>   }
+> }
+> ```
+>
+> store.js
+>
+> ```js
+> import { combineReducers, legacy_createStore as createStore } from 'redux'
+> // 引入 reducers
+> import cityReducer from './reducers/cityReducer'
+> import statusReducer from './reducers/statusReducer'
+> // 合并 reducer
+> const reducer  = combineReducers({
+>   cityReducer,
+>   statusReducer
+> })
+> const store = createStore(reducer)
+> ```
+
+
+
+### Middleware
+
+> redux 的中间件；
+>
+> 不使用中间件时，reducer 无法处理**异步**的情况；
+>
+> 在 action 和 reducer 中间架起一座桥梁来处理异步，这就是 middleware（中间件）；
+
+> 中间件的由来与原理、机制；
+>
+> ```js
+> export default function thunkMiddleware({ dispatch, getState }){
+>   return next => action => 
+>   	typeof action === 'function' ?
+>     	action(dispatch, getState) :
+>   		next(action)
+> }
+> // 中间件这个桥梁接受到的参数action，如果不是function则和过去一样直接执行next方法(下一步处理)，相当于中间件没有做任何事。如果action是function，则先执行action，action的处理结束之后，再在action的内部调用dispatch
+> ```
+
+[^Tip]:**异步 action 不是必须的，可以等待异步任务的结果再去分发同步 action**；
+
+
+
+#### redux-thunk
+
+> 使 store.dispatch() 可以接收一个回调函数作为参数；
+>
+> ```shell
+> npm install redux-thunk --save
+> ```
+>
+> ```js
+> import thunk from 'redux-thunk'
+> import { applyMiddleware } from "redux"
+> const store = createStore(reducer, applyMiddleware(thunk))
+> ```
+>
+> ```js
+> store.dispatch(get_list())
+> 
+> export const get_list = () => {
+>   return (dispatch) => {
+>     axios({url: 'url', method: 'GET'}).then((res) => {
+>       // 在 异步请求 结束获得数据后，再使用 dispatch 分发 action
+>       dispatch({
+>         type: 'set-list',
+>         data: res.data.data
+>       })
+>     })
+>   }
+> }
+> ```
+
+
+
+#### redux-promise
+
+> 使 store.dispatch() 可以接收是一个 **promise** 对象作为参数，promise 风格；
+>
+> ```shell
+> npm install redux-promise --save
+> ```
+>
+> ```js
+> import promiseMiddleware from 'redux-promise'
+> import { applyMiddleware } from "redux"
+> // 可以应用多个中间件
+> const store = createStore(reducer, applyMiddleware(thunk, promiseMiddleware))
+> ```
+>
+> ```js
+> export const get_list = async () => {
+>   const list = await axios({url: 'url', method: 'GET'}).then((res) => {
+>       // 在 异步请求 结束获得数据后，再使用 dispatch 分发 action
+>       return {
+>         type: 'set-list',
+>         data: res.data.data
+>       }
+>   })
+>   return list
+> }
+> ```
+
+
+
+### react-redux
 
 > 官方发布的 redux 库，只能在 react 框架里使用；
+>
+> ```shell
+> # react-redux 需要依赖 redux 才有用
+> npm install react-redux
+> ```
 >
 > ![react-redux](imags/react-redux.png)
 
 
 
-### Install
-
-> ```shell
-> # yarn
-> yarn add react-redux
-> 
-> # npm
-> npm install react-redux
-> ```
-
-
-
-### 概念
+#### 概念
 
 > [^UI 组件]:不使用任何 redux 的 api 或方法，只负责页面内容的呈现、交互；
 > [^容器组件]:负责和 redux 通信，将结果传递给**UI 组件**；
@@ -2371,160 +2565,7 @@
 
 
 
-#### 纯函数
-
-> 一类特别的函数；
->
-> 只要输入的（实参）是相同的，必定得倒相同的输出或返回值；
->
-> 遵守一下约束：
->
-> * 不得改写改变传递的参数的数据；
-> * 不会产生任何副作用、不确定作用，例如（网络请求 ...）；
-> * 不能在函数中使用`new Date().now()`或`Math.random()`等不纯的方法；
->
-> 而 redux中的 reducer 必须是一个**纯函数**；
-
-[^Important]:reducer 的返回值会有浅比较，数据**引用地址**相同的不会被更新，需要总是返回一个新的数据，不改变`preState`的数据；
-
-
-
-#### 高阶函数
-
-> 参数是**函数**，返回值是**函数**；
-
-
-
-### 使用
-
-> App.js
->
-> ```jsx
-> import "./App.css";
-> 
-> // 引入 store
-> import store from "./redux/store";
-> 
-> // 引入组件
-> import Count from "./page/Count/Count";
-> 
-> import React, { Component } from "react";
-> 
-> export default class App extends Component {
->   render() {
->     return (
->       <div>
->         {/* 给 容器组件 传递 store */}
->         <Count store={store} />
->       </div>
->     );
->   }
-> }
-> ```
->
-> 容器组件
->
-> [^Important]:容器组件不需要写`store.subscribe()`监听方法，数据也会是实时更新的；
->
-> ```jsx
-> // 引入 Count 的 UI 组件
-> import CountUI from "./components/CountUI";
-> 
-> // 引入 connect 用于连接 UI 组件 与 redux
-> import { connect } from "react-redux";
-> 
-> // 容器组件 会传递给 UI 组件：(1).redux中所保存的状态；（2).用于操作状态的方法
-> 
-> // 返回对象中的 属性名（key）作为传递给 CountUI 组件 props 中的 属性名（key）；
-> // 返回对象中的 属性值（value）作为 props 中的属性值（value）；
-> function mapStateToProps(state) { // 状态
->   return {
->     sum: state,
->   };
-> }
-> 
-> function mapDispatchToProps(dispatch) { // 操作方法
->   return {
->     increase: (number) => {
->       dispatch({
->         type: "increase",
->         data: number,
->       });
->     },
->     decrease: (number) => {
->       dispatch({
->         type: "decrease",
->         data: number
->       });
->     }
->   };
-> }
-> 
-> // mapDispatchToProps 两种类型的值
-> // 1、函数
-> // 2、对象（简写）
-> 
-> function increase(number) {
->   return {
->     type: "increase",
->     data: number
->   }
-> }
-> 
-> function decrease(number) {
->   return {
->     type: "decrease",
->     data: number,
->   };
-> }
-> 
-> // mapDispatchToProps 简写形式
-> export default connect(mapStateToProps,{
->   increase，
->   decrease
-> })(CountUI);
-> 
-> // 导出
-> // export default connect(mapStateToProps, mapDispatchToProps)(CountUI);
-> ```
->
-> UI 组件
->
-> ```jsx
-> import React, { Component } from "react";
-> 
-> export default class Count extends Component {
->   // 增加
->   add = () => {
->     const { value } = this.selectValue;
->     this.props.increase(Number(value));
->   };
->   // 减少
->   decrease = () => {
->     const { value } = this.selectValue;
->     this.props.decrease(Number(value));
->   };
->   render() {
->     const { sum } = this.props;
->     return (
->       <div>
->         <h3>{sum}</h3>
->         <select ref={(node) => (this.selectValue = node)}>
->           <option value={1}>1</option>
->           <option value={2}>2</option>
->           <option value={3}>3</option>
->         </select>
->         <button onClick={this.add}>Add</button>
->         <button onClick={this.decrease}>Decrease</button>
->       </div>
->     );
->   }
-> }
-> ```
-
-
-
-### Provider
+#### Provider
 
 > react-redux 官方提供的优化、简写的方式；
 >
@@ -2558,60 +2599,45 @@
 > ```jsx
 > // 不需要给 容器组件 书写 store={store} 属性来传递 store ，Provider 已经管理好了
 > import "./App.css";
-> 
 > // 引入组件
 > import Count from "./page/Count/Count";
-> 
 > import React, { Component } from "react";
 > 
 > export default class App extends Component {
->     render() {
->        return (
+>  render() {
+>     return (
 >          <div>
 >            <Count />
 >          </div>
 >        );
 >     }
-> }
-> ```
+>    }
+>    ```
 
 
 
-### 合并 容器/UI
+#### connect
 
-> 优化代码，将**UI 组件**和**容器组件**合并到一个文件中；
+> 作用是用**UI 组件**生成**容器组件**，将两种组件连接起来；
 >
 > ```jsx
 > import React, { Component } from 'react'
-> 
 > // 引入 connect 用于连接 UI 组件 与 redux
 > import { connect } from "react-redux";
 > 
-> function increase(number) {
->   return {
->     type: "increase",
->     data: number,
->   };
-> }
 > 
-> function decrease(number) {
->   return {
->     type: "decrease",
->     data: number,
->   };
-> }
-> 
+> /* UI 组件 */
 > class CountUI extends Component {
 >   // 增加
 >   add = () => {
 >     const { value } = this.selectValue;
->     this.props.increase(Number(value));
->   };
+>     this.props.increase(Number(value))
+>   }
 >   // 减少
 >   decrease = () => {
->     const { value } = this.selectValue;
->     this.props.decrease(Number(value));
->   };
+>     const { value } = this.selectValue
+>     this.props.decrease(Number(value))
+>   }
 >   render() {
 >     const { sum, person } = this.props;
 >     return (
@@ -2625,175 +2651,99 @@
 >         <button onClick={this.add}>Add</button>
 >         <button onClick={this.decrease}>Decrease</button>
 >       </div>
->     );
+>     )
 >   }
 > }
 > 
-> // mapDispatchToProps 简写形式
+> 
+> function increase(number) {
+>   return {
+>     type: "increase",
+>     data: number,
+>   }
+> }
+> function decrease(number) {
+>   return {
+>     type: "decrease",
+>     data: number
+>   }
+> }
+> // 使用 connect 连接 UI组件 和 redux
+> // connent() 接收两个参数(redux中所保存的状态, 用于操作状态的方法)
+> // mapStateToProps 和 mapDispatchToProps 都会通过 props 属性将 状态和方法传递给 UI组件；
 > export default connect(
+>   // mapStateToProps
 >   (state) => {
 >     return {
 >       sum: state.count,
 >       person: state.person,
->     };
+>     }
 >   },
+>   // mapDispatchToProps
 >   {
 >     increase,
->     decrease,
+>     decrease
 >   }
-> )(CountUI);
-> ```
-
-
-
-### 多个状态
-
-> 在 react-redux 的使用中，更多的是将不同的数据都储存在 redux 中；
-
-
-
-#### 文件格式
-
-> ```tex
-> - src
-> -- redux
-> --- actions
-> ---- countAction.js
-> ---- personAction.js
-> --- reducers
-> ---- countReducer.js
-> ---- personReducer.js
-> --- store.js
-> ```
-
-
-
-#### 基本书写
-
-> countAction.js
->
-> ```js
-> export function increase(number) {
->   return {
->     type: "increase",
->     data: number,
->   };
-> }
+> )(CountUI)
 > 
-> export function decrease(number) {
+> // mapDispatchToProps 的函数写法
+> function mapDispatchToProps(dispatch) {
 >   return {
->     type: "decrease",
->     data: number,
->   };
-> }
-> ```
->
-> countReducer.js
->
-> ```js
-> export default function countReducer(preState, action) {
->   // 加判断，解决初始化时 preState 的值为 undefined
->   if (preState === undefined) {
->     preState = 0;
->   }
->   // 从 action 对象中解构出 type， data；
->   const { type, data } = action;
->   // 根据 type 动作表示来决定如何加工操作数据；
->   switch (type) {
->     case "increase": {
->       return preState + data;
->     }
->     case "decrease": {
->       return preState - data;
->     }
->     default: {
->       // 没有动作标识，表示初始化 state；
->       return preState;
+>     increase: (number) => {
+>       dispatch({
+>         type: "increase",
+>         data: number
+>       })
+>     },
+>     decrease: (number) => {
+>       dispatch({
+>         type: "decrease",
+>         data: number
+>       })
 >     }
 >   }
 > }
 > ```
+
+[^Tip]:容器组件不需要写`store.subscribe()`监听方法，数据也会是实时更新的；
+
+
+
+### HOC
+
+> 高阶组件；
 >
-> store.js
+> `connect`是 HOC， 高阶组件；
+>
+> Provider组件，可以让容器组件拿到state ， 使用了context；
 >
 > ```jsx
-> // 该文件专门用于暴露一个 store 实例对象，整个应用只有一个 store 对象；
-> 
-> // 专门用于创建 redux 中最核心的store对象；
-> import { legacy_createStore as createStore, combineReducers } from "redux";
-> 
-> //引入为 Count 组件服务的reducer
-> import countReducer from "./reducers/count";
-> 
-> //引入为 Person 组件服务的reducer
-> import personReducer from "./reducers/person";
-> 
-> // 汇总所有 reducer 合并成总对象
-> const allReducer = combineReducers({
->   count: countReducer,
->   person: personReducer,
-> });
-> const store = createStore(allReducer);
-> //暴露出去
-> export default store;
-> ```
->
-> 组件中使用
->
-> ```jsx
-> import React, { Component } from 'react'
-> 
-> // 引入 connect 用于连接 UI 组件 与 redux
-> import { connect } from "react-redux";
-> 
-> // 引入 action
-> import { increase, decrease } from "../../redux/actions/countActoion";
+> // 模拟 conent() 方法将状态通过 props 提供给子组件
 > 
 > // UI 组件
-> class CountUI extends Component {
->     // 增加
->     add = () => {
->        const { value } = this.selectValue;
->        this.props.increase(Number(value));
->     };
->     // 减少
->     decrease = () => {
->        const { value } = this.selectValue;
->        this.props.decrease(Number(value));
->     };
->     render() {
->        const { sum, person } = this.props;
->        return (
->          <div>
->            <h3>sum: {sum} person: {person}</h3>
->            <select ref={(node) => (this.selectValue = node)}>
->              <option value={1}>1</option>
->              <option value={2}>2</option>
->              <option value={3}>3</option>
->            </select>
->            <button onClick={this.add}>Add</button>
->            <button onClick={this.decrease}>Decrease</button>
->          </div>
->        );
->     }
+> function MyComponent(props) {
+>   console.log(props)
+>   return (
+>     <div></div>
+>   )
 > }
 > 
 > // 容器组件
-> export default connect(
->     (state) => {
->        return {
->          sum: state.count,
->          person: state.person,
->        };
->     },
->     {
->        increase,
->        decrease,
+> function connect(mapState, mapDispatch) {
+>   const state = mapState()
+>   return (Component) => {
+>     return (props) => {
+>       return (
+>         <div>
+>           <Component {...props} {...state} {...mapDispatch} />
+>         </div>
+>       )
 >     }
-> )(CountUI);
+>   }
+> }
 > ```
 
-#### 
+
 
 ### Redux DevTools
 

@@ -1,11 +1,3 @@
-## 前端工程化
-
-> 在企业级的前端项目开发中，把前端开发所需的 `工具、技术、流程、经验` 等进行规范化、标准化；
-
-
-
-
-
 ## Vue
 
 > 是一套用于构建用户界面的渐进式`JavaScript`框架；
@@ -3633,87 +3625,6 @@
 
 
 
-## WebStorage
-
-> 浏览器在本地存储用户的浏览数据，数据不会被保存在服务器，而是客户端；
->
-> 数据以`键/值`对存在，网页的数据只允许该网页访问使用；
->
-> `键/值`对总是以**字符串**的形式存储；
->
-> 存储内容的大小一般支持 5MB 左右，不同浏览器可能不一样；
-
-
-
-#### localStorage
-
-> 存储在 `localStorage` 的数据可以**长期保留**，除非主动的去删除数据；
-
-
-
-#### sessionStorage
-
-> 存储在 `sessionStorage` 里面的数据在**页面会话结束时**会被清除，即关闭浏览器；
-
-
-
-#### ApI
-
->  `localStorage` 和 `sessionStorage` 使用的 API 是一样的；
->
-> ```javascript
-> // 定义一个要存储的数据；
-> let message = {
->     id: '001',
->     title: 'Study Knowledge',
->     done: true
-> }
-> ```
-
-
-
-###### setItem()
-
-> 添加一个数据；
->
-> ```javascript
-> localStorage.setItem("message", JSON.stringify(message));
-> ```
-
-
-
-###### getItem()
-
-> 读取一个数据；
->
-> ```javascript
-> let data = localStorage.getItem("message");
-> ```
-
-
-
-###### removeItem()
-
-> 删除一个数据；
->
-> ```javascript
-> localStorage.removeItem("message");
-> ```
-
-
-
-###### clear()
-
-> 清空所有数据；
->
-> ```javascript
-> localStorage.clear();
-> ```
-
-
-
-
-
 ## vue-resource
 
 > Vue 中的一个**插件**库；
@@ -4465,5 +4376,5 @@
 > })
 > ```
 
-[^Tip]:如果引入 path 报错，是因为模块缺少了 ts 的一些声明配置，安装`npm i -D @types/node`关于 node 库的 ts 类型声明；
+[^Tip]:引入 path 报错，是因为缺少了 ts 的一些声明配置，安装`npm i -D @types/node`关于 node 库的 ts 类型声明；
 

@@ -22,6 +22,12 @@
 
 
 
+### 前端工程化
+
+> 在企业级的前端项目开发中，把前端开发所需的 `工具、技术、流程、经验` 等进行规范化、标准化；
+
+
+
 
 
 ## 类( Class )
@@ -313,7 +319,7 @@
 
  
 
-## 数组迭代
+## Array.
 
 > forEach（）、map（）、filter（）、some（）、every（）
 
@@ -1535,6 +1541,28 @@
 
 
 
+### WeakSet()
+
+> **弱集合**，和 Set 类似，都是**不重复的值的集合**；
+>
+> **成员只能是对象，且都是弱引用的对象**，适合临时存放一组对象和跟对象绑定的信息；
+>
+> WeakSet **没有size属性，无法遍历（故没有 forEach 方法)**，只有 add、delete、has、clear；
+>
+> ```js
+> // 实例
+> const weakSet = new WeakSet()
+> const obj = {}
+> weakSet.add(obj) // add
+> weakSet.add(window)
+> 
+> weakSet.has(window) // true
+> 
+> weakSet.delete(window)
+> ```
+
+
+
 ### Map()
 
 > Map 类型是**键值对的有序列表**，而`键和值都可以是任意类型`；
@@ -1704,6 +1732,32 @@
 [^value]:键值；
 [^key]:键名；
 [^map]:Map 对象；
+
+
+
+### WeakMap()
+
+> 是**弱映射**，不可迭代键；
+>
+> **弱映射中的键只能是Object或者继承自Object的类型，值的类型没有限制**；
+>
+> **弱键**，意思是不属于正式的引用，不会阻止垃圾回收；
+>
+> 弱映射中的**值**不是，只要键存在，键/值对就会存在于映射中；
+>
+> ```js
+> const wm = new WeakMap()
+> wm.set({}, "val")
+> 
+> const container = {
+>   key: {}
+> }
+> wm.set(container.key, "val")
+> // 调用 removeReference()，会摧毁键对象的最后一个引用，垃圾回收程序就可以把这个键/值对清理掉
+> function removeReference() {
+>   container.key = null;
+> }
+> ```
 
 
 
@@ -1944,6 +1998,87 @@
 >     console.log(json)
 >   })
 > }
+> ```
+
+
+
+
+
+## WebStorage
+
+> 浏览器在本地存储用户的浏览数据，数据不会被保存在服务器，而是客户端；
+>
+> 数据以`键/值`对存在，网页的数据只允许该网页访问使用；
+>
+> `键/值`对总是以**字符串**的形式存储；
+>
+> 存储内容的大小一般支持 5MB 左右，不同浏览器可能不一样；
+
+
+
+#### localStorage
+
+> 存储在 `localStorage` 的数据可以**长期保留**，除非主动的去删除数据；
+
+
+
+#### sessionStorage
+
+> 存储在 `sessionStorage` 里面的数据在**页面会话结束时**会被清除，即关闭浏览器；
+
+
+
+#### ApI
+
+>  `localStorage` 和 `sessionStorage` 使用的 API 是一样的；
+>
+>  ```javascript
+>  // 定义一个要存储的数据；
+>  let message = {
+>   id: '001',
+>   title: 'Study Knowledge',
+>   done: true
+>  }
+>  ```
+
+
+
+###### setItem()
+
+> 添加一个数据；
+>
+> ```javascript
+> localStorage.setItem("message", JSON.stringify(message));
+> ```
+
+
+
+###### getItem()
+
+> 读取一个数据；
+>
+> ```javascript
+> let data = localStorage.getItem("message");
+> ```
+
+
+
+###### removeItem()
+
+> 删除一个数据；
+>
+> ```javascript
+> localStorage.removeItem("message");
+> ```
+
+
+
+###### clear()
+
+> 清空所有数据；
+>
+> ```javascript
+> localStorage.clear();
 > ```
 
 

@@ -1,13 +1,3 @@
-## Traditional Website
-
-1. 网速慢的情况下，页面加载时间长，用户只能等待；
-2. 表单提交后，如果有内容不正确，可能需要重新填写所有表单内容；
-3. 页面跳转，重新加载页面，造成资源浪费，增加等待时间；
-
-
-
-
-
 ## AJAX ?
 
 > [^AJAX]:Asynchronous JavaScript and XML，即**异步的 JavaScript 和 XML** ；
@@ -18,13 +8,13 @@
 
 
 
-#### Advantage
+### Advantage
 
 > 在**不重新加载整个页面**的情况下，可以**与服务器交换数据并更新部分网页内容**；
 
 
 
-#### Response Data Format
+### ResponseData Format
 
 > 服务器大多数情况下会以`JSON`对象作为响应数据的格式；
 >
@@ -39,13 +29,13 @@
 
 
 
-#### Implementation Process
+### Implementation Process
 
 > `AJAX`技术要运行在网站环境中才能生效；
 
 
 
-###### 创建 AJAX 对象
+#### 创建 AJAX 对象
 
 > ```javascript
 > // 创建对象
@@ -54,7 +44,7 @@
 
 
 
-###### 初始化
+#### 初始化
 
 > ```javascript
 > // 初始化，设置请求方法和请求地址（url）
@@ -63,7 +53,7 @@
 
 
 
-###### 发送请求
+#### 发送请求
 
 > ```javascript
 > // 发送请求；
@@ -72,7 +62,7 @@
 
 
 
-###### 获取响应数据
+#### 获取响应数据
 
 > ```javascript
 > // 简写方式；
@@ -113,6 +103,16 @@
 
 
 
+### Traditional Website
+
+> 网速慢的情况下，页面加载时间长，用户只能等待；
+>
+> 表单提交后，如果有内容不正确，可能需要重新填写所有表单内容；
+>
+> 页面跳转，重新加载页面，造成资源浪费，增加等待时间；
+
+
+
 
 
 ## 请求参数传递
@@ -121,17 +121,17 @@
 
 
 
-#### 请求报文
+### 请求报文
 
 > 是在 http 请求和响应的过程中传递的[^数据块]；
 >
-> <img src="./AJAX_requestMessage.png" alt="AJAX_requestMessage" style="zoom:50%;" />
+> <img src="imags/AJAX_requestMessage.png" alt="AJAX_requestMessage" style="zoom:40%;float:left" />
 
 [^数据块]:包括要传递的数据和一些附加信息，都要遵守规定好的格式；
 
 
 
-#### 参数格式
+### 参数格式
 
 > 用`xhr.setRequestHeader('Content-Type')`方法设置请求参数的格式；
 >
@@ -139,17 +139,17 @@
 
 
 
-###### 查询字符串
+#### 查询字符串
 
 > `application/x-www-form-urlencoded`；
 >
 > ```javascript
-> username=Kein&gender=Male&grade=A
+> const params = 'username=Kein&gender=Male&grade=A'
 > ```
 
 
 
-###### JSON 对象
+#### JSON 对象
 
 > `application/json`；
 >
@@ -167,7 +167,7 @@
 
 
 
-#### GET
+### GET
 
 > `GET`请求方式，在请求路径后面拼接[^查询字符串]；
 >
@@ -179,7 +179,7 @@
 
 
 
-#### POST
+### POST
 
 > `POST`请求在传递数据时，要**设置参数格式的类型**；
 >
@@ -322,7 +322,7 @@
 
 
 
-#### Instance Methods
+### 实例方法
 
 > 创建`formData`实例对象；
 >
@@ -334,18 +334,18 @@
 
 
 
-###### .get()
+#### .get()
 
 > 获取表单实例对象中某个属性的值；
 >
 > ```javascript
-> // 获取表单中用户输入的 username 输入框的值；
+> // 获取表单中 name = username 输入框的值；
 > formData.get('username')
 > ```
 
 
 
-###### .set()
+#### .set()
 
 > 设置表单实例对象中某个属性的值；
 >
@@ -356,7 +356,7 @@
 
 
 
-###### .delete()
+#### .delete()
 
 > 删除表单实例对象中某个属性的值；
 >
@@ -365,7 +365,7 @@
 
 
 
-###### .append()
+#### .append()
 
 > 向表单实例对象中追加属性和值；
 >
@@ -375,13 +375,13 @@
 
 
 
-#### Usage
+### Usage
 
 > 此构造函数方法只能用于`POST`请求；
 
 
 
-###### html 表单
+#### html 表单
 
 > ```html
 > <form id="form">
@@ -393,7 +393,7 @@
 
 
 
-###### 创建对象
+#### 创建对象
 
 > ```javascript
 > let form = document.getElementById('form')
@@ -403,7 +403,7 @@
 
 
 
-###### 提交表单
+#### 提交表单
 
 > `POST`请求方式向服务器传递数据；
 >
@@ -413,7 +413,7 @@
 
 
 
-###### 服务器端
+#### 服务器端
 
 > 下载 FormData 实例对象的解析模块；
 >
@@ -444,7 +444,7 @@
 
 
 
-#### 二进制文件上传
+### 二进制文件上传
 
 > `FormData`构造函数允许异步上传**二进制文件**；
 
@@ -452,7 +452,7 @@
 
 
 
-###### Html
+#### Html
 
 > ```html
 > <!-- 文件上传输入框 -->
@@ -461,7 +461,7 @@
 
 
 
-###### JavaScript
+#### JavaScript
 
 > ```javascript
 > // 获取上传文件；
@@ -473,7 +473,7 @@
 
 
 
-###### Service-Side
+#### Service-Side
 
 > ```javascript
 > app.post('/upload',function(request,response){
@@ -497,7 +497,7 @@
 
 
 
-#### xhr.upload.progress
+### xhr.upload.progress
 
 > 上传文件过程中触发进度函数；
 >
@@ -522,19 +522,19 @@
 
 
 
-#### 同源 ？
+### 同源 ？
 
 > 两个页面拥有**相同**的`协议、域名、端口号`，就是同源；
 
 
 
-#### Solution
+### Solution
 
 > 解决`AJAX`同源限制的问题；
 
 
 
-###### JSONP
+#### JSONP
 
 > 是`json with padding`的缩写，它不属于`AJAX`请求，但可以模拟；
 
@@ -579,7 +579,7 @@
 
 
 
-###### CORS
+#### CORS
 
 > 全称`Cross-origin resource sharing`，即**跨域资源共享**；
 >
@@ -597,6 +597,12 @@
 
 
 
+#### 代理
+
+> 使用前端框架在开发阶段会在本地开启一个代理服务器；
+>
+> 数据请求直接请求代理服务器，代理服务器会将请求转发到目标实际服务器；
+
 
 
 ## JQuery Ajax
@@ -605,7 +611,7 @@
 
 
 
-#### $.ajax()
+### $.ajax()
 
 > `$.ajax()` 可以发送 GET 和 POST 请求；
 >
@@ -645,7 +651,7 @@
 
 
 
-#### $.get()
+### $.get()
 
 > 发送 GET 请求；
 >
@@ -657,7 +663,7 @@
 
 
 
-#### $.post()
+### $.post()
 
 > 发送 POST 请求；
 >
@@ -671,7 +677,7 @@
 
 
 
-#### 全局事件
+### 全局事件
 
 > 只要页面中有 AJAX 请求被发送，就会触发对应的全局事件；
 >
@@ -679,7 +685,7 @@
 
 
 
-###### .ajaxStart()
+#### .ajaxStart()
 
 > 请求开始发送时触发；
 >
@@ -692,7 +698,7 @@
 
 
 
-###### .ajaxComplete()
+#### .ajaxComplete()
 
 > 请求完成时触发；
 >
@@ -716,7 +722,7 @@
 
 
 
-#### Install
+### Install
 
 > ```shell
 > npm install nprogress --save
@@ -724,7 +730,7 @@
 
 
 
-#### 加载
+### 加载
 
 > 加载 CSS 文件；
 >
@@ -740,17 +746,17 @@
 
 
 
-#### Usage
+### Usage
 
 
 
-###### NProgress.start()
+#### NProgress.start()
 
 > 动画开始；
 
 
 
-###### NProgress.done()
+#### NProgress.done()
 
 > 动画结束；
 
@@ -767,14 +773,87 @@
 > 为前端开发人员提供一个高仿真的`RESTFul`后台服务（数据原型）；
 >
 > **解决前后端并行的问题**；
+>
+> 可以不借助后端完成对本地 .json 数据文件的**增删改查**；
 
 
 
-#### Install
+### Install
 
 > ```shell
+> # 全局安装
 > npm install json-server --global
 > ```
+
+
+
+### Usage
+
+> 将模拟后端的数据存放在`mock.json`一个 json 文件中；
+>
+> ```json
+> {
+>   "posts": [
+>     { "id": 1, "title": "json-server", "author": "typicode" },
+>     { "id": 2, "title": "json-data", "author": "node" }
+>   ],
+>   "comments": [
+>     { "id": 1, "body": "some comment", "postId": 1 }
+>   ],
+>   "profile": { "name": "typicode" }
+> }
+> ```
+>
+> 会生成三个请求路径；
+>
+> ```tex
+> http://localhost:3000/posts/
+> http://localhost:3000/comments/
+> http://localhost:3000/profile/
+> ```
+>
+> 开始监听运行；
+>
+> ```shell
+> json-server --watch db.json
+> ```
+>
+> 通过网络请求获取数据；
+>
+> ```js
+> import axios from 'axios'
+> 
+> // get 获取数据
+> axios.get('http://localhost:3000/posts').then((res) => {
+>   console.log(res) // 为 mock.json 文件中 posts 属性对应的数据
+> })
+> 
+> // get 请求携带参数
+> axios.get('http://localhost:3000/posts?id=1').then((res) => {
+>   console.log(res) // 获取 posts 中 id = 1 的数据
+> })
+> 
+> // post 增加数据
+> axios.post('http://localhost:3000/posts', {
+>   title: 'add-data',
+>   author: 'typora'
+> })
+> 
+> // delete 删除数据
+> axios.delete('http://localhost:3000/posts/2') // 删除 posts 中 id = 2 的数据；
+> 
+> // put 替换更新数据
+> axios.put('http://localhost:3000/posts/1', {
+>   title: 'json-data-adjust'
+> }) // 会直接替换 id = 1 数据，缺少参数会导致数据信息缺少
+> 
+> // patch 补丁更新数据
+> axios.put('http://localhost:3000/posts/1', {
+>   title: 'json-data-adjust-patch'
+> }) // 只会更新 id = 1 的数据中 title 字段的值
+> ```
+>
+> 
 
 
 
@@ -788,7 +867,7 @@
 
 
 
-#### Features
+### Features
 
 > Make [XMLHttpRequests](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) from the browser;
 >
@@ -808,7 +887,7 @@
 
 
 
-#### 加载
+### 加载
 
 > Using npm
 >
@@ -824,7 +903,7 @@
 
 
 
-#### 请求方式
+### 请求方式
 
 > Axios 支持 GET、POST、PUT、DELETE 请求；
 >
@@ -832,7 +911,7 @@
 
 
 
-###### GET
+#### GET
 
 > ```javascript
 > axios({
@@ -845,7 +924,7 @@
 
 
 
-###### POST
+#### POST
 
 > ```javascript
 > axios({
@@ -863,7 +942,7 @@
 
 
 
-###### PUT
+#### PUT
 
 > [^Focus]:请求参数`data`至少是一个**空对象**，否则会出错；
 >
@@ -884,7 +963,13 @@
 
 
 
-###### DELETE
+#### PATCH
+
+> 也是**更新数据**，但是`PATCH`是以类似打补丁的形势**局部更新数据**；
+
+
+
+#### DELETE
 
 > ```javascript
 > // 删除数据；
@@ -898,7 +983,7 @@
 
 
 
-#### 默认配置
+### 默认配置
 
 > Axios 中对重复配置项的统一设置；
 >
@@ -918,7 +1003,7 @@
 
 
 
-#### 创建实例对象
+### 创建实例对象
 
 > 创建实例对象；
 >
@@ -958,7 +1043,7 @@
 
 
 
-#### Interceptors
+### Interceptors
 
 > Axios 中的**拦截器**；
 >
@@ -966,7 +1051,7 @@
 
 
 
-###### 请求拦截器
+#### 请求拦截器
 
 > axios.Interceptors.request.use()
 >
@@ -984,7 +1069,7 @@
 
 
 
-###### 响应拦截器
+#### 响应拦截器
 
 > axios.Interceptors.response.use()
 >
@@ -1002,7 +1087,7 @@
 
 
 
-#### 取消请求
+### 取消请求
 
 > ```javascript
 > // 2、声明全局变量；
@@ -1037,7 +1122,7 @@
 
 
 
-#### mockAxios
+### mockAxios
 
 > ```javascript
 > // 创建 Axios 构造函数；
