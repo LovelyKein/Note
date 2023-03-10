@@ -3722,6 +3722,24 @@
 
 
 
+### 错误捕捉
+
+> 统一处理捕捉组件发生错误时的信息；
+>
+> ```js
+> // 在顶级组件 App 中书写；
+> export default {
+>   errorCaptured(err, vm, info) {
+>     // err: 具体的错误信息
+>     // vm: 发生错误的组件
+>     // info: 错误信息，指出哪一个地方出现报错
+>     console.log("errorCaptured", err, vm, info)
+>   }
+> }
+> ```
+
+
+
 
 
 ## Vue 3
