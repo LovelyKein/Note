@@ -2,8 +2,9 @@
 
 > 以 JavaScript 为基础构建的语言，是 JavaScript 的超集，扩展了 JavaScript ，并添加了类型校验；
 >
-> 可以在任何支持 JavaScript 的平台上执行，但 TypeScript 不能直接被 JavaScript 解析器直接执行，需要编译成 JS；
+> 可以在任何支持 JavaScript 的平台上执行；
 >
+> 但 TypeScript 不能直接被 JavaScript 解析器直接执行，需要编译成 JS；
 
 
 
@@ -397,56 +398,59 @@
 > ```typescript
 > // 定义对象的类型
 > interface PersonInfo {
->   name: string; // 不是类似对象般用 , 隔开，而是 ;
->   age: number;
+> name: string; // 不是类似对象般用 , 隔开，而是 ;
+> age: number;
 > }
 > let zhangsan: PersonInfo = {
->   name: "张三",
->   age: 20
+> name: "张三",
+> age: 20
 > }
 > 
 > // 定义数组的类型
 > interface ArrayNumber {
->   [idx: number]: number;
+> [idx: number]: number;
 > }
 > let arr1: ArrayNumber = [1, 2, 3]
 > 
 > // 定义函数的类型
 > interface PersonFn {
->   (p: PersonInfo): void;
+> (p: PersonInfo): void;
 > }
 > let Person1: PersonFn = (obj: PersonInfo): void => {
->   console.log(obj.name, obj.age);
+> console.log(obj.name, obj.age);
 > }
 > 
 > // 定义 类Class 的成员及类型
 > interface myInterface {
->   // 接口中所有属性都不能有实际的值；
->   // 接口中的方法都是抽象方法；
->   name: string;
->   age: number;
->   sayHello(): void;
+> // 接口中所有属性都不能有实际的值；
+> // 接口中的方法都是抽象方法；
+> name: string;
+> age: number;
+> sayHello(): void;
 > };
 > 
 > // 用接口去限制类的属性和方法
 > // 用来定义一个类的结构，指定一个类中应该包含哪些属性和方法
 > class myClass implements myInterface {
->   name: string; // 声明 this.name 的数据类型
->   age: number;
->   constructor(name: string, age: number) {
->     this.name = name;
->     this.age = age;
->   }
->   sayHello = () => {
->     console.log('Hello !');
->   }
+> name: string; // 声明 this.name 的数据类型
+> age: number;
+> constructor(name: string, age: number) {
+>  this.name = name;
+>  this.age = age;
+> }
+> sayHello = () => {
+>  console.log('Hello !');
+> }
 > }
 > 
 > // 缺省和只读特性
 > interface PersonInfo {
->   name?: string; // 缺省
->   readonly height: number; // 只读
+> name?: string; // 缺省
+> readonly height: number; // 只读
 > }
+> 
+> // 不限制属性名和属性值
+> interface AnyObj { [propname: string]: unknown }
 > ```
 
 [^Tip]:很少使用接口类型来定义函数的类型，更多使用内联类型或类型别名配合箭头函数语法来定义函数类型；
