@@ -319,7 +319,7 @@
 
  
 
-## Array.
+## 数组迭代
 
 > forEach（）、map（）、filter（）、some（）、every（）
 

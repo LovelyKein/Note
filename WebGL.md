@@ -8,12 +8,6 @@
 >
 > 这样就可以借助系统显卡来在浏览器里更流畅地展示 3D 场景和模型；
 
-
-
-### 发展历史
-
-> WebGL 的发展历史；
-
 | 2006    | 事件                                                         |
 | :------ | :----------------------------------------------------------- |
 | 2006    | WebGL 起源于 Mozilla 员工**弗拉基米尔·弗基西维奇**的一项 Canvas 3D 实验项目 |
@@ -21,10 +15,6 @@
 | 2009    | Kronos Group 联盟建立了 WebGL 的工作组，初始成员包括 Apple、Google、Mozilla、Opera 等 |
 | 2011/03 | WebGL 1.0 规范发布                                           |
 | 2017/01 | WebGL 2 规范发布，在 Firefox 5、Chrome 56、Opera 43 中被支持 |
-
-
-
-### 同类对比
 
 > WebGL 与其他的三维开发相比的不足之处；
 >
@@ -36,11 +26,13 @@
 
 
 
-### 坐标系( Coordinate )
+
+
+## 坐标系( Coordinate )
 
 
 
-#### webgl
+### webgl
 
 > webgl 使用的是**正交右手坐标系**，坐标原点在画布中心，坐标系的 y 轴方向是朝上的；
 >
@@ -50,7 +42,7 @@
 
 
 
-#### canvas 2D
+### canvas 2D
 
 > 坐标系的原点在左上角，坐标系的 y 轴方向是朝下的；
 >
@@ -60,7 +52,9 @@
 
 
 
-### 渲染管线( Render )
+
+
+## 渲染管线( Render )
 
 > 类似于一条流水线，由一系列具有特定功能的数字电路单元组成；
 >
@@ -70,11 +64,7 @@
 
 
 
-### 关键词( Keywords )
-
-
-
-#### 顶点着色器
+### VertexShader
 
 > 是**GPU 渲染管线**上一个可以执行**着色器语言**的功能单元，具体执行的就是顶点着色器程序；
 >
@@ -88,7 +78,7 @@
 
 
 
-###### attribute
+#### attribute
 
 > 被称为**存储限定符**，表示接下来的变量是一个`attribute`变量；
 >
@@ -100,11 +90,11 @@
 > attribute vec4 a_Position;
 > ```
 
-[^Important]:`attribute`只能在**顶点着色器**中使用；
+[^Tip]:`attribute`只能在**顶点着色器**中使用；
 
 
 
-###### uniform
+#### uniform
 
 > 用来从`JavaScript` 程序向`顶点着色器`和`片元着色器`传输**一致的（不变的）**的数据；
 >
@@ -116,11 +106,21 @@
 > uniform vec4 u_FragColor
 > ```
 
-[^Important]:`uniform`在**顶点着色器**和**片元着色器**中都可以使用；
+[^Tip]:`uniform`在**顶点着色器**和**片元着色器**中都可以使用；
 
 
 
-#### 图元装配
+### FragmentShader
+
+> 和**顶点着色器**一样是 GPU 渲染管线上一个可以执行着色器程序的功能单元；
+>
+> **片元着色器**是逐片元处理片元数据，通过给**内置变量**`gl_FragColor`赋值可以给每个片元进行着色；
+>
+> 通过关键字`discard`可以实现哪些片元可以被丢弃，被丢弃的片元不会出现在帧缓冲区，就不会显示在`canvas`画布上；
+
+
+
+### 图元装配
 
 > 经过**顶点着色器**操作变换后的是**图元装配(primitive assembly)**；
 >
@@ -135,94 +135,11 @@
 
 
 
-#### 光栅化
+### 光栅化
 
 > 将**图元装配**处理后的图形，转换成**像素点**；
 >
 > ![webgl_guangshan_1](imags/webgl/webgl_guangshan_1.png)
-
-
-
-#### 片元着色器
-
-> 和**顶点着色器**一样是 GPU 渲染管线上一个可以执行着色器程序的功能单元；
->
-> **片元着色器**是逐片元处理片元数据，通过给**内置变量**`gl_FragColor`赋值可以给每个片元进行着色；
->
-> 通过关键字`discard`可以实现哪些片元可以被丢弃，被丢弃的片元不会出现在帧缓冲区，就不会显示在`canvas`画布上；
->
-> ![webgl_fragment](imags/webgl/webgl_fragment.png)
-
-
-
-### 基本使用( Usage )
-
-> 1. 填充画布颜色；
->
-> ```html
-> <!-- webgl 画布容器 -->
-> <canvas id="canvas"></canvas>
-> 
-> <script>
->   const canvas = document.getElementById('canvas'); // 获取 webgl 画布
->   canvas.width = window.innerWidth; // 必须，设置画布的 宽度
->   canvas.height = window.innerHeight;// 必须，设置画布的 高度
->   const webgl = canvas.getContext('webgl'); // 使用 canvas 获取 webgl 绘图上下文
->   webgl.clearColor(1,1,0,1); // 指定将要用来清空绘图区的颜色，参数含义：clearColor(r, g, b, alpha)
->   webgl.clear(gl.COLOR_BUFFER_BIT); // 使用之前指定的颜色，清空绘图区
-> </script>
-> ```
->
-> 2. 将 css 色值解析为 webgl 颜色；
->
-> ```javascript
-> const rgbaCSS = "rgba(255,0,0,1)";
-> const reg = RegExp(/\((.*)\)/);
-> const rgbaStr = reg.exec(rgbaCSS)[1];
-> const rgb = rgbaStr.split(",").map((ele) => parseInt(ele));
-> const r = rgb[0] / 255;
-> const g = rgb[1] / 255;
-> const b = rgb[2] / 255;
-> const a = rgb[3];
-> 
-> gl.clearColor(r, g, b, a);
-> gl.clear(gl.COLOR_BUFFER_BIT);
-> ```
->
-> 3. 请求**帧动画**，动态改变画布的色值；
->
-> ```html
-> <canvas id="canvas"></canvas>
-> <script type="module">
->   // three.js 中的一个颜色对象 Color，通过这个对象可以控制颜色
->   import { Color } from "https://unpkg.com/three/build/three.module.js";
-> 
->   const canvas = document.querySelector("#canvas");
->   canvas.width = window.innerWidth;
->   canvas.height = window.innerHeight;
->   const webgl = canvas.getContext("webgl");
->   //声明颜色 rgba
->   webgl.clearColor(1, 1, 0, 1);
->   //刷底色
->   webgl.clear(gl.COLOR_BUFFER_BIT);
-> 
->   // 建立 Color 对象
->   const color = new Color("rgba(255,0,0,1)");
->   //声明颜色 rgba
->   webgl.clearColor(color.r, color.g, color.b, 1);
->   //刷底色
->   webgl.clear(gl.COLOR_BUFFER_BIT);
-> 
->   (function ani() {
->     color.offsetHSL(0.005, 0, 0); // 偏移 色相值
->     //声明颜色 rgba
->     gl.clearColor(color.r, color.g, color.b, 1);
->     //刷底色
->     gl.clear(gl.COLOR_BUFFER_BIT);
->     requestAnimationFrame(ani); // 请求帧动画
->   })();
-> </script>
-> ```
 
 
 
@@ -253,27 +170,27 @@
 > </script>
 > 
 > <script type="module">
->   import { initShader } from "../jsm/Utils.js"; // 引入 shader 初始化方法
+>   import { initShader } from "../jsm/Utils.js" // 引入 shader 初始化方法
 >   
->   const canvas = document.querySelector("#canvas"); // 获取canvas画布
->   canvas.width = window.innerWidth; // 设置宽高
->   canvas.height = window.innerHeight;
+>   const canvas = document.querySelector("#canvas") // 获取canvas画布
+>   canvas.width = window.innerWidth // 设置宽高
+>   canvas.height = window.innerHeight
 > 
 >   // 获取着色器文本
->   const vsSource = document.querySelector("#vertexShader").innerText; // 顶点着色器源
->   const fsSource = document.querySelector("#fragmentShader").innerText; // 片元着色器源
+>   const vsSource = document.querySelector("#vertexShader").innerText // 顶点着色器源
+>   const fsSource = document.querySelector("#fragmentShader").innerText // 片元着色器源
 > 
->   const webgl = canvas.getContext("webgl"); // 获取 webgl 上下文
+>   const webgl = canvas.getContext("webgl") // 获取 webgl 上下文
 > 
 >   // 初始化着色器
 >   // 功能：解析着色器文本，整合到程序对象里，关联webgl上下文对象，实现两种语言的相互通信
->   initShaders(webgl, vsSource, fsSource);
+>   initShaders(webgl, vsSource, fsSource)
 > 
->   webgl.clearColor(0, 0, 0, 1); // 声明颜色 rgba
->   webgl.clear(gl.COLOR_BUFFER_BIT); // 刷底色
+>   webgl.clearColor(0, 0, 0, 1) // 声明清空画布的颜色，存储在内存中
+>   webgl.clear(gl.COLOR_BUFFER_BIT) // 使用内存中的颜色清空画布
 > 
 >   // 绘制 点类型
->   webgl.drawArrays(webgl.POINTS, 0, 1);
+>   webgl.drawArrays(webgl.POINTS, 0, 1)
 > </script>
 > ```
 >
@@ -281,35 +198,25 @@
 >
 > ```js
 > function loadShader(webgl, type, source) {
+>   const shader = webgl.createShader(type) // 根据着色类型，建立着色器对象
+>   webgl.shaderSource(shader, source) // 将着色器源文件传入着色器对象中
+>   webgl.compileShader(shader) // 编译着色器对象
+>   return shader // 返回着色器对象
+>   }
 >   
->   const shader = webgl.createShader(type); // 根据着色类型，建立着色器对象
->   
->   webgl.shaderSource(shader, source); // 将着色器源文件传入着色器对象中
->   
->   webgl.compileShader(shader); // 编译着色器对象
->   
->   return shader; // 返回着色器对象
-> }
-> 
-> // 导出初始化 shader （着色器） 方法
-> export function initShaders(webgl, vsSource, fsSource) {
->   
->   const program = webgl.createProgram(); // 创建程序对象
->   
->   const vertexShader = loadShader(webgl, webgl.VERTEX_SHADER, vsSource); // 建立 顶点着色器对象
->   const fragmentShader = loadShader(webgl, webgl.FRAGMENT_SHADER, fsSource); // 建立 片元着色器对象
->   
->   webgl.attachShader(program, vertexShader); // 把顶点着色对象装进程序对象中
->   webgl.attachShader(program, fragmentShader); // 把片元着色对象装进程序对象中
->   
->   webgl.linkProgram(program); // 连接 webgl 上下文对象和程序对象
->   
->   webgl.useProgram(program); // 使用启动程序对象
->   
->   webgl.program = program; // 将程序对象挂到上下文对象上
->   return true;
-> }
-> ```
+>   // 导出初始化 shader （着色器） 方法
+>   export function initShaders(webgl, vsSource, fsSource) {
+> const program = webgl.createProgram() // 创建程序对象
+> const vertexShader = loadShader(webgl, webgl.VERTEX_SHADER, vsSource) // 建立 顶点着色器对象
+> const fragmentShader = loadShader(webgl, webgl.FRAGMENT_SHADER, fsSource) // 建立 片元着色器对象
+> webgl.attachShader(program, vertexShader) // 把顶点着色对象装进程序对象中
+>   webgl.attachShader(program, fragmentShader) // 把片元着色对象装进程序对象中
+>   webgl.linkProgram(program) // 连接 webgl 上下文对象和程序对象
+>   webgl.useProgram(program) // 使用启动程序对象
+>   webgl.program = program // 将程序对象挂到上下文对象上
+>   return true
+>   }
+>   ```
 
 
 
