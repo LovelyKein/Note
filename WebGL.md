@@ -1,4 +1,4 @@
-## WebGL
+## WebGL?
 
 > WebGL`Web Graphics Library`，是一种**3D 绘图协议**；
 >
@@ -62,69 +62,28 @@
 >
 > ![webgl_render](imags/webgl/webgl_render.png)
 
-
-
-### VertexShader
-
-> 是**GPU 渲染管线**上一个可以执行**着色器语言**的功能单元，具体执行的就是顶点着色器程序；
+> 顶点着色器；
 >
 > 在 Javascript 中以**字符串**的形式存在，通过编译处理后传递给顶点着色器执行；
 >
-> [^作用]:就是执行顶点着色器程序对顶点进行变换计算，比如顶点位置坐标执行旋转平移等矩阵变换；
+> 变换后新的顶点坐标会赋值给内置变量`gl Position`；
 >
-> 变换后新的顶点坐标会赋值给内置变量`gl Position`，作为顶点着色器的输出，图元装配和光栅化环节的输入；
+> 并作为顶点着色器的输出，图元装配和光栅化环节的输入；
 >
 > ![webgl_keyword](imags/webgl/webgl_keyword.png)
 
-
-
-#### attribute
-
-> 被称为**存储限定符**，表示接下来的变量是一个`attribute`变量；
+> 片元着色器；
 >
-> **必须全局声明，且数据要从着色器外部传递给该变量**；
->
-> [^声明格式]:`<存储限定符> <类型> <变量名称>`；
->
-> ```glsl
-> attribute vec4 a_Position;
-> ```
-
-[^Tip]:`attribute`只能在**顶点着色器**中使用；
-
-
-
-#### uniform
-
-> 用来从`JavaScript` 程序向`顶点着色器`和`片元着色器`传输**一致的（不变的）**的数据；
->
-> 使用`uniform`变量之前，必须先声明变量；
->
-> [^声明格式]: `<存储限定符> <类型> <变量名称>`；
->
-> ```glsl
-> uniform vec4 u_FragColor
-> ```
-
-[^Tip]:`uniform`在**顶点着色器**和**片元着色器**中都可以使用；
-
-
-
-### FragmentShader
-
 > 和**顶点着色器**一样是 GPU 渲染管线上一个可以执行着色器程序的功能单元；
->
-> **片元着色器**是逐片元处理片元数据，通过给**内置变量**`gl_FragColor`赋值可以给每个片元进行着色；
 >
 > 通过关键字`discard`可以实现哪些片元可以被丢弃，被丢弃的片元不会出现在帧缓冲区，就不会显示在`canvas`画布上；
 
-
-
-### 图元装配
-
+> 图元装配；
+>
 > 经过**顶点着色器**操作变换后的是**图元装配(primitive assembly)**；
 >
 > **控制该怎么去绘制图形、绘制什么样的图形**；
+>
 > `gl.LINES`是将两个顶点装配成一个**线条图元**；
 >
 > `gL.TRIANGLES`是将三个顶点装配为一个**三角面图元**；
@@ -133,34 +92,30 @@
 >
 > ![webgl_tuyuan](imags/webgl/webgl_tuyuan.png)
 
-
-
-### 光栅化
-
+> 光栅化；
+>
 > 将**图元装配**处理后的图形，转换成**像素点**；
 >
 > ![webgl_guangshan_1](imags/webgl/webgl_guangshan_1.png)
 
-
-
-### 绘图流程
-
 > webgl 渲染引擎使用的是`GLSL ES` 语言去绘制 3D 图形，和`JavaScript` 语言不相同；
 >
-> 所以需要一个**程序对象( program )**，承载GLSL ES语言，翻译GLSL ES语言和js语言，使两者可以相互通信；
+> 所以需要一个**程序对象( program )**，承载GLSL ES语言；
 >
+> 用来翻译GLSL ES语言和js语言，使两者可以相互通信；
+> 
 > ```html
 > <!-- 在html中建立canvas 画布 -->
 > <canvas id="canvas"></canvas>
 > 
 > <!-- 顶点着色器 -->
-> <script id="vertexShader" type="x-shader/x-vertex">
-> 	void main(){
->   	//点位
+>   <script id="vertexShader" type="x-shader/x-vertex">
+>    	void main(){
+>    	//点位
 >     gl_Position=vec4(0, 0, 0, 1);
->     //尺寸
->     gl_PointSize=50.0;
->   }
+>    //尺寸
+>  gl_PointSize=50.0;
+> }
 > </script>
 > <!-- 片元着色器 -->
 > <script id="fragmentShader" type="x-shader/x-fragment">
@@ -168,48 +123,48 @@
 > 		gl_FragColor=vec4(1, 1, 0, 1);
 > 	}
 > </script>
-> 
-> <script type="module">
+>   
+>   <script type="module">
 >   import { initShader } from "../jsm/Utils.js" // 引入 shader 初始化方法
 >   
 >   const canvas = document.querySelector("#canvas") // 获取canvas画布
->   canvas.width = window.innerWidth // 设置宽高
+> canvas.width = window.innerWidth // 设置宽高
 >   canvas.height = window.innerHeight
-> 
+>   
 >   // 获取着色器文本
->   const vsSource = document.querySelector("#vertexShader").innerText // 顶点着色器源
+> const vsSource = document.querySelector("#vertexShader").innerText // 顶点着色器源
 >   const fsSource = document.querySelector("#fragmentShader").innerText // 片元着色器源
 > 
 >   const webgl = canvas.getContext("webgl") // 获取 webgl 上下文
-> 
+>   
 >   // 初始化着色器
->   // 功能：解析着色器文本，整合到程序对象里，关联webgl上下文对象，实现两种语言的相互通信
+> // 功能：解析着色器文本，整合到程序对象里，关联webgl上下文对象，实现两种语言的相互通信
 >   initShaders(webgl, vsSource, fsSource)
-> 
->   webgl.clearColor(0, 0, 0, 1) // 声明清空画布的颜色，存储在内存中
+>   
+> webgl.clearColor(0, 0, 0, 1) // 声明清空画布的颜色，存储在内存中
 >   webgl.clear(gl.COLOR_BUFFER_BIT) // 使用内存中的颜色清空画布
-> 
->   // 绘制 点类型
->   webgl.drawArrays(webgl.POINTS, 0, 1)
-> </script>
+>   
+> // 绘制 点类型
+> webgl.drawArrays(webgl.POINTS, 0, 1)
+></script>
 > ```
 >
 > `../jsm/Utils.js`路径中的**模块化**内容， 封装的用来**初始化着色器**的方法；
->
-> ```js
-> function loadShader(webgl, type, source) {
+> 
+>   ```js
+>   function loadShader(webgl, type, source) {
 >   const shader = webgl.createShader(type) // 根据着色类型，建立着色器对象
 >   webgl.shaderSource(shader, source) // 将着色器源文件传入着色器对象中
 >   webgl.compileShader(shader) // 编译着色器对象
 >   return shader // 返回着色器对象
 >   }
 >   
->   // 导出初始化 shader （着色器） 方法
->   export function initShaders(webgl, vsSource, fsSource) {
+> // 导出初始化 shader （着色器） 方法
+> export function initShaders(webgl, vsSource, fsSource) {
 > const program = webgl.createProgram() // 创建程序对象
 > const vertexShader = loadShader(webgl, webgl.VERTEX_SHADER, vsSource) // 建立 顶点着色器对象
-> const fragmentShader = loadShader(webgl, webgl.FRAGMENT_SHADER, fsSource) // 建立 片元着色器对象
-> webgl.attachShader(program, vertexShader) // 把顶点着色对象装进程序对象中
+>   const fragmentShader = loadShader(webgl, webgl.FRAGMENT_SHADER, fsSource) // 建立 片元着色器对象
+>   webgl.attachShader(program, vertexShader) // 把顶点着色对象装进程序对象中
 >   webgl.attachShader(program, fragmentShader) // 把片元着色对象装进程序对象中
 >   webgl.linkProgram(program) // 连接 webgl 上下文对象和程序对象
 >   webgl.useProgram(program) // 使用启动程序对象
@@ -224,38 +179,34 @@
 
 ## 着色器 ( Shaders )
 
-> WebGL 绘图需要两种着色器：**`顶点着色器( Vertex shader )`**和**`片元着色器( Fragment shader )`**；
+> 分为**`顶点着色器( Vertex shader )`**和**`片元着色器( Fragment shader )`**；
 >
 > 举个例子：两点决定一条直线
 >
 > **顶点着色器**里的顶点就是决定这一条直线的两个点；
 >
 > **片元着色器**里的片元就是把直线画到画布上后，这两个点之间构成直线的每个像素；
-
-
-
-### 语言 ( Language )
-
+>
 > WebGL 的着色器语言是`GLSL ES`语言；
 >
-> 是`GLSL( OpenGL Shading Language )`和`JavaScript`语言的结合，运行在浏览器端的着色器语言；
->
+> 是`GLSL( OpenGL Shading Language )`和`JS`语言的结合，运行在浏览器端的着色器语言；
+
 > ```html
-> <!-- 顶点着色程序，要写在 type=“x-shader/x-vertex” 的 script 标签中 -->
+><!-- 顶点着色程序 -->
 > <script id="vertexShader" type="x-shader/x-vertex">
->   void main() {
->   	gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
->   	gl_PointSize = 100.0;
+>void main() {
+> 	gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+> 	gl_PointSize = 100.0;
 > 	}
-> </script>
-> 
-> <!-- 片元着色程序，要写在 type=“x-shader/x-fragment” 的 script 标签中 -->
+>   </script>
+>   
+>   <!-- 片元着色程序 -->
 > <script id="fragmentShader" type="x-shader/x-fragment">
->   void main() {
->   	gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
+> void main() {
+> 	gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
 > 	}
 > </script>
-> ```
+>   ```
 
 [^void main()]:着色器语言中的主体函数；
 [^gl_Position]:顶点着色器，顶点的位置（固定名称）；
@@ -265,19 +216,51 @@
 
 
 
-### 顶点着色器
+### VertexShader
 
-> `Vertex Shader`
+> 顶点着色器；
 >
-> 用于描述顶点的特征，如位置、颜色等；
-
-
-
-### 片元着色器
-
-> `Fragment Shader`
+> 是**GPU 渲染管线**上一个可以执行**着色器语言**的功能单元；
 >
-> 进行逐片元处理，如光照；
+> 执行顶点着色器程序对顶点进行变换计算，比如顶点位置坐标执行旋转平移等矩阵变换；
+
+
+
+#### attribute
+
+> 被称为**存储限定符**，表示接下来的变量是一个`attribute`变量；
+>
+> **必须全局声明，且数据要从着色器外部传递给该变量**；
+>
+> ```glsl
+> // 格式: <存储限定符> <类型> <变量名称>
+> attribute vec4 a_Position;
+> ```
+
+[^Tip]: `attribute`只能在**顶点着色器**中使用；
+
+
+
+#### uniform
+
+> 用来从`JavaScript` 程序向`顶点着色器`和`片元着色器`传输**一致的（不变的）**的数据；
+>
+> 使用`uniform`变量之前，必须先声明变量；
+>
+> ```glsl
+> // 格式: <存储限定符> <类型> <变量名称>
+> uniform vec4 u_FragColor;
+> ```
+
+[^Tip]: `uniform`在**顶点着色器**和**片元着色器**中都可以使用；
+
+
+
+### FragmentShader
+
+> 片元着色器；
+>
+> 逐片元处理片元数据，通过给**内置变量**`gl_FragColor`赋值可以给每个片元进行着色；
 
 
 
@@ -285,17 +268,15 @@
 
 ## 同步绘图 ( Async )
 
-> `webgl.drawArrays()`方法只会**同步绘图**；
+> `webgl.drawArrays()`方法只可以进行**同步绘图**；
 
-
-
-### 问题
-
-> 走完 js 主线程后，再次绘图时，就会从头再来，**异步执行**的`drawArrays()`方法会把画布上之前绘制的图像都刷掉；
+> 走完 js 主线程后，再次绘图时，就会从头再来；
+>
+> **异步执行**的`drawArrays()`方法会把画布上之前绘制的图像都刷掉；
 >
 > ```js
-> const a_Position = gl.getAttribLocation(gl.program, "a_Position");
-> gl.clearColor(0, 0, 0, 1); // 声明颜色 rgba
+> const a_Position = gl.getAttribLocation(gl.program, "a_Position") // 获取属性
+> gl.clearColor(0, 0, 0, 1); // 声明颜色
 > gl.clear(gl.COLOR_BUFFER_BIT); // 刷底色
 > 
 > gl.vertexAttrib2f(a_Position, -0.3, 0); // 修改 attribute 变量
@@ -312,11 +293,7 @@
 > // 此时画布上只有异步绘制的一个点，之前的会被清除掉
 > ```
 
-
-
-### 解决
-
-> 可以用数组把一开始的那两个顶点存起来，在异步绘制后续的顶点的时候，把之前的两个顶点也一起画上；
+> 用数组把一开始的那两个顶点存起来，在异步绘制后续的顶点的时候，把之前的两个顶点也一起画上；
 >
 > ```javascript
 > const a_Position = gl.getAttribLocation(gl.program, "a_Position");
@@ -342,8 +319,8 @@
 > render() // 调用渲染方法绘制图形，此时为 同步绘制
 > 
 > setTimeout(() => {
->     a_points.push({ x: 0, y: 0 }) // 增加 顶点数据
->     render() // 绘制渲染，此时为异步
+>      a_points.push({ x: 0, y: 0 }) // 增加 顶点数据
+>      render() // 绘制渲染，此时为异步
 > }, 1000);
 > ```
 
@@ -593,7 +570,9 @@
 
 ## 程序交互 ( Communication )
 
-> 通过在 JavaScript 程序中向**顶点着色器**和**片元着色器**传递变量参数，动态控制位置、大小、图形、颜色...
+> 通过在 JavaScript 程序中向**顶点着色器**和**片元着色器**传递变量参数；
+>
+> 动态控制位置、大小、图形、颜色...
 
 
 
