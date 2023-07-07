@@ -4396,3 +4396,23 @@
 
 [^Tip]:引入 path 报错，是因为缺少了 ts 的一些声明配置，安装`npm i -D @types/node`关于 node 库的 ts 类型声明；
 
+
+
+### $ref 类型
+
+> 在 TS 中声明`this.$refs['xxx']`的类型；
+>
+> ```vue
+> <!-- 1. 元素类型是 html 元素 -->
+> <canvas ref="canvas" />
+> <script lang='ts'>
+>   const canvas = this.$refs.canvas as HTMLCanvasElement
+> </script>
+> 
+> <!-- 2. 元素类型是 子组件 -->
+> <Three ref="three" />
+> <script lang='ts'>
+>   import Three from '@/components/three/Three.vue'
+>   const threeComponent = this.$refs.three as InstanceType<typeof Three>
+> </script>
+> ```
