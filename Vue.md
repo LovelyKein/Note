@@ -2697,6 +2697,175 @@
 
 
 
+## pinia
+
+> Pinia 是 Vue 的专属状态管理库，它允许你跨组件或页面共享状态，用来代替 vuex；
+
+
+
+### 创建实例
+
+> 创建一个 pinia 实例 (根 store) 并将其传递给应用；
+>
+> ```js
+> // vue 3.0
+> import { createApp } from 'vue'
+> import { createPinia } from 'pinia'
+> import App from './App.vue'
+> 
+> const pinia = createPinia()
+> const app = createApp(App)
+> 
+> app.use(pinia)
+> app.mount('#app')
+> 
+> 
+> // vue 2.0
+> import { createPinia, PiniaVuePlugin } from 'pinia'
+> 
+> Vue.use(PiniaVuePlugin)
+> const pinia = createPinia()
+> 
+> new Vue({
+>   el: '#app',
+>   // 其他配置...
+>   // ...
+>   // 请注意，同一个`pinia'实例
+>   // 可以在同一个页面的多个 Vue 应用中使用。 
+>   pinia,
+> })
+> ```
+
+
+
+### 定义 Store
+
+> Store (如 Pinia) 是一个保存状态和业务逻辑的实体，**它承载着全局状态**；
+>
+> 它有点像一个永远存在的组件，每个组件都可以读取和写入它；
+>
+> 它有**三个概念**，[state](https://pinia.vuejs.org/zh/core-concepts/state.html)、[getter](https://pinia.vuejs.org/zh/core-concepts/getters.html) 和 [action](https://pinia.vuejs.org/zh/core-concepts/actions.html)
+>
+> ```js
+> import { defineStore } from 'pinia'
+> import { ref, reactive, computed } from 'vue'
+> 
+> // option store
+> export const useUserStore = defineStore('user', {
+>   // 为了完整类型推理，推荐使用箭头函数
+>   state: () => ({
+>     userInfo: {
+>       name: 'Kein',
+>       age: 23,
+>       gender: 'Male',
+>     },
+>   }),
+>   getters: {
+>     username: (state) => {
+>       return state.userInfo.name || ''
+>     },
+>   },
+>   actions: {
+>     // 不能使用箭头函数定义 action，因为節头函数鄉定外部 this
+>     changeName(value) {
+>       this.userInfo.name = value
+>     },
+>   },
+> })
+> 
+> 
+> // setup store
+> export const useMapStore = defineStore('map', () => {
+>   // state
+>   const zoom = ref(10)
+>   const mapCenter = ref([115.23243, 28.25284])
+> 
+>   // getters
+>   const lng = computed(() => {
+>     return mapCenter.value[0]
+>   })
+>   const lat = computed(() => {
+>     return mapCenter.value[1]
+>   })
+> 
+>   // actions
+>   const addZoom = () => {
+>     zoom.value++
+>   }
+>   function reduceZoom() {
+>     zoom.value--
+>   }
+> 
+>   return {
+>     zoom,
+>     mapCenter,
+>     lng,
+>     lat,
+>     addZoom,
+>     reduceZoom
+>   }
+> })
+> ```
+
+
+
+### 使用
+
+> 在其他页面或组件中使用数据；
+>
+> ```vue
+> <script setup>
+> import { useMapStore } from './store/map' // userStore
+> import { useUserStore } from './store/user' // mapStore
+> import { storeToRefs } from 'pinia'
+> const mapStore = useMapStore()
+> const userStore = useUserStore()
+> 
+> // 这是有问题的，因为这样拿到的数据不是响应式的，是一次性的
+> // Pinia 其实就是把 state 数据都做了 reactive 处理了
+> // const { userInfo } = userStore
+> 
+> // 把解构出来的数据做 ref 响应式代理
+> const { userInfo } = storeToRefs(userStore)
+> console.log(userInfo.value)
+> 
+> const reduceZooom = () => {
+>   mapStore.reduceZoom()
+> }
+> 
+> const changeName = () => {
+>   const value = userStore.username === 'Kein' ? 'LoveKein' : 'Kein'
+>   // 方式一：直接改变数据
+>   // userStore.userInfo.name = value
+>   
+>   // 方式二：使用 $patch 函数
+>   // userStore.$patch(state => {
+>   // 	state.userInfo.name = value
+>   // })
+>   
+>   // 方式三：使用最多的时候是使用封装到 actions 中的方法改变数据
+>   userStore.changeName(value)
+> }
+> </script>
+> 
+> <template>
+>   <div class="container">
+>     <h4>UserStore</h4>
+>     <h6>username: {{ userStore.username }}</h6>
+>     <h6>userInfo: {{ userInfo }}</h6>
+>     <br>
+>     <h4>mapStore</h4>
+>     <h6>lng: {{ mapStore.lng }}</h6>
+>     <h6>lat: {{ mapStore.lat }}</h6>
+>     <h6>zoom: {{ mapStore.zoom }}</h6>
+>   </div>
+> </template>
+> ```
+
+
+
+
+
 ## vue-router
 
 > Vue 中的一个**插件库**，专门用来实现[^SPA]；
