@@ -382,8 +382,14 @@
 >
 > ```javascript
 > //语法
-> var moduleName = require('module');
+> var moduleName = require('a');
 > ```
+>
+> 查找规则：
+>
+> 1. 查找是否有内置模块a
+> 2. 查找当前目录的`node_modules`中是否有a
+> 3. 依次查找上级目录的`node_modules`中是否有a，直到根目录
 
 
 
@@ -488,6 +494,14 @@
 > `npm`node package manager
 >
 > [npm Official Website](https://www.npmjs.com)
+
+
+
+#### 查看仓库源
+
+> ```shell
+> npm config get registry
+> ```
 
 
 
