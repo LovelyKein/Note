@@ -18,7 +18,7 @@
 >
 > 例如：微信扫码、微信支付、微信登录、地理定位、etc…
 >
-> <img src="imags/miniProgram/host.png" alt="image-20221018235931099" style="zoom:70%;" />
+> <img src="./assets/miniProgram/host.png" alt="image-20221018235931099" style="zoom:70%;" />
 
 
 
@@ -28,13 +28,13 @@
 >
 > WXML 模板和 WXSS 样式工作在渲染层，JS 脚本工作在逻辑层；
 >
-> <img src="imags/miniProgram/connectModel.png" alt="image-20221019004244205" style="zoom:50%;" />
+> <img src="./assets/miniProgram/connectModel.png" alt="image-20221019004244205" style="zoom:50%;" />
 >
 > 渲染层和逻辑层之间的通信，由微信客户端进行转发；
 >
 > 逻辑层和第三方服务器之间的通信，由微信客户端进行转发；
 >
-> <img src="imags/miniProgram/connectModel_1.png" alt="image-20221019004415329" style="zoom:50%;" />
+> <img src="./assets/miniProgram/connectModel_1.png" alt="image-20221019004415329" style="zoom:50%;" />
 
 
 
@@ -85,7 +85,7 @@
 >
 > 常用来实现页面的布局效果；
 >
-> <img src="imags/miniProgram/component_view.png" alt="image-20221019112521149" style="zoom:50%;" />
+> <img src="./assets/miniProgram/component_view.png" alt="image-20221019112521149" style="zoom:50%;" />
 
 
 
@@ -95,7 +95,7 @@
 >
 > 常用来实现滚动列表效果；
 >
-> <img src="imags/miniProgram/component_scrollview.png" alt="image-20221019140837819" style="zoom:50%;" />
+> <img src="./assets/miniProgram/component_scrollview.png" alt="image-20221019140837819" style="zoom:50%;" />
 
 
 
@@ -112,7 +112,7 @@
 > | interval               | number  | 5000              | 自动切换时间间隔     |
 > | circular               | boolean | false             | 是否采用衔接滑动     |
 >
-> <img src="imags/miniProgram/component_swiper.png" alt="image-20221019215707995" style="zoom:50%;" />
+> <img src="./assets/miniProgram/component_swiper.png" alt="image-20221019215707995" style="zoom:50%;" />
 
 
 
@@ -130,7 +130,7 @@
 >
 > [^Focus]:通过 text 组件的 selectable 属性，实现长按选中文本内容的效果；
 >
-> <img src="imags/miniProgram/component_text.png" alt="image-20221019221748964" style="zoom:50%;" />
+> <img src="./assets/miniProgram/component_text.png" alt="image-20221019221748964" style="zoom:50%;" />
 
 
 
@@ -149,7 +149,7 @@
 >
 > 
 >
-> <img src="imags/miniProgram/component_richText.png" alt="image-20221019221947216" style="zoom:50%;" />
+> <img src="./assets/miniProgram/component_richText.png" alt="image-20221019221947216" style="zoom:50%;" />
 
 
 
@@ -167,7 +167,7 @@
 >
 > 通过`type`属性可以给 button 设置不同的样式；
 >
-> <img src="imags/miniProgram/component_button.png" alt="image-20221019223116918" style="zoom:50%;" />
+> <img src="./assets/miniProgram/component_button.png" alt="image-20221019223116918" style="zoom:50%;" />
 
 
 
@@ -187,7 +187,7 @@
 > | widthFix    | 宽度不变，高度自动变化，保持原图宽高比不变                   |
 > | heightFix   | 高度不变，宽度自动变化，保持原图宽高比不变                   |
 >
-> <img src="imags/miniProgram/component_image.png" alt="image-20221019223205609" style="zoom:50%;" />
+> <img src="./assets/miniProgram/component_image.png" alt="image-20221019223205609" style="zoom:50%;" />
 
 
 
@@ -328,7 +328,7 @@
 >
 > 下图为小程序窗口的组成部分：
 >
-> <img src="imags/miniProgram/window_composition.png" alt="image-20221022155619193" style="zoom:50%;float:left;" />
+> <img src="./assets/miniProgram/window_composition.png" alt="image-20221022155619193" />
 >
 > window 节点常用的配置项：
 >
@@ -666,7 +666,7 @@
 >
 > 在小程序中，生命周期分为两类：**应用生命周期**和**页面生命周期**；
 >
-> <img src="imags/miniProgram/lifecircle.png" alt="image-20221025231229435" style="zoom:60%;float:left;" />
+> <img src="./assets/miniProgram/lifecircle.png" alt="image-20221025231229435" />
 >
 > 
 
@@ -817,7 +817,7 @@
 > Page({
 >      data: {
 >        title: 'Mustache 语法',
->        imgUrl: '/imags/miniProgram/mustache_bind_data.png',
+>        imgUrl: '/imags/mustache_bind_data.png',
 >        randomNumber: Math.random(),
 >      }
 > })
@@ -867,7 +867,7 @@
 >
 > 但是，在 wxs 中定义的函数不能作为组件的事件回调函数，下图为错误的使用方法；
 >
-> <img src="imags/miniProgram/wxs_error.png" alt="image-20221026234208208" style="zoom:60%;float:left;" />
+> <img src="./assets/miniProgram/wxs_error.png" alt="image-20221026234208208" />
 
 
 
@@ -1287,7 +1287,7 @@
 
 > 可以通过`styleIsolation`修改组件的样式隔离选项；
 >
-> <img src="imags/miniProgram/css_isolation.png" alt="image-20221028155932824" style="zoom:50%;float:left;" />
+> <img src="./assets/miniProgram/css_isolation.png" alt="image-20221028155932824" />
 
 |    可选值    |                             描述                             |
 | :----------: | :----------------------------------------------------------: |
@@ -1305,7 +1305,7 @@
 >
 > 通过事件可以将用户在渲染层产生的行为，反馈到逻辑层进行业务的处理；
 >
-> <img src="imags/miniProgram/event_bind.png" alt="image-20221020205927332" style="zoom:60%;float:left;" />
+> <img src="./assets/miniProgram/event_bind.png" alt="image-20221020205927332" />
 
 
 
@@ -1356,7 +1356,7 @@
 >
 > `currentTarget`则是当前事件所绑定的组件；
 >
-> <img src="imags/miniProgram/event_target.png" alt="image-20221020215226502" style="zoom:50%;float:left;" />
+> <img src="./assets/miniProgram/event_target.png" alt="image-20221020215226502" />
 >
 > 点击`<view>`内部的`<button>`时，点击事件以**冒泡**的方式向外扩散，触发外层`<view>` 的`bindtap`事件处理函数；
 >
@@ -1368,7 +1368,7 @@
 
 > 小程序中的事件传参比较特殊，**不能在绑定事件的同时为事件处理函数传递参数**，以下为错误方式；
 >
-> <img src="imags/miniProgram/event_params.png" alt="image-20221020220916697" style="zoom:60%;float:left;" />
+> <img src="./assets/miniProgram/event_params.png" alt="image-20221020220916697" />
 >
 > 小程序会把`bindtap`的属性值，统一当作事件名称来处理，相当于要调用一个名称为`btnHandler(123)`的事件处理函数；
 >
@@ -1390,7 +1390,7 @@
 > })
 > ```
 >
-> <img src="imags/miniProgram/event_data-set.png" alt="image-20221020225516705" style="zoom:60%;float:left;" />
+> <img src="./assets/miniProgram/event_data-set.png" alt="image-20221020225516705" />
 
 
 
@@ -1513,7 +1513,7 @@
 >
 > 使用`wx:for-item`可以指定遍历项的变量名称；
 >
-> <img src="imags/miniProgram/wx_for.png" alt="image-20221022150837480" style="zoom:60%;float:left;" />
+> <img src="./assets/miniProgram/wx_for.png" alt="image-20221022150837480" />
 
 
 
@@ -1551,7 +1551,7 @@
 > * 只能请求 HTTPS 类型的接口；
 > * 必须将接口的域名添加到信任列表中；
 >
-> <img src="imags/miniProgram/network_safe.png" alt="image-20221022193021222" style="zoom:40%;float:left;" />
+> <img src="./assets/miniProgram/network_safe.png" alt="image-20221022193021222" />
 
 
 
@@ -1572,7 +1572,7 @@
 
 > 在微信开发者工具中，临时开启开发环境不校验请求域名、TLS 版本及 HTTPS 证书选项，跳过 request 合法域名的校验；
 >
-> <img src="imags/miniProgram/request_charm.png" alt="image-20221022233436908" style="zoom:40%;float:left;" />
+> <img src="./assets/miniProgram/request_charm.png" alt="image-20221022233436908" />
 
 [^Focus]:跳过 request 合法域名校验的选项，**仅限在 开发 与 调试阶段 使用**；
 
@@ -2055,7 +2055,7 @@
 
 > 在自定义组件的 wxml 结构中，可以提供一个`<slot>`节点（插槽），用于承载组件使用者提供的 wxml 结构；
 >
-> <img src="imags/miniProgram/slot.png" alt="image-20221028223443689" style="zoom:50%;float:left;" />
+> <img src="./assets/miniProgram/slot.png" alt="image-20221028223443689" />
 
 
 
@@ -2276,7 +2276,7 @@
 > })
 > ```
 >
-> <img src="imags/miniProgram/component_instance.png" alt="image-20221030193305779" style="zoom:50%;float:left;" />
+> <img src="./assets/miniProgram/component_instance.png" alt="image-20221030193305779" style="zoom:50%;float:left;" />
 
 
 
@@ -2478,7 +2478,7 @@
 >
 > 导致整个项目体积过大，影响小程序首次启动的下载时间；
 >
-> <img src="imags/miniProgram/part_package.png" alt="image-20221102233747018" style="zoom:40%;float:left;" />
+> <img src="./assets/miniProgram/part_package.png" />
 
 
 
@@ -2490,7 +2490,7 @@
 >
 > **分包**：只包含和当前分包有关的页面和私有资源；
 >
-> <img src="imags/miniProgram/part_package_after.png" alt="image-20221102233951944" style="zoom:50%;float:left;" />
+> <img src="./assets/miniProgram/part_package_after.png" />
 
 
 
@@ -2515,11 +2515,11 @@
 
 #### 配置方法
 
-> <img src="imags/miniProgram/part_package_fileConstitution.png" alt="image-20221102234459002" style="zoom:50%;float:left;" />
+> <img src="./assets/miniProgram/part_package_fileConstitution.png" />
 >
 > 在小程序的 app.json 文件中声明`subpackages`字段，声明分包结构；
 >
-> <img src="imags/miniProgram/part_package_js.png" alt="image-20221102234658248" style="zoom:50%;float:left" />
+> <img src="./assets/miniProgram/part_package_js.png" alt="image-20221102234658248" />
 
 
 
@@ -2544,7 +2544,7 @@
 
 > 独立分包本质上也是分包，只不过它比较特殊，**可以独立于主包和其他分包而单独运行**；
 >
-> <img src="imags/miniProgram/independent_package.png" alt="image-20221104161146188" style="zoom:50%;float:left;" />
+> <img src="./assets/miniProgram/independent_package.png" alt="image-20221104161146188" />
 
 
 
@@ -2570,11 +2570,11 @@
 
 #### 配置方法
 
-> <img src="imags/miniProgram/independent_package_institution.png" alt="image-20221104161627172" style="zoom:50%;float:left;" />
+> <img src="./assets/miniProgram/independent_package_institution.png" />
 >
 > 再普通分包的节点对象中，声明一个`independent`属性字段，并且值为`true`，则该分包为独立分包；
 >
-> <img src="imags/miniProgram/independent_package_config.png" alt="image-20221104161733870" style="zoom:50%;float:left;" />
+> <img src="./assets/miniProgram/independent_package_config.png"/>
 
 
 
@@ -2597,7 +2597,7 @@
 >
 > 在 app.json 文件中，使用`preloadRule`节点定义分包的预下载规则；
 >
-> <img src="imags/miniProgram/preload_package.png" alt="image-20221104162758561" style="zoom:50%;float:left;" />
+> <img src="./assets/miniProgram/preload_package.png" alt="image-20221104162758561" />
 
 [^Focus]:同一个分包中的页面享有共同的预下载大小限额 2M；
 
