@@ -3,8 +3,8 @@
 本质是一个函数，简单来说，类`class`就是构造函数的另一种写法（语法糖）
 
 - 类的构造器必须使用`new`关键字调用
-- 类在初始化之前不可被读取使用，和`let`和`const`一样，声明不会被提升，存在暂时性死区
-- 类的所有方法都是不可枚举的，内部处理会将方法放到原型对象上去
+- 类在定义和初始化之前不可被读取使用，和`let`和`const`一样，声明不会被提升，存在暂时性死区
+- 类的所有方法（非箭头函数）都是不可枚举的，内部处理会将方法放到原型对象上去
 - 类的所有代码均在严格模式下执行
 - 类里面的所有方法都不需要加`function`前缀，多个函数方法之间不需要添加逗号分割
 
@@ -109,37 +109,107 @@ cat.sayHello()
 
 ## `get/set`
 
-```javascript
-get dataName() {
-  // 实例化对象获取 dataName 的数据时，触发此方法
-  return this._dataName
+`class`类中的`get`和`set`是两个特殊的方法，**其作用是对类属性的读取和赋值操作进行自定义**
+
+注意点：
+
+- **`getter/setter`的名称不能和实际存储属性的名称相同**，否则会溢出最大调用栈报错
+- `setter`必须接受且只能接受一个参数（即要设置的值），而`getter`不能有参数
+- 可以只实现`getter`，这样该属性就会变成只读属性，但只实现`setter`是不允许的，否则在读取属性时会得到`undefined`
+- ES6的`class`中的`getter/setter`其实是`Object.defineProperty()`的语法糖，二者功能相同
+
+基本概念：
+
+- `getter`：获取对象属性值的方法，使用`get`关键字定义对象的某个属性时，对应的`getter`方法就会被自动调用
+- `setter`：设置对象属性值的方法，通过`set`关键字定义对象的某个属性赋值时，相应的`setter`方法会被触发
+
+```js
+/** 基本语法 **/
+class MyClass {
+  constructor() {
+    this._property = 0
+  }
+
+  // 定义getter方法
+  get property() {
+    console.log('获取属性值')
+    return this._property
+  }
+  // 定义setter方法
+  set property(value) {
+    console.log(`设置属性值为: ${value}`)
+    if (value < 0) {
+      this._property = 0 // 可以在setter里添加数据验证逻辑
+    } else {
+      this._property = value
+    }
+  }
 }
 
-set dataName(newValue) {
-  // 实例化对象设置或赋值 dataName 时，触发此方法
-  this._dataName = newValue
-}
+// 使用示例
+const obj = new MyClass()
+console.log(obj.property) // 调用getter，输出: 获取属性值 0
+obj.property = 10         // 调用setter，输出: 设置属性值为: 10
+console.log(obj.property) // 调用getter，输出: 获取属性值 10
+obj.property = -5         // 调用setter，输出: 设置属性值为: -5
+console.log(obj.property) // 调用getter，输出: 获取属性值 0（经过了setter里的验证处理）
 ```
 
- 
+主要作用：
 
-### 注意( Focus )
+- **数据验证**：借助`setter`，能够在给属性赋值之前对数据进行检查，保证数据的有效性
 
-> 在ES6中类没有变量提升，所以必须先定义类，才能通过类实例化对象；
->
-> 类里面共有的属性和方法一定要加`this`使用；
->
-> constructor 里面的`this`指向实例化的对象，方法里面的 this 指向这个方法的调用者；
+- **计算属性**：可以根据其他属性动态地计算出属性值，无需将其存储为实体数据
 
- 
+  ```js
+  class Rectangle {
+    constructor(width, height) {
+      this.width = width
+      this.height = height
+    }
+    // 可以只实现 getter，这样该属性就会变成只读属性
+    // 但只实现 setter 是不允许的，否则在读取属性时会得到 undefined
+    // 面积属性是通过计算得到的，不需要单独存储
+    get area() {
+      return this.width * this.height
+    }
+  }
+  const rect = new Rectangle(5, 10)
+  console.log(rect.area) // 输出: 50
+  ```
 
-### 原型( prototype )
+- **封装实现细节**：可以隐藏对象内部的实际属性，对外提供统一的访问接口
 
-> 在原型对象（prototype）里面添加方法；
->
-> 原型对象（prototype）里面的 constructor 属性指向类（class）本身；
+- **监听属性变化**：在`setter`中添加额外的逻辑，当属性值发生变化时执行相应操作
 
- 
+  ```js
+  class Temperature {
+    constructor() {
+      this._celsius = 0
+    }
+  
+    get celsius() {
+      return this._celsius
+    }
+    set celsius(value) {
+      this._celsius = value
+      console.log(`温度已更新为 ${value}°C`)
+    }
+  
+    get fahrenheit() {
+      return (this._celsius * 9/5) + 32
+    }
+    set fahrenheit(value) {
+      this._celsius = (value - 32) * 5/9
+      console.log(`温度已更新为 ${this._celsius}°C`)
+    }
+  }
+  const temp = new Temperature()
+  temp.celsius = 25     // 输出: 温度已更新为 25°C
+  console.log(temp.fahrenheit) // 输出: 77°F
+  temp.fahrenheit = 32  // 输出: 温度已更新为 0°C
+  console.log(temp.celsius)    // 输出: 0°C
+  ```
 
  
 
@@ -942,44 +1012,53 @@ const objet = {
 ### 数组
 
 ```javascript
-const F4 = ['小沈阳','刘能','赵四','宋小宝'];
-let [a, b, c, d] = F4;
+const F4 = ['小沈阳','刘能','赵四','宋小宝']
+let [a, b, c, d] = F4
+
+// 这样结构也行
+const {
+  0: one,
+  1: two
+} = F4
 ```
 
 ### 对象
 
 ```javascript
 const person = {
- name: '赵本山',
- age:65,
- power: function(){
-    console.log('我是小品演员！');
- }
-};
-let {name, age, power} = person;
+  name: '赵本山',
+  power: function() {
+    console.log('我是小品演员！')
+  }
+}
+let { name, age = 40 } = person
+// age 有一个默认值 40，假如解构 age 的结果是 undefined ，则使用默认值
 ```
 
 ### 连续解构
 
 ```javascript
 const list = {
-keys: {
- left: 'A',
- right: 'D'
-},
-mouse: {
- clickLeft: 'mouse-left',
- middle: 'mouse-middle',
- clickRight: 'mouse-right'
-}
+  keys: {
+    left: 'A',
+    right: 'D'
+  },
+  mouse: {
+    clickLeft: 'mouse-left',
+    middle: 'mouse-middle',
+    clickRight: 'mouse-right'
+  }
 }
 
 // 解构赋值
-const { keys } = list
+let { keys } = list
+// 等同于 -->
+let keys
+keys = list.keys
 // 连续解构赋值
 const { keys:{ left } } = list // 'A'
 // 连续解构并且更改变量名 为 keyLeft
-const { keys:{ left:keyLeft } } = list // 'A'
+const { keys:{ left: keyLeft } } = list // 'A'
 ```
 
 
@@ -1032,36 +1111,6 @@ const clonePerson_1 = {...person, name: 'MuYi', gender: 'Female'}
 person.name = 'Kein' // 改变 person.name 的值
 console.log(clonePerson) // clonePerson 不会受影响
 ```
-
-
-
-## Symbol
-
-> 是 ES6 中新增的一种**原始数据类型**，表示**独一无二的值**；
->
-> 类似于字符串`String`数据类型；
-
-
-
-#### Create
-
-> 创建一个`Symbol`类型数据；
->
-> ```javascript
-> var dataName = Symbol()
-> ```
-
-
-
-#### Feature
-
-> `Symbol`的值是唯一的，用来解决命名冲突的问题；
->
-> `Symbol`的值不能与其他数据进行运算；
->
-> `Symbol`定义的对象不能用 for…in 循环遍历；
->
-> `Symbol`可以使用 Reflect.ownKeys 来获取对象的所有键名；
 
 
 
