@@ -3584,9 +3584,29 @@ vue3中一个新的配置项，是一个函数，`setup()`是所有`Composition 
 
 ## `ref()`
 
+```javascript
+// 导入
+import { ref, reactive } from 'vue'
+
+const obj = { name: 'Kyle', age: 26 }
+
+const countRef = ref(0)
+countRef.value++
+
+// 如果传值是一个对象，则内部通过`reactive`函数进行代理
+const objRef = ref(obj)
+objRef.value.name
+objRef.value.gender = 'Male'
+
+// 如果传值已经是一个代理对象，则直接返回代理对象
+const objReactive = reactive(obj)
+const reRef = ref(objReactive)
+reRef.value === objReactive // true
+```
 
 
-### toRef()
+
+## `toRef()`
 
 将响应式数据中的某个属性单独提供给外部使用，且数据是响应式的
 
@@ -3603,7 +3623,7 @@ let person = reactive({
 
 
 
-### toRefs()
+## `toRefs()`
 
 与`toRef()`功能一致，但可以创建多个 ref 实例对象
 
@@ -3620,31 +3640,26 @@ let { name, gender, list, age, enRich } = toRefs(reactive({
 
 
 
-### reactive()
+## `reactive()`
 
-定义一个**对象或数组类型**的响应数据，基本类型不要用它
+接受一个对象类型的参数，返回一个**代理对象(Proxy实例)**，不能代理基本类型数据
 
-接受一个对象或数组类型的参数，返回一个**代理对象(Proxy实例)**
-
-```javascript
+```js
 export default {
   name: 'Message',
-  setup(){
+  setup() {
     // 定义对象类型的响应式数据
     const person = reactive({
       name:'Kein',
       age:22,
-      gender: 'Male',
+      gender: 'Male'
     })
-    }
-}
-```
+    
+    // 更改数据
+    person.name = 'MuYin'
+    person.gender = 'Female'
+  }
 
-更改数据
-
-```javascript
-person.name = 'MuYin'
-person.gender = 'Female'
 ```
 
 模版中使用数据
@@ -3656,253 +3671,208 @@ person.gender = 'Female'
 
 
 
-### computed()
+## `readonly()`
 
-> Vue3 中提供的计算属性；
+不希望数据被修改的情况，让一个响应式的数据变为**只读**，不可修改
 
+```javascript
+const private = readonly(person)
 
-
-#### Import
-
-> ```javascript
-> import { computed } from 'vue'
-> ```
-
-
-
-#### use
-
-> ```javascript
-> let number = ref(1);
-> // 函数式；
-> let multipleNumber = computed(() => {
->      return number.value * 4;
-> })
-> 
-> // 对象式；
-> let canSetNumber = computed({
->      get: () => {
->        return number.value*2;
->      },
->      set: (value) => {
->        number.value = Math.sin(value);
->      }
-> })
-> 
-> // 在模版中使用
-> // <p>{{ multipleNumber }}</p>
-> ```
+// shallowReadonly() 让响应式数据的最外层属性变成只读（浅只读）
+const p = shallowReadonly(person)
+```
 
 
 
-### watch()
+## `computed()`
 
-> Vue3 中的数据监视函数；
+Vue3提供的计算属性
 
+```js
+import { computed } from 'vue'
 
+const number = ref(1)
+// 函数式
+let multipleNumber = computed(() => {
+  return number.value * 4
+})
 
-#### Focus
+// 对象式，官方不建议这么用
+let canSetNumber = computed({
+  get: () => {
+    return number.value*2
+  },
+  set: (value) => {
+    number.value = Math.sin(value)
+  }
+})
 
-> 监视`reactive()`定义的数据时，`oldValue`无法获取，且强制开启**深度监视**；
->
-> 监视`reactive()`定义的数据中的某个属性时，默认`deep = false`，需要手动开启；
+// 读取数据时，根据函数内部的依赖，来确定回调函数是否执行
+multipleNumber.value
 
-
-
-#### Import
-
-> `watch()`函数需要从 vue 文件中引入；
->
-> ```javascript
-> import { watch } from 'vue'
-> ```
-
-
-
-#### Use
-
-> ```javascript
-> setup(){
->      let number = ref(0)
->      let cluster = ref('name')
->      const person = {
->        name: 'Kein',
->        age: 22,
->        gender: 'Male',
->        salary: '30K',
->        hobit: {
->          common: 'Music',
->          leisure: 'phone'
->        }
->      }
->   
->      // 1、监视 ref() 定义的数据；
->      watch(number,(newValue,oldValue) => {
->        consloe.log(newValue,oldValue)
->      },{immediate: true})
->   
->      // 2、监视多个 ref() 定义的数据；
->      watch([number,cluster],(newValue,oldValue) => {
->        consloe.log(newValue,oldValue)
->      },{deep: true})
->   
->      // 3、监视 reactive() 定义的数据；
->      watch(person,(newValue,oldValue) => {
->        // 此处 oldValue 无法获取；
->        consloe.log(newValue)
->      },{immediate: true,
->         // 此处 deep 配置无效，强制开启深度监视；
->         deep: false})
->   
->      // 4、监视 reactive() 定义的数据中的某个属性；
->      watch(() => person.hobit,(newValue,oldValue) => {
->        consloe.log(newValue,oldValue)
->      },{immediate: true,
->         // 此处 deep 配置有效；
->         deep: true})
->   
->      // 5、监视 reactive() 定义的数据中的多个属性；
->      watch([() => person.salary,() => person.hobit],(newValue,oldValue) => {
->        consloe.log(newValue,oldValue)
->      },{deep: true,immediate: true})
->   
->      // 返回数据；
->      return {number, cluster, person}
-> }
-> ```
+// 在模版中使用
+// <p>{{ multipleNumber }}</p>
+```
 
 
 
-### watchEffect()
+## `watch()`
 
-> Vue3 中新增的监视函数；**需要引入**；
->
-> **有立即监听效果，在页面刷新时就会监听**；
->
-> **回调函数中用到了那些数据，就会智能地监视哪些数据**；
->
-> ```javascript
-> watchEffect(() => {
->   // watchEffect() 的回调函数中使用到的数据发生变化，就会触发回调；
->   let digital = number.value;
->   let myHobit = person.hobit;
-> })
-> ```
+Vue3 中的数据监视函数
 
+监视`reactive()`定义的数据时，`oldValue`无法获取，且强制开启**深度监视**
 
+监视`reactive()`定义的数据中的某个属性时，默认`deep = false`，需要手动开启
 
-### shallowReactive()
+```javascript
+import { watch } from 'vue'
 
-> 需引入；
->
-> 只处理对象数据中最外层属性的响应式，即**浅响应式**；
+setup(){
+  let number = ref(0)
+  let cluster = ref('name')
+  const person = {
+    name: 'Kein',
+    age: 26,
+    gender: 'Male',
+    salary: '30K'
+  }
 
+  // 1、监视 ref 定义的数据
+  watch(number, (newValue,oldValue) => {
+    consloe.log(newValue,oldValue)
+  },{immediate: true})
 
+  // 2、监视多个 ref 定义的数据
+  watch([number,cluster], (newValue,oldValue) => {
+    consloe.log(newValue,oldValue)
+  },{deep: true})
 
-### shallowRef()
+  // 3、监视 reactive 定义的数据
+  watch(person, (newValue,oldValue) => {
+    // 此处 oldValue 无法获取
+    consloe.log(newValue)
+  },{immediate: true,
+     // 此处 deep 配置无效，强制开启深度监视
+     deep: false})
 
-> 需引入；
->
-> 只处理**基本类型**数据的响应式，不进行对象数据的响应式处理；
+  // 4、监视 reactive 定义的数据中的某个属性
+  watch(() => person.hobit, (newValue,oldValue) => {
+    consloe.log(newValue, oldValue)
+  },{immediate: true,
+     // 此处 deep 配置有效
+     deep: true})
 
+  // 5、监视 reactive 定义的数据中的多个属性
+  watch([() => person.salary, () => person.hobit], (newValue,oldValue) => {
+    consloe.log(newValue,oldValue)
+  },{deep: true,immediate: true})
 
-
-### readonly()
-
-> 需引入；
->
-> 不希望数据被修改的情况；
->
-> 让一个响应式的数据变为**只读**，不可修改（深只读）；
->
-> ```javascript
-> const private = readonly(person)
-> 
-> // shallowReadonly() 让响应式数据的最外层属性变成只读（浅只读）；
-> const p = shallowReadonly(person)
-> ```
-
-
-
-### toRaw()
-
-> 需引入；
->
-> 将一个`reactive()`生成的响应式对象转为**普通对象**；
->
-> 对其操作不会引起页面的更新；
->
-> ```javascript
-> const p = toRaw(person)
-> 
-> // markRaw()  
-> // 标记一个对象，使其永远不会再成为响应式对象；
-> const p = markRaw(person)
-> ```
+  return {number, cluster, person}
+}
+```
 
 
 
-### customRef()
+## `watchEffect()`
 
-> 创建自定义的 ref ，并对其依赖项跟踪和更新触发进行显式控制；
->
-> 它需要一个工厂函数去接收`track`和`trigger`函数作为参数；
->
-> 返回一个带有`get`和`set`的对象；
->
-> ```html
-> <input v-model="text" />
-> ```
->
-> 实现快速输入防抖效果；
->
-> ```javascript
-> // 引入 Composition APT ；
-> import {customRef} from 'vue'
-> 
-> function userRef(value, delay = 200) {
->      let timeout
->      return customRef((track, trigger) => {
->        return {
->          get() {
->            // 通知 Vue 追踪 value 的变化；
->            track()
->            return value
->          },
->          set(newValue) {
->            // 每次设置新值的时候都先清除定时器；
->            clearTimeout(timeout)
->            // 延迟数据的更新显示；
->            timeout = setTimeout(() => {
->              value = newValue
->              // 通知 Vue 去重新解析模版；
->              trigger()
->            }, delay)
->          }
->        }
->      })
-> }
-> 
-> export default {
->      setup() {
->        return {
->          text: userRef('hello')
->        }
->      }
-> }
-> ```
+有立即监听效果，在页面刷新时回调函数就会运行一遍
+回调函数中用到了那些数据，就会智能地监视哪些数据
+
+```javascript
+watchEffect(() => {
+  // watchEffect() 的回调函数中使用到的数据发生变化，就会触发回调
+  let digital = number.value
+  let myHobit = person.hobit
+})
+```
 
 
 
-### Provide / Inject
+## `shallowReactive()`
 
-需要引入；
+只处理对象数据中最外层属性的响应式，即**浅响应式**
+
+
+
+## `shallowRef()`
+
+只处理**基本类型**数据的响应式，不进行对象数据的响应式处理
+
+
+
+## `toRaw()`
+
+将一个`reactive()`生成的响应式对象转为**普通对象**；
+
+对其操作不会引起页面的更新；
+
+```javascript
+const p = toRaw(person)
+
+// markRaw()  
+// 标记一个对象，使其永远不会再成为响应式对象；
+const p = markRaw(person)
+```
+
+
+
+## `customRef()`
+
+创建自定义的 ref ，并对其依赖项跟踪和更新触发进行显式控制
+
+它需要一个工厂函数去接收`track`和`trigger`函数作为参数
+
+返回一个带有`get`和`set`的对象
+
+```html
+<input v-model="text" />
+```
+
+实现快速输入防抖效果
+
+```javascript
+// 引入 Composition APT ；
+import {customRef} from 'vue'
+
+function userRef(value, delay = 200) {
+  let timeout
+  return customRef((track, trigger) => {
+    return {
+      get() {
+        // 通知 Vue 追踪 value 的变化；
+        track()
+        return value
+      },
+      set(newValue) {
+        // 每次设置新值的时候都先清除定时器；
+        clearTimeout(timeout)
+        // 延迟数据的更新显示；
+        timeout = setTimeout(() => {
+          value = newValue
+          // 通知 Vue 去重新解析模版；
+          trigger()
+        }, delay)
+      }
+    }
+  })
+}
+
+export default {
+  setup() {
+    return {
+      text: userRef('hello')
+    }
+  }
+}
+```
+
+
+
+## `Provide & Inject`
 
 实现`父组件 ==> 后代组件`之间通信；
 
-无论组件层次结构有多深，**父组件**都可以作为其**所有子组件**的依赖提供者；
-
-![Provide_Inject](./assets/Provide_Inject.png)
+无论组件层次结构有多深，**父组件**都可以作为其**所有子组件**的依赖提供者
 
 父组件中`provide('数据名',数据值)`来提供数据；
 
@@ -3920,7 +3890,7 @@ setup(){
 }
 ```
 
-所有子组件中都可以使用`inject()`接受使用数据；
+所有子组件中都可以使用`inject()`接受使用数据
 
 ```javascript
 // 引入；
@@ -3934,7 +3904,7 @@ setup(){
 
 
 
-### teleport
+## `<teleport>`
 
 `teleport`标签能让其包裹的 html 结构移动到指定的文档位置
 
@@ -3994,59 +3964,59 @@ app.use(router).mount("#app")
 
 
 
-### 路径别名
+## 路径别名
 
-> 目前 ts 对`@`指向`src`目录的提示是不支持的，vite 默认也是不支持的，需要手动配置 @ 符号的指向；
->
-> ```json
-> // tsconfig.json 文件
-> {
->     "compilerOptions": {
->        "baseUrl": "./",
->        "paths": {
->          "@/*": ["src/*"],
->          "#/*": ["types/*"]
->        }
->     },
->     "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
-> }
-> ```
->
-> 此时只是增加了 TS 文件中书写`@`路径别名的语法提示，vite 编译的时候依然不认识`@`会报错；
->
-> ```typescript
-> // vite.config.ts 文件
-> import path from 'path';
-> export default defineConfig({
->      plugins: [vue()],
->      resolve: {
->        alias: {
->          "@": path.join(__dirname, 'src'),
->          "#": path.join(__dirname, 'types')
->        }
->      }
-> })
-> ```
+目前 ts 对`@`指向`src`目录的提示是不支持的，vite 默认也是不支持的，需要手动配置 @ 符号的指向；
+
+```json
+// tsconfig.json 文件
+{
+ "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+      "#/*": ["types/*"]
+    }
+ },
+ "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
+}
+```
+
+此时只是增加了 TS 文件中书写`@`路径别名的语法提示，vite 编译的时候依然不认识`@`会报错；
+
+```typescript
+// vite.config.ts 文件
+import path from 'path';
+export default defineConfig({
+  plugins: [vue()],
+  resolve: {
+    alias: {
+      "@": path.join(__dirname, 'src'),
+      "#": path.join(__dirname, 'types')
+    }
+  }
+})
+```
 
 [^Tip]:引入 path 报错，是因为缺少了 ts 的一些声明配置，安装`npm i -D @types/node`关于 node 库的 ts 类型声明；
 
 
 
-### $ref 类型
+## `$ref`类型
 
-> 在 TS 中声明`this.$refs['xxx']`的类型；
->
-> ```vue
-> <!-- 1. 元素类型是 html 元素 -->
-> <canvas ref="canvas" />
-> <script lang='ts'>
->   const canvas = this.$refs.canvas as HTMLCanvasElement
-> </script>
-> 
-> <!-- 2. 元素类型是 子组件 -->
-> <Three ref="three" />
-> <script lang='ts'>
->   import Three from '@/components/three/Three.vue'
->   const threeComponent = this.$refs.three as InstanceType<typeof Three>
-> </script>
-> ```
+在 TS 中声明`this.$refs['xxx']`的类型；
+
+```vue
+<!-- 1. 元素类型是 html 元素 -->
+<canvas ref="canvas" />
+<script lang='ts'>
+const canvas = this.$refs.canvas as HTMLCanvasElement
+</script>
+
+<!-- 2. 元素类型是 子组件 -->
+<Three ref="three" />
+<script lang='ts'>
+import Three from '@/components/three/Three.vue'
+const threeComponent = this.$refs.three as InstanceType<typeof Three>
+</script>
+```
