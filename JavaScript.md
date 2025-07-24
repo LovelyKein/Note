@@ -329,265 +329,6 @@ console.log(obj.property) // 调用getter，输出: 获取属性值 0（经过�
 
  
 
- 
-
-## 数组迭代
-
-> forEach（）、map（）、filter（）、some（）、every（）
-
- 
-
-### forEach（）
-
-> 遍历数组，对数组里面的每个元素都进行操作；
->
-> ```javascript
-> var array = [12, 5, 8, 9, 11];
-> var arraySum = 0;
-> // forEach（）：遍历数组，对数组里面的每个元素都进行操作
-> array.forEach(function(value, index, array) {
->      arraySum += value;
-> })
-> console.log(arraySum);/*arraySum = 45;*/
-> ```
-
- 
-
-### filter（）
-
-> 根据条件筛选数组，返回一个符合条件的**新数组**；
->
-> ```javascript
-> var array = [12, 5, 8, 9, 11];
-> // filter（）：筛选数组，返回一个新的数组
-> var newAr = array.filter(function(value, index, array) {
->      return value > 8;
-> })
-> console.log(newAr);/*newAr = [12,9,11];*/
-> ```
-
- 
-
-### some()
-
-> 检测数组中的元素是否满足制定条件；
->
-> 如果找到第一个满足条件的元素，则终止循环不再继续查找，返回的是**布尔值**；
->
-> ```javascript
-> var array = [12, 5, 8, 9, 11];
-> 
-> var result = array.some(function(value, index, array) {
->      return value > 10;
-> })
-> console.log(result);/* result = true */
-> ```
-
-
-
-### every()
-
-> 用于检测数组中**所有元素**是否都符合指定条件；
->
-> 如果有一个元素不满足条件，返回`false` ，终止循环不再继续检测，
->
-> 所有元素都符合条件，返回`true`；
->
-> ```javascript
-> const array = [12, 5, 8, 9, 11]
-> 
-> const result = array.every((value, index, array) => {
->     // 检测元素元素是否都大于 4
->     return value > 4
-> })
-> console.log(result);/* result = true */
-
-
-
-### map()
-
-> `map()` 方法会创建一个**新数组**；
->
-> 其结果是数组中的每个元素进行操作后的**返回值**；
->
-> [^Focus]:`return`的是什么，新数组的成员就是什么；
->
-> ```javascript
-> const target = [
->      {name: 'Kein',age: 23},
->      {name: 'MuYin',age: 1},
->      {name: 'ZouKai',age: 22},
-> ]
-> 
-> const newArray = target.map((item,index,array) => {
->      return item.name
-> })
-> 
-> // newArray = ['Kein','MuYin','ZouKai']
-> ```
-
-
-
-### find（）
-
-> 返回通过测试（函数内判断）的数组中的**第一个元素的值**，之后的值不会再调用执行函数；
->
-> 如果没有符合条件的元素返回 undefined ；
->
-> ```javascript
-> var array = [12, 5, 8, 9, 11];
-> // find（）：返回通过测试（函数内判断）的数组的第一个元素的值;
-> var result = array.find(function(value){
->   return value === 9;
-> })
-> console.log(result);/*result = 9;*/
-> ```
-
-[^value]:数组里面每个元素的值；
-[^index]:数组每个元素的索引值；
-[^array]:数组本身；
-
-  
-
-### reduce()
-
-> `reduce()` 方法对数组中的**每个元素**执行一个自定义的 **reducer** 函数；
->
-> 将其结果汇总为值并返回；
->
-> ```javascript
-> // 语法：
-> arr.reduce(callback,initialValue);
-> // callback 是一个自定义的 reducer 函数；
-> 
-> function callback(accumulator,currentValue,index,array){
->      return accumulator + currentValue;
-> }
-> ```
-
-[^callback]:用户自定义的 reducer 函数，作为`reduce()`方法的第一个参数；
-
-> [^accumulator]:累计器累计回调的返回值，它是上一次调用回调时返回的累积值；
-> [^currentValue]:数组中正在处理的元素的值；
-> [^index]:可选，数组中正在处理的当前元素的索引值；
-> [^array]:可选，调用`reduce()`方法的数组；
-
-[^initialValue]:可选，作为第一次调用 `callback`函数时的第一个参数的值；
-
-
-
-
-
-## Object.defineProperty()
-
-> 给对象增加新的属性或修改原有的属性；
->
-> 语法：
->
-> ```javascript
-> Object.defineProperty(obj,prop,descriptor);
-> ```
-
-[^obj]:要进行操作的目标对象；
-[^prop]:要定义或修改的属性名；
-[^descriptor]:要定义或修改的属性的描述；以对象形式`{ }`书写；
-
-​		 
-
-### descriptor
-
-> 以对象形式`{ }`书写；
->
-> ```javascript
-> var phone = {
->     model: 'iphone 12 ProMax',
->     brand: 'Apple',
->     color: 'black',
->     price: 5999
-> };
-> 
-> // 通过Object.defineProperty（）方法修改color属性
-> Object.defineProperty(phone, 'color', {
->     value: 'white'
-> })
-> console.log(phone);/*phone.color = 'white';*/
-> 
-> // 通过Object.defineProperty（）方法增加一个amount属性
-> Object.defineProperty(phone, 'amount', {
->     value: 1000,
->     writable:true,
->     enumerable:true,
->     configurable:true,
->     // 当读取 phone 中的 amount 属性时，就会调用此方法，返回一个值；
->     get: function(){
->        return this.amount;
->     },
->     // 当修改 phone 中的 amount 属性时，就会调用此方法；
->     set: function(newValue){
->        this.amount = newValue;
->     }
-> });
-> ```
-
-[^value]:设置属性的值，默认为 undefined；
-[^writable]:属性值是否可以重写，布尔值（true或false），默认是 false；
-[^enumerable]:属性是否可以被枚举，布尔值（true或false），默认是 false；
-[^configurable]:属性是否可以被删除或者再次修改，布尔值（true或false），默认是 false；
-
- 
-
-  
-
-## 函数进阶
-
- 
-
-### 定义方式
-
-
-
-#### 命名函数
-
-> ```javascript
-> // 自定义函数
-> function funName（）{};
-> ```
-
-
-
-#### 匿名函数
-
-> ```javascript
-> // 函数表达式；
-> var funName = function（）{ };
-> ```
-
-
-
-#### Function 构造函数
-
-> ```javascript
-> var funName = new Function（）；
-> ```
-
-​		
-
-### 函数本质
-
-> 所有的函数都是`Function`构造函数的实例对象；
->
-> 函数本质是对象，是一种数据类型；
-
-​	
-
-### this
-
-> 一般`this`指向函数的调用者，谁调用了函数，`this`就指向谁；
->
-> 定时器函数里面的`this`指向的是`window`；
-
-
-
 ### 获取异步操作的结果
 
 > 如果要获取一个函数中异步操作的结果，则必须通过回调函数来获取；
@@ -607,58 +348,6 @@ console.log(obj.property) // 调用getter，输出: 获取属性值 0（经过�
 > }
 > fn(receive)
 > ```
-
- 
-
-### 函数柯里化
-
-> 通过函数调用继续返回函数的方式，实现多次接受参数最后统一处理的函数编码形式；
-
- 
-
-
-
-## strict mode
-
-> 严格模式；
->
-> 指在严格的语法条件下运行JavaScript代码；	
-
-
-
-### 兼容性
-
-> 在 IE10 以上版本会被支持，旧版本会被忽略；
-
-​	
-
-### 开启 strict mode	
-
-
-
-#### 全局开启
-
-> 在脚本里面的代码的最上方写入 ` ‘use strict’`；
-
-​		
-
-#### 局部开启
-
-> 在函数体内写入 ` ‘use strict’`；
-
-​	
-
-### 规则
-
-> 变量必须先声明再使用；
->
-> 不能随意删除已经声明好的变量；
->
-> 全局作用域的函数里面的 this 指向 undefined ；
->
-> 函数不能传递重名的形参；
->
-> 函数必须声明在顶层：逻辑运算（ if、for、while、switch ...）里面不能声明函数；
 
  
 
@@ -789,115 +478,77 @@ console.log(obj.property) // 调用getter，输出: 获取属性值 0（经过�
 
 > **闭包找到的是同一地址中父级函数中对应变量最终的值**；
 
-​	
-
-
-
-## 循环( Loop )
-
-
-
-### for-in
-
-> 获取的是**对象的键值**或者**数组的索引**；
->
-> 遍历顺序有可能不是按实际数组的内部顺序，更适合遍历对象；
->
-> ```javascript
-> const obj = { x: 123, y: 234, z: 456 };
-> for (let i in obj) {
->      console.log(i);
-> }
-> // x y z
-> ```
-
-
-
-### for-of
-
-> 遍历的是**数组元素值**，返回的是数组内的元素；
->
-> ```javascript
-> const array = [123, 234, 456]
-> for(let i of array) {
->     console.log(i)
-> }
-> // 123 234 456
-> ```
-
-​	
-
-​	
+​		
 
 ## 递归
 
 [^定义]:如果一个函数在内部自己调用本身，那这个函数就是**递归函数**；	
 [^Focus]:递归函数容易发生“栈溢出”错误( stack overflow )，**必须要有退出条件；** 
 
-> ```javascript
-> // 利用递归函数求1～n的阶乘：
-> function number(n) {
->      if (n === 1) { // 添加递归函数的退出条件，否则就会发生错误，死循环；
->        return 1;
->      }
->      return n * number(n - 1); //自己在函数内部调用本身
-> };
-> console.log(number(6));/*720*/
-> 
-> 
-> // 利用递归函数求斐波那契数列（兔子序列）：1 1 2 3 5 8 13 21 34 55 ...，输入n就可以知道与之对应的序列值；
-> // 理解：知道（n-1）和（n-2）的序列值就可以知道n的序列值 = （n-1）+（n-2）；
-> function fbnq(n) {
->      // 添加递归函数的退出条件，否则就会发生错误，死循环
->      if (n === 1 || n === 2) {
->        return 1;
->      };
->      //自己在函数内部调用本身
->      return fbnq(n - 1) + fbnq(n - 2);
-> };
-> console.log(fbnq(10));/*55*/
-> 
-> 
-> // 利用递归函数实现数据的 深度拷贝
-> var apple = [
->      {
->        id: 1,
->        brand: 'Iphone',
->        model: ['iphone8 Plus', 'iphone11', 'iphone12 Pro', 'iphone13ProMax']
->      },
->      {
->        id: 2,
->        brand: 'iMac',
->        model: ['iMac Pro', 'iMac 4K', 'iMac 6K', 'iMac Display']
->      },
->      {
->        id: 3,
->        brand: 'Watch',
->        model: ['Watch Series 3', 'Watch SE', 'Watch Series 6', 'Watch Series 7']
->      }
-> ]
-> 
-> var copy = []
-> function deepCopy(creat, target) {
->      for (var index in target) {
->        // 获取属性值；
->        var item = target[index];
->        // 判断属性值是哪一种数据类型；
->        if (item instanceof Array) {
->          // 判断属性值是否是数组；
->          creat[index] = [];
->          deepCopy(creat[index], item);
->        } else if (item instanceof Object) {
->          // 判断属性值是否是对象；
->          creat[index] = {};
->          deepCopy(creat[index], item);
->        } else {
->          creat[index] = item;
->        }
->      }
-> }
-> deepCopy(copy,apple)
-> ```
+```javascript
+// 利用递归函数求1～n的阶乘：
+function number(n) {
+  if (n === 1) { // 添加递归函数的退出条件，否则就会发生错误，死循环；
+    return 1;
+  }
+  return n * number(n - 1); //自己在函数内部调用本身
+};
+console.log(number(6));/*720*/
+
+
+// 利用递归函数求斐波那契数列（兔子序列）：1 1 2 3 5 8 13 21 34 55 ...，输入n就可以知道与之对应的序列值；
+// 理解：知道（n-1）和（n-2）的序列值就可以知道n的序列值 = （n-1）+（n-2）；
+function fbnq(n) {
+  // 添加递归函数的退出条件，否则就会发生错误，死循环
+  if (n === 1 || n === 2) {
+    return 1;
+  };
+  //自己在函数内部调用本身
+  return fbnq(n - 1) + fbnq(n - 2);
+};
+console.log(fbnq(10));/*55*/
+
+
+// 利用递归函数实现数据的 深度拷贝
+var apple = [
+  {
+    id: 1,
+    brand: 'Iphone',
+    model: ['iphone8 Plus', 'iphone11', 'iphone12 Pro', 'iphone13ProMax']
+  },
+  {
+    id: 2,
+    brand: 'iMac',
+    model: ['iMac Pro', 'iMac 4K', 'iMac 6K', 'iMac Display']
+  },
+  {
+    id: 3,
+    brand: 'Watch',
+    model: ['Watch Series 3', 'Watch SE', 'Watch Series 6', 'Watch Series 7']
+  }
+]
+
+var copy = []
+function deepCopy(creat, target) {
+  for (var index in target) {
+    // 获取属性值；
+    var item = target[index];
+    // 判断属性值是哪一种数据类型；
+    if (item instanceof Array) {
+      // 判断属性值是否是数组；
+      creat[index] = [];
+      deepCopy(creat[index], item);
+    } else if (item instanceof Object) {
+      // 判断属性值是否是对象；
+      creat[index] = {};
+      deepCopy(creat[index], item);
+    } else {
+      creat[index] = item;
+    }
+  }
+}
+deepCopy(copy,apple)
+```
 
  
 
@@ -1063,543 +714,298 @@ const { keys:{ left: keyLeft } } = list // 'A'
 
 
 
-### 扩展运算符
+# `Set()`
 
-`...`是 ES6 中增加的扩展运算符，能将`数组`或`对象`转换为`逗号`分隔的参数序列；
+集合，成员的值都是唯一的
 
-### 合并数组
+- 自带元素去重功能，集合里的值都是唯一的
+- 可以接收一个可迭代对象参数得到一个初始集合数据
+- `Set`本身就是一个可迭代对象，所以可以使用扩展运算符`...`和`for-of`循环遍历
 
-```javascript
-const kuaizi = ['王太利','肖央'];
-const fh = ['曾毅','玲花'];
+```js
+console.log(new Set()) // Set(0) {size: 0}
+console.log(new Set('aabbccdd')) // Set(4) {'a', 'b', 'c', 'd'}
+console.log(new Set([0, 2, 0, 4, 3, 1, 2])) // Set(5) {0, 2, 4, 3, 1}
 
-//const star = kuaizi.concat(fh);数组拼接concat()方法；
-
-const star = [...kuaizi,...fh];/*star = ['王太利','肖央','曾毅','玲花']*/
+// 利用`...`，数据去重，并得到一个新数组
+const arr = [...new Set([1, 3, 3, 1, 2, 5, 2])] // [1, 3, 2, 5]
+// 字符串去重
+const str = [...new Set('cdhjdcbhdwqeqcd')].join('') // 'cdhjbwqe'
 ```
 
-### 数组浅拷贝
+
+
+## `.size`
+
+返回集合里的元素个数，只读属性，不可复制
 
 ```javascript
-const zm = ['A','B','C']
-const clone = [...zm] /*clone = ['A','B','C']*/
+const array = ['Iphone', 'Huawei', 'Oppo', 'Vivo']
+new Set(array).size // 4
 ```
 
-### 转化成数组
+
+
+## `.add()`
+
+给当前的集合在元素的最后面添加一个新元素，可以进行链式调用
+当添加的是已经存在的元素，操作无效，内部使用的是`Object.is()`来判断两个数据是否相同，但`Set`认为`+0`和`-0`相同
 
 ```javascript
-const zm = {
-  0: A,
-  1: B,
-  2: C
-};
-const clone = [...zm] /*clone = ['A','B','C']*/
+const array = ['Iphone', 'Huawei', 'Oppo', 'Vivo']
+new Set(array).add('Xiaomi').add('Xiaomi') // 只会添加一次
 ```
 
-### 克隆对象
+
+
+## `.delete()`
+
+删除当前集合里的元素，返回的是布尔`boolean`值，是否删除成功，内部判断和`.add`一样
 
 ```javascript
-// 如果对象属性不是复杂的类型，可以深度克隆对象；
-const person = {
-name: 'LovelyKein',
-  gender: 'Male',
-  age: '22'
+const array = ['Iphone', 'Huawei', 'Oppo', 'Vivo']
+new Set(array).delete('Xiaomi')
+```
+
+
+
+## `.has()`
+
+检测集合里是否包含某个元素，返回的是布尔`boolean`值
+
+```javascript
+const array = ['Iphone', 'Huawei', 'Oppo', 'Vivo']
+new Set(array).has('Iphone') // true
+```
+
+
+
+## `.clear()`
+
+清空当前集合里的所有元素
+
+```javascript
+const array = ['Iphone', 'Huawei', 'Oppo', 'Vivo']
+new Set(array).clear()
+// array: []
+```
+
+
+
+## `.forEach()`
+
+集合中不存在下标，因此`forEach`中的第二个参数和第一个参数是一致的，均表示集合中的每一项
+
+```js
+const list = new Set(['a', 'b', 'c', 'd'])
+list.forEach((item, index, arr) => {
+  console.log(item === index) // true
+})
+```
+
+
+
+# `WeakSet()`
+
+**弱集合**，和`Set`类似，都是**不重复的值的集合**
+**成员只能是对象，且都是弱引用的对象**，适合临时存放一组对象和跟对象绑定的信息
+没有`size`属性，无法遍历（不是可迭代对象)，只有`add、delete、has、clear`方法
+
+```js
+// 实例
+const weakSet = new WeakSet()
+let obj = { name: 'Kyle' }
+weakSet.add(obj) // add
+
+// 但当`obj`赋值为`null`时，此时若除了集合中没有其他变量保存了对象的引用
+// 则集合中保存的数据也会被丢弃删除，弱集合储存的对象引用不会影响js的垃圾回收机制
+obj = null
+console.log(weakSet) // 无属性-空
+
+weakSet.add(window)
+weakSet.has(window) // true
+weakSet.delete(window)
+```
+
+
+
+# `Map()`
+
+是**键值对的有序列表**，键和值都可以是任意类型，键不可重复
+可以传递一个可迭代对象参数来初始化，该参数要求每次迭代的都是一个长度为2的数组（可迭代对象），形如`[键， 值]`
+产生的实例也是一个可迭代对象，同样可以使用`...`扩展运算符和`for-of`遍历
+
+```js
+const map = new Map([['name', 'Kyle'], ['gender', 'Male']]) // Map(2) {'name' => 'Kyle', 'gender' => 'Male'}
+
+const arr = [...map]
+
+for (const [key, value] of map) {
+  console.log(key, value)
 }
-const clonePerson = {...person}
-// 克隆的同时，修改对象的属性值
-const clonePerson_1 = {...person, name: 'MuYi', gender: 'Female'}
-person.name = 'Kein' // 改变 person.name 的值
-console.log(clonePerson) // clonePerson 不会受影响
 ```
 
 
 
-### 迭代器( Iterator )
-
->迭代器`Iterator`是一种接口，为各种不同的数据结构提供统一的访问机制；
->
->任何数据结构只要部署`Iterator`接口，就可以完成遍历操作；
-
-
-
-### 生成器( Generator )
-
->`Generator` 生成器函数；
->
->解决回调再回调（回调地狱）`callbacl hell`的问题;
->
->```javascript
->// 模拟先获取用户的数据，再获取用户的订单数据，最后获得订单的商品数据
->
->// 先创建要用到的回调函数；
->function user() {
->    setTimeout(() => {
->         let data = '用户数据';
->         // 第二次调next（），将data里面的数据传出，作为第一段yield代码的返回值
->         creatFuntion.next(data);
->    })
->};
->
->function order() {
->    setTimeout(() => {
->         let data = '订单数据';
->         // 第三次调next（），将data里面的数据传出，作为第二段yield代码的返回值
->         creatFuntion.next(data);
->    })
->};
->
->function goods() {
->    setTimeout(() => {
->         let data = '订单的商品数据';
->         // 第四次调next（），将data里面的数据传出，作为第三段yield代码的返回值
->         creatFuntion.next(data);
->    })
->};
->
->// 创建生成器函数；
->function* getData() {
->    // 此时获取了creatFuntion.next(data)传过来的‘用户数据’；
->    let one = yield user();
->    console.log(one);
->    // 此时获取了creatFuntion.next(data)传过来的'订单数据'；
->    let two = yield order();
->    console.log(two);
->    // 此时获取了creatFuntion.next(data)传过来的订单的'商品数据'；
->    let three = yield goods(); 
->    console.log(three);
->};
->
->let creatFuntion = getData();
->// 生成器函数要用.next()调用才会生效，这是第一次调next（）
->creatFuntion.next(); 
->```
-
-
-
-### Promise
-
->[ES6入门教程](https://es6.ruanyifeng.com)
->
->ES6引入的异步编程的新的解决方案，语法上`Promise`是一个构造函数；
->
->用来封装异步编程，并且可以获取其成功或失败的结果；
->
->`Promise`不是异步函数，一般里面封装的才是异步；
->
->```javascript
->var fs = require('fs');
->// 创建一个Promise构造函数实例化的对象；
->const p_1 = new Promise((resolve, reject) => {
->      // 函数体内进行异步操作；
->      fs.readFile('./data.json',function(error,data){
->         if (error){
->           reject(error);
->         } else {
->           resolve(data);
->         }
->      })
->})
->// resolve（‘数据’）：异步操作成功时，使用的方法；
->// reject（‘数据’）：异步操作失败时，使用的方法；
->
->const p_2 = new Promise((resolve, reject) => {
->      // 函数体内进行异步操作；
->      fs.readFile('./data_1.json',function(error,data){
->         if (error){
->           reject(error);
->         } else {
->           resolve(data);
->         }
->      })
->})
->
->// 调用then方法：
->
->// then方法的返回结果是Promise的实例化对象，对象的状态由构造函数的执行结果决定；
->
->// 构造函数返回的是非 Promise 对象类型的数据，状态为成功，返回值为对象return的成功（resolve（））的值；
->p_1.then(function(value){
->      console.log(value);
->      // return 'successful!';
->
->      // 解决回调地狱的问题，链式调用；
->      return p_2; // p_2 是一个 Promise 实例对象；
->      // 当 return 一个 Promise 实例对象时，后续的 then 方法中的两个参数会对应 P_2 的 resolve() 和 reject()；
->},function(reason){
->      console.error(reason);
->      return 'error!';
->}).then(function(value){
->      return value;
->},function(reason){
->      return reason;
->})
->
->
->// then（function（value）{}，function(reason){}）
->// then方法可以接受两个函数参数：
->
->// value函数：形参value的值是resolve（）抛出的值；
->// 函数体内写的是异步操作成功后的操作；
->
->// reason函数：形参reason的值是reject（）抛出的值；
->// 函数体内写的是异步操作失败后的操作；
->
->
->// Promise 封装文件读取方法，代替自己写 callback 回调函数；
->var fs = require('fs');
->var promiseReadFile = function(filePath){
->      return new Promise(function(resolve,reject){
->         fs.readFile(filePath,'utf8',function(error,data){
->           if(error){
->             reject(error);
->           } else{
->             resolve(data);
->           }
->         })
->      })
->}
->// then 方法获取异步操作结果；
->promiseReadFile(./data.json).then(function(value){
->      return value;
->},function(reason){
->      return reason;
->})
->```
-
-
-
-### Set()
-
-> 集合；
->
-> 成员的值都是唯一的，没有重复的值；
-
-
-
-#### Feature
-
-> 自带数组去重，但返回的结果是**对象**，和扩展运算符（...）一起使用转换成数组；
->
-> ```javascript
-> // 1.数组去重
-> let arr = [1, 2, 6, 2, 5, 3, 1, 6, 8, 9, 3];
-> let result = [...new Set(arr)];
-> console.log(result);
-> 
-> 
-> // 2.求交集
-> let arr_1 = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-> let arr_2 = [12, 25, 3, 49, 51, 6, 7, 8, 9];
-> let result_1 = arr_2.filter((item) => {
->    if (new Set(arr_1).has(item)) {
->        return item;
->    } else {
->        return false;
->    }
-> })
-> console.log(result_1);
-> 
-> 
-> // 3.求并集
-> let union = [...new Set([...arr_1, ...arr_2])];
-> console.log(union);
-> 
-> 
-> // 4.求差集，相当于交集的取反
-> let diff = arr_2.filter((item) => {
->    if (!new Set(arr_1).has(item)) {
->        return item;
->    }
-> })
-> console.log(diff);
-> ```
-
-
-
-#### Methods
-
-> 集合的方法；
-
-
-
-##### .size
-
-> 返回集合里的元素个数；
->
-> ```javascript
-> const array = ['Iphone', 'Huawei', 'Oppo', 'Vivo']
-> new Set(array).size // 4
-> ```
->
-
-
-
-##### .add(item)
-
-> 给当前的集合在元素的最后面添加一个新元素；
->
-> 当添加实例中已经存在的元素，`Set`不会进行处理添加；
->
-> 可以进行**链式**调用；
->
-> ```javascript
-> const array = ['Iphone', 'Huawei', 'Oppo', 'Vivo']
-> new Set(array).add('Xiaomi').add('Xiaomi') // 只会添加一次
-> ```
-
-
-
-##### .delete(item)
-
-> 删除当前集合里的元素，返回的是布尔（boolean）值；
->
-> ```javascript
-> const array = ['Iphone', 'Huawei', 'Oppo', 'Vivo']
-> new Set(array).delete('Xiaomi')
-> ```
-
-
-
-##### .has(item)
-
-> 检测集合里是否包含某个元素，返回的是布尔（boolean）值；
->
-> ```javascript
-> const array = ['Iphone', 'Huawei', 'Oppo', 'Vivo']
-> new Set(array).has('Iphone') // true
-> ```
-
-
-
-##### .clear()
-
-> 清空当前集合里的所有元素；
->
-> ```javascript
-> const array = ['Iphone', 'Huawei', 'Oppo', 'Vivo']
-> new Set(array).clear()
-> // array: []
-> ```
-
-
-
-### WeakSet()
-
-> **弱集合**，和 Set 类似，都是**不重复的值的集合**；
->
-> **成员只能是对象，且都是弱引用的对象**，适合临时存放一组对象和跟对象绑定的信息；
->
-> WeakSet **没有size属性，无法遍历（故没有 forEach 方法)**，只有 add、delete、has、clear；
->
-> ```js
-> // 实例
-> const weakSet = new WeakSet()
-> const obj = {}
-> weakSet.add(obj) // add
-> weakSet.add(window)
-> 
-> weakSet.has(window) // true
-> 
-> weakSet.delete(window)
-> ```
-
-
-
-### Map()
-
-> Map 类型是**键值对的有序列表**，而`键和值都可以是任意类型`；
-
-
-
-#### Map/Set
-
-> [^Map]:是一种叫做[^字典]的数据结构，以**[键，值]**的形式存储；
-> [^Set]:是一种叫做[^集合]的数据结构，以**[值，值]**的形式存储元素；
-> [^字典]:是一些元素的集合，每个元素有一个称作 key 的域，不同元素的 key 各不相同；
-> [^集合]:是由一堆无序的、相关联的，且不重复**内存**的结构**数学中称为元素**组成的组合；
->
-> 都可以存储不重复的值；
-
-
-
-#### Methods
-
-> Map 实例的方法；
-
-
-
-##### size
-
-> `size`属性返回 Map 结构的成员总数；
->
-> ```javascript
-> const map = new Map()
-> map.set('foo', true)
-> map.set('bar', false)
-> 
-> map.size // 2
-> ```
-
-
-
-##### set()
-
-> 设置**键名`key`**对应的**键值为`value`**，然后返回整个 Map 结构；
->
-> 如果`key`已经有值，则键值会被更新，否则就新生成该键；
->
-> 因为方法返回的是当前`Map`对象，所以可以采用链式写法；
->
-> ```javascript
-> const m = new Map();
-> 
-> m.set('edition', 6)        // 键是字符串
-> m.set(262, 'standard')     // 键是数值
-> m.set(undefined, 'nah')    // 键是 undefined
-> m.set(1, 'a').set(2, 'b').set(3, 'c') // 链式操作
-> ```
+## `.size`
 
+`size`属性返回map的成员总数
 
+```javascript
+const map = new Map()
+map.set('foo', true)
+map.set('bar', false)
+map.size // 2
+```
 
-##### get()
 
-> `get()`方法读取`key`对应的键值，如果找不到`key`，返回`undefined`；
->
-> ```javascript
-> const m = new Map();
-> 
-> m.set('hello', 'Hello ES6!')
-> 
-> m.get('hello')  // Hello ES6!
-> ```
-
-
-
-##### has()
-
-> `has()`方法返回一个**布尔值**，表示某个键是否在当前 Map 对象之中；
->
-> ```javascript
-> const m = new Map();
-> 
-> m.set('edition', 6);
-> m.set(262, 'standard');
-> m.set(undefined, 'nah');
-> 
-> m.has('edition')     // true
-> m.has('years')       // false
-> m.has(262)           // true
-> m.has(undefined)     // true
-> ```
-
-
-
-##### delete()
-
-> `delete()`方法删除某个键，返回`true`，如果删除失败，返回`false`；
->
-> ```javascript
-> const m = new Map();
-> m.set(undefined, 'nah');
-> m.has(undefined)     // true
-> 
-> m.delete(undefined)
-> m.has(undefined)       // false
-> ```
-
-
-
-##### clear()
-
-> `clear()`方法清除所有成员，没有返回值；
->
-> ```javascript
-> let map = new Map();
-> map.set('foo', true);
-> map.set('bar', false);
-> 
-> map.size // 2
-> map.clear()
-> map.size // 0
-> ```
-
-
-
-##### keys()
-
-> 返回 Map 键名的遍历器；
->
-> ```javascript
-> const map = new Map([['F', 'no'],['T',  'yes']])
-> const mapKeys = map.keys() // ['F', 'T']
-> ```
-
-
-
-##### values()
-
-> 返回 Map 键值的遍历器；
->
-> ```javascript
-> const map = new Map([['F', 'no'],['T',  'yes']])
-> const mapValues = map.values() // ['no', 'yes']
-> ```
-
-
-
-##### entries()
-
-> 返回 Map 所有成员的遍历器；
->
-> ```javascript
-> const map = new Map([['F', 'no'],['T',  'yes']])
-> const mapEntries = map.entries() // [['F', 'no'],['T',  'yes']]
-> ```
-
-
-
-##### forEach()
-
-> 遍历 Map 的所有成员；
->
-> ```javascript
-> const map = new Map([['F', 'no'],['T',  'yes']])
-> map.forEach(value, key, map) {
->      console.log(value) // 'no'、'yes'
->      console.log(key) // 'F'、'T'
->      console.log(map) // [['F', 'no'],['T',  'yes']]
-> }
-> ```
-
-[^value]:键值；
-[^key]:键名；
-[^map]:Map 对象；
+
+## `.set()`
+
+设置**键名`key`**对应的**键值为`value`**，然后返回整个map结构，即可以使用链式写法
+如果`key`已经有值，则键值会被更新，否则就新生成该键并映射值
+比较键的方法和`Set`一样，都是使用`Object.is()`判断
+
+```javascript
+const m = new Map()
+
+m.set('edition', 6)        // 键是字符串
+m.set(262, 'standard')     // 键是数值
+m.set(undefined, 'nah')    // 键是 undefined
+m.set(1, 'a').set(2, 'b').set(3, 'c') // 链式操作
+```
+
+
+
+## `.get()`
+
+读取`key`对应的键值，如果找不到`key`，返回`undefined`
+
+```javascript
+const m = new Map()
+m.set('hello', 'Hello ES6!')
+m.get('hello')  // Hello ES6!
+```
+
+
+
+## `.has()`
+
+返回一个**布尔值**，表示某个键是否在当前map结构中
+
+```javascript
+const m = new Map()
+m.set('edition', 6)
+m.set(262, 'standard')
+m.set(undefined, 'nah')
+
+m.has('edition') // true
+m.has('years') // false
+m.has(262) // true
+m.has(undefined) // true
+```
+
+
+
+## `.delete()`
+
+方法删除某个键和对应的值，返回`true`，如果删除失败，返回`false`
+
+```javascript
+const m = new Map()
+m.set(undefined, 'nah')
+m.has(undefined)     // true
+
+m.delete(undefined)
+m.has(undefined)       // false
+```
+
+
+
+## `.clear()`
+
+清除所有成员，没有返回值
+
+```javascript
+const map = new Map()
+map.set('foo', true)
+map.set('bar', false)
+
+map.size // 2
+map.clear()
+map.size // 0
+```
+
+
+
+## `.keys()`
+
+返回map键名的迭代器
+
+```javascript
+const map = new Map([['F', 'no'],['T',  'yes']])
+const mapKeys = map.keys() // ['F', 'T']
+```
+
+
+
+## `.values()`
+
+返回键值的遍历器
+
+```javascript
+const map = new Map([['F', 'no'],['T',  'yes']])
+const mapValues = map.values() // ['no', 'yes']
+```
+
+
+
+## `.entries()`
+
+返回所有成员的遍历器
+
+```javascript
+const map = new Map([['F', 'no'],['T',  'yes']])
+const mapEntries = map.entries() // [['F', 'no'],['T',  'yes']]
+```
+
+
+
+## `.forEach()`
+
+遍历映射中的所有成员，`forEach((值, 键, map) => {})`
+
+```javascript
+const map = new Map([['F', 'no'],['T',  'yes']])
+map.forEach(value, key, map) {
+  console.log(value) // 'no'、'yes'
+  console.log(key) // 'F'、'T'
+  console.log(map) // [['F', 'no'],['T',  'yes']]
+}
+```
 
 
 
 ### WeakMap()
 
-> 是**弱映射**，不可迭代键；
->
-> **弱映射中的键只能是Object或者继承自Object的类型，值的类型没有限制**；
->
-> **弱键**，意思是不属于正式的引用，不会阻止垃圾回收；
->
-> 弱映射中的**值**不是，只要键存在，键/值对就会存在于映射中；
->
-> ```js
-> const wm = new WeakMap()
-> wm.set({}, "val")
-> 
-> const container = {
->   key: {}
-> }
-> wm.set(container.key, "val")
-> // 调用 removeReference()，会摧毁键对象的最后一个引用，垃圾回收程序就可以把这个键/值对清理掉
-> function removeReference() {
->   container.key = null;
-> }
-> ```
+是**弱映射**，是不可迭代对象
+**弱映射中的键只能是Object或者继承自Object的类型，值的类型没有限制**
+**弱键**，意思是不属于正式的引用，不会阻止垃圾回收
+弱映射中的**值**不是，只要键存在，键/值对就会存在于映射中
+
+```js
+const wm = new WeakMap()
+wm.set({}, "val")
+
+const container = {
+key: {}
+}
+wm.set(container.key, "val")
+// 调用 removeReference()，会摧毁键对象的最后一个引用，垃圾回收程序就可以把这个键/值对清理掉
+function removeReference() {
+container.key = null;
+}
+```
 
 
 

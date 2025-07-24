@@ -1,32 +1,28 @@
-## React ?
+# React ?
 
 [React Chinese Website](https://react.docschina.org)
 
-> 用于构建**用户界面**的 JavaScript 库；
->
-> 将**数据**渲染为**HTML视图**的开源库；
->
-> 由 Facebook 开发；
->
-> 1. **组件化**开发，**声明式编码**，提高效率和复用率；
-> 2. 利用`React Native`可以进行移动端开发；
-> 3. `VDOM`+`Diffing`，尽量减少与真实 DOM 的交互；
+用于构建**用户界面**的 JavaScript 库，将**数据**渲染为**HTML视图**的开源库，由 Facebook 开发
+
+1. **组件化**开发，**声明式编码**，提高效率和复用率
+2. 利用`React Native`可以进行移动端开发
+3. `VDOM`+`Diffing`，尽量减少与真实 DOM 的交互
 
 
 
-### 虚拟 DOM
+### 虚拟`DOM`
 
-> React 的优势就在于不会直接操作**真实 DOM**，性能更好；
->
-> **虚拟 DOM**本质是一个**对象**；
->
-> **虚拟 DOM**最终会被 React 转化成真实的 DOM，呈现在页面上；
->
-> ```jsx
-> // 虚拟 DOM
-> const vDom = <h1>Hello React</h1>；
-> console.log(vDom instanceof Obiect) // true
-> ```
+React 的优势就在于不会直接操作**真实 DOM**，性能更好
+
+**虚拟 DOM**本质是一个**对象**
+
+**虚拟 DOM**最终会被 React 转化成真实的 DOM，呈现在页面上
+
+```jsx
+// 虚拟 DOM
+const vDom = <h1>Hello React</h1>；
+console.log(vDom instanceof Obiect) // true
+```
 
 
 
