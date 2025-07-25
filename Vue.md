@@ -3611,14 +3611,13 @@ reRef.value === objReactive // true
 将响应式数据中的某个属性单独提供给外部使用，且数据是响应式的
 
 ```javascript
-setup(){
-let person = reactive({
-    name: 'Kein',
-    gender: 'Male'
-  })
-  let myName = toRef(person,'name')
-  return{myName}
-}
+const person = reactive({
+  name: 'Kein',
+  gender: 'Male'
+})
+const myName = toRef(person,'name')
+myName.value = 'Kyle' // 改变会同步到 person 对象中
+console.log(person.name) // 'Kyle'
 ```
 
 
@@ -3629,13 +3628,13 @@ let person = reactive({
 
 ```js
 // toRefs() 与 reactive() 配合，解构变量，优化书写
-let { name, gender, list, age, enRich } = toRefs(reactive({
- name: 'Kein',
- gender: 'Male',
- list: [22, 23, 24, 25],
- age: 22,
- enRich: true
-}))
+const state = reactive({
+  name: 'Kein',
+  gender: 'Male'
+})
+const { name, gender } = toRefs(state)
+name.value = 'Kyle'
+gender.value
 ```
 
 
@@ -3698,7 +3697,7 @@ let multipleNumber = computed(() => {
 })
 
 // 对象式，官方不建议这么用
-let canSetNumber = computed({
+const canSetNumber = computed({
   get: () => {
     return number.value*2
   },
@@ -3707,7 +3706,7 @@ let canSetNumber = computed({
   }
 })
 
-// 读取数据时，根据函数内部的依赖，来确定回调函数是否执行
+// 读取数据时，根据函数内部的依赖是否有变化，来确定回调函数是否执行
 multipleNumber.value
 
 // 在模版中使用
@@ -3716,95 +3715,123 @@ multipleNumber.value
 
 
 
+## `watchEffect(callback)`
+
+`callback`回调函数初始化会立即执行一次（同步执行），然后收集回调函数中用到的响应式数据，数据发生变化后才会再次执行
+
+```javascript
+import { reactive, watchEffect, ref } from 'vue'
+
+const state = reactive({ a: 1, b: 2 })
+const count = ref(0)
+
+const stop = watchEffect(() => {
+  console.log(count.value, state.a)
+})
+
+count.value++ // 是回调中的响应式数据，发生变化，回调执行
+
+state.b = 4 // 即使回调中有state，但是使用是的是属性a，属性b发生改变不会引起回调的执行
+
+// 发生连续的改变，并不是每次都会触发回调执行
+state.a++
+state.a++
+state.a++
+state.a++
+// 回调只会运行一次，此时 state.a = 5
+// callback 回调是异步的，vue内部将他放在了微队列中执行，所以同步代码中会等数据改变完成后再运行一次
+
+// 停止监听
+stop()
+```
+
+
+
 ## `watch()`
 
-Vue3 中的数据监视函数
+- `ref`的监听方式：因为`ref`创建的是一个包装对象，其值存储在`.value`中，监听时可以直接传入`ref`本身，会自动解包
 
-监视`reactive()`定义的数据时，`oldValue`无法获取，且强制开启**深度监视**
+  ```js
+  const count = ref(0)
+  watch(count, (newVal, oldVal) => {
+    console.log('count changed:', newVal)
+  })
+  ```
 
-监视`reactive()`定义的数据中的某个属性时，默认`deep = false`，需要手动开启
+- `reactive`的监听方式：监听时需要传入一个返回该对象属性的函数
 
-```javascript
-import { watch } from 'vue'
+  ```js
+  const state = reactive({ count: 0 })
+  watch(
+    () => state.count, // 建议监听对象中的某个属性
+    (newVal, oldVal) => {
+      console.log('count:', oldVal)
+      console.log('count changed:', newVal)
+    },
+    {
+      // 监听对象属性时，deep 值默认为 false， 为了防止对象属性的嵌套，导致 深层监听
+      deep: false, 
+      immediate: true // 开启立即监听
+    }
+  )
+  ```
 
-setup(){
-  let number = ref(0)
-  let cluster = ref('name')
-  const person = {
-    name: 'Kein',
-    age: 26,
-    gender: 'Male',
-    salary: '30K'
-  }
+  为什么要避免直接监听`reactive`代理的整个对象？
+  因为会递归深层监听所有属性，对象中任何属性的更改都会触发回调，所以旧值与新值是同一个对象（引用值）
 
-  // 1、监视 ref 定义的数据
-  watch(number, (newValue,oldValue) => {
-    consloe.log(newValue,oldValue)
-  },{immediate: true})
+  ```js
+  watch(state, (newState, oldState) => {
+    // 此处newState === oldState，且任何嵌套属性变化都会触发
+  }, {
+    deep: false // 此处 deep 配置无效，强制开启深度监视
+  })
+  ```
 
-  // 2、监视多个 ref 定义的数据
-  watch([number,cluster], (newValue,oldValue) => {
-    consloe.log(newValue,oldValue)
-  },{deep: true})
+  监听`reactive`中嵌套对象：
 
-  // 3、监视 reactive 定义的数据
-  watch(person, (newValue,oldValue) => {
-    // 此处 oldValue 无法获取
-    consloe.log(newValue)
-  },{immediate: true,
-     // 此处 deep 配置无效，强制开启深度监视
-     deep: false})
+  ```js
+  const state = reactive({
+    user: {
+      profile: {
+        name: 'John',
+        age: 30
+      }
+    }
+  })
+  // 只监听 state.user.profile 对象的 引用值 是否变化，改变其属性不触发回调
+  watch(
+    () => state.user.profile,
+    (newProfile, oldProfile) => {
+      console.log('profile changed')
+    }
+  )
+  // 修改 name（嵌套属性）不会触发监听
+  state.user.profile.name = 'Jane' // ❌ 不触发
+  // 替换整个 profile 对象会触发监听
+  state.user.profile = { name: 'Jane', age: 31 } // ✅ 触发
+  ```
 
-  // 4、监视 reactive 定义的数据中的某个属性
-  watch(() => person.hobit, (newValue,oldValue) => {
+- 监听多个数据：用`[]`数组包裹要监听的数据
+  ```js
+  const count = ref(0)
+  const state = reactive({ count: 0 })
+  
+  watch([count, () => state.count], (newValue, oldValue) => {
     consloe.log(newValue, oldValue)
-  },{immediate: true,
-     // 此处 deep 配置有效
-     deep: true})
+  })
+  ```
 
-  // 5、监视 reactive 定义的数据中的多个属性
-  watch([() => person.salary, () => person.hobit], (newValue,oldValue) => {
-    consloe.log(newValue,oldValue)
-  },{deep: true,immediate: true})
-
-  return {number, cluster, person}
-}
-```
-
-
-
-## `watchEffect()`
-
-有立即监听效果，在页面刷新时回调函数就会运行一遍
-回调函数中用到了那些数据，就会智能地监视哪些数据
-
-```javascript
-watchEffect(() => {
-  // watchEffect() 的回调函数中使用到的数据发生变化，就会触发回调
-  let digital = number.value
-  let myHobit = person.hobit
-})
-```
-
-
-
-## `shallowReactive()`
-
-只处理对象数据中最外层属性的响应式，即**浅响应式**
-
-
-
-## `shallowRef()`
-
-只处理**基本类型**数据的响应式，不进行对象数据的响应式处理
+> [!NOTE]
+>
+> 无论是`watchEffect`还是`watch`，当依赖项有变化时，回调函数的执行都是异步的（微队列）
+>
+> 但是`watchEffect`第一次初始化运行是同步执行；`watch`配置`immediate = true`也会立即同步执行一次
 
 
 
 ## `toRaw()`
 
-将一个`reactive()`生成的响应式对象转为**普通对象**；
-
-对其操作不会引起页面的更新；
+将一个`reactive()`生成的响应式对象转为普通对象，对其操作不会引起页面的更新
 
 ```javascript
 const p = toRaw(person)
@@ -3818,38 +3845,29 @@ const p = markRaw(person)
 
 ## `customRef()`
 
-创建自定义的 ref ，并对其依赖项跟踪和更新触发进行显式控制
-
-它需要一个工厂函数去接收`track`和`trigger`函数作为参数
-
-返回一个带有`get`和`set`的对象
-
-```html
-<input v-model="text" />
-```
+创建自定义的`ref `，并对其依赖项跟踪和更新触发进行显式控制
+接收`track`和`trigger`函数作为参数，返回一个带有`get`和`set`的对象
 
 实现快速输入防抖效果
 
 ```javascript
-// 引入 Composition APT ；
-import {customRef} from 'vue'
+import { customRef } from 'vue'
 
 function userRef(value, delay = 200) {
   let timeout
   return customRef((track, trigger) => {
     return {
       get() {
-        // 通知 Vue 追踪 value 的变化；
+        // 通知 Vue 追踪 value 的变化
         track()
         return value
       },
       set(newValue) {
-        // 每次设置新值的时候都先清除定时器；
+        // 防抖
         clearTimeout(timeout)
-        // 延迟数据的更新显示；
         timeout = setTimeout(() => {
           value = newValue
-          // 通知 Vue 去重新解析模版；
+          // 通知 Vue 去重新解析模版
           trigger()
         }, delay)
       }
@@ -3864,6 +3882,10 @@ export default {
     }
   }
 }
+```
+
+```html
+<input v-model="text" />
 ```
 
 
