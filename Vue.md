@@ -3517,6 +3517,28 @@ createVNode(
 
 
 
+## 为什么使用`props`时不能直接解构？传参也需整体传递？
+
+```js
+const props = defineProps({ message: String })
+
+// 错误！解构会破坏响应式
+const { message } = props // 这里的 message 不会随父组件更新而变化
+// 正确！使用 toRef/toRefs 解构
+const { message } = toRefs(props)
+
+// 错误！传递单个属性会失去响应式
+useMyHook(props.message)
+// 正确！传递整个props对象
+useMyHook(props)
+```
+
+因为Vue3的响应式是基于`Proxy`实现的，只有通过原始的`props`代理对象访问属性时，才能触发依赖追踪和更新
+解构操作会把值从响应式对象中提取出来，得到的只是一个普通的初始值副本
+传递参数时直接传入单个属性，它也就只是一个普通值
+
+
+
 ## `setup`
 
 vue3中一个新的配置项，是一个函数，`setup()`是所有`Composition API`**表演的舞台**
@@ -3615,7 +3637,7 @@ const person = reactive({
   name: 'Kein',
   gender: 'Male'
 })
-const myName = toRef(person,'name')
+const myName = toRef(person, 'name')
 myName.value = 'Kyle' // 改变会同步到 person 对象中
 console.log(person.name) // 'Kyle'
 ```
@@ -3644,21 +3666,16 @@ gender.value
 接受一个对象类型的参数，返回一个**代理对象(Proxy实例)**，不能代理基本类型数据
 
 ```js
-export default {
-  name: 'Message',
-  setup() {
-    // 定义对象类型的响应式数据
-    const person = reactive({
-      name:'Kein',
-      age:22,
-      gender: 'Male'
-    })
-    
-    // 更改数据
-    person.name = 'MuYin'
-    person.gender = 'Female'
-  }
+// 定义对象类型的响应式数据
+const person = reactive({
+  name: 'Kein',
+  age: 22,
+  gender: 'Male'
+})
 
+// 更改数据
+console.log(person.name) // Kein
+person.gender = 'Female'
 ```
 
 模版中使用数据
@@ -3675,7 +3692,11 @@ export default {
 不希望数据被修改的情况，让一个响应式的数据变为**只读**，不可修改
 
 ```javascript
+const person = reactive({ name: 'Kein' })
+
 const private = readonly(person)
+
+console.log(person === private) // false
 
 // shallowReadonly() 让响应式数据的最外层属性变成只读（浅只读）
 const p = shallowReadonly(person)
