@@ -3543,7 +3543,7 @@ useMyHook(props)
 
 vue3中一个新的配置项，是一个函数，`setup()`是所有`Composition API`**表演的舞台**
 
-`setup()`优先于所有生命周期函数执行，且`setup()`中的`this `是`undefined`
+`setup()`优先于所有生命周期函数执行，且`setup()`中的`this`是`undefined`
 
 ```vue
 <script>
@@ -3572,26 +3572,6 @@ vue3中一个新的配置项，是一个函数，`setup()`是所有`Composition 
     }
  }
 </script>
-
-
-<!-- setup 语法糖 -->
-<script setup>
- // 在 <script> 标签中书写 setup 属性
- // 不需要 return 返回值
- import { reactive, ref } from "vue"
- const person = reactive({
-    name: "Kyle",
-    gender: "Male",
- })
- let number = ref(1)
- function changeNumber(type) {
-    if (type == "add") {
-      number.value++
-    } else if (type == "subtract") {
-      number.value--
-    }
- }
-</script>
 ```
 
 `setup(props, context)`接受两个参数
@@ -3601,6 +3581,39 @@ vue3中一个新的配置项，是一个函数，`setup()`是所有`Composition 
   - `attrs`：包含父组件传递过来，但是没在``props``中声明的属性，相当于2版本中的`this.$attrs`
   - `slots`：收到的插槽的内容，相当于2版本的`this.$slots`
   - `emit`：用来分发自定义事件的函数，相当于`this.$emit`
+  - `expose`：有选择地暴露组件的内部状态数据，`expose({...})`
+
+`setup`语法糖🍬写法，官方推荐写法
+
+```vue
+<script setup>
+  // 在 <script> 标签中书写 setup 属性
+  // 不需要 return 返回值
+  
+  // 定义属性
+  const props = defineProps({
+    list: {
+      type: Array,
+      default: () => []
+    }
+  })
+  // 定义自定义事件
+  const emit = defineEmits(['change', 'reset'])
+  
+  import { reactive, ref } from "vue"
+  const person = reactive({
+    name: 'Kyle',
+    gender: 'Male'
+  })
+  const number = ref(0)
+  function changeNumber() { number.value++ }
+  
+  // 定义向外暴露的状态数据
+  defineExpose({
+    number
+  })
+</script>
+```
 
 
 
@@ -3689,14 +3702,20 @@ person.gender = 'Female'
 
 ## `readonly()`
 
-不希望数据被修改的情况，让一个响应式的数据变为**只读**，不可修改
+接收一个对象参数，不希望数据被修改的情况，让一个响应式的数据变为**只读**，不可修改
 
 ```javascript
-const person = reactive({ name: 'Kein' })
+const _person = reactive({ name: 'Kein' })
+const _count = ref(0)
 
-const private = readonly(person)
+const person = readonly(person)
+const count = readonly(_count)
 
-console.log(person === private) // false
+person.name // 'Kein'
+count.value // 0
+
+console.log(_person === person) // false
+console.log(_count === count) // false
 
 // shallowReadonly() 让响应式数据的最外层属性变成只读（浅只读）
 const p = shallowReadonly(person)
@@ -3913,36 +3932,129 @@ export default {
 
 ## `Provide & Inject`
 
-实现`父组件 ==> 后代组件`之间通信；
-
-无论组件层次结构有多深，**父组件**都可以作为其**所有子组件**的依赖提供者
-
-父组件中`provide('数据名',数据值)`来提供数据；
+实现`父组件 ==> 后代组件`之间通信，无论组件层次结构有多深，**父组件**都可以作为其**所有子组件**的依赖提供者
+父组件中`provide('数据名',数据值)`来提供数据
 
 ```javascript
-// 引入；
-import {provide} from 'vue'
+import { provide } from 'vue'
 
 setup(){
   const car = reactive({
     brand: 'BWM',
     price: '36W'
   })
-  // 调用 provide() 提供数据；
-  provide('car',car)
+  // 调用 provide() 提供数据
+  provide('car', car)
 }
 ```
 
 所有子组件中都可以使用`inject()`接受使用数据
 
 ```javascript
-// 引入；
 import {inject} from 'vue'
 
 setup(){
   const car = inject('car')
   return {car}
 }
+```
+
+在实例上使用`provide`方法，可以提供整个应用的共享数据
+
+```js
+createApp(App).provide('count', ref(0)).mount('#app')
+```
+
+
+
+## 全局状态`global state`
+
+因为在Vue3中的`composition API`和`reactivity API`是相互独立的
+利用这个特性可以将全局使用的响应式数据抽离，其他文件直接导入使用
+
+```js
+// 创建一个 store/useData.js 文件，提供全局地响应式数据
+import { reactive, readonly, ref } from 'vue'
+
+// 创建全局单例的响应式数据，仅供内部使用，外界无法访问
+const _count = ref(0)
+const _state = reactive({
+  age: 25
+})
+
+// 导出的数据为只读，不能直接修改
+export const count = readonly(_count)
+export const state = readonly(_state)
+
+// 通过到处方法改变内部的数据
+export function incrementCount() {
+  _count.value++
+}
+export function incrementAge() {
+  _state.age++
+}
+```
+
+```html
+<template>
+  <button type="button" @click="incrementCount">count is {{ count }}</button>
+  <button type="button" @click="incrementAge">age is {{ state.age }}</button>
+</template>
+
+<script setup>
+import { onMounted } from 'vue'
+import { count, incrementCount, state, incrementAge } from './store/useCount'
+
+onMounted(() => {
+  // 此处数据只读，更改数据需要使用导出的方法
+  console.log(count.value) // 0
+  console.log(state) // Proxy(Object) {age: 25}
+})
+</script>
+```
+
+这种方案在多个vue应用之间数据也是共享的
+
+But!将`gloabl state`和`Provide/Inject`结合起来，就可以实现单个vue应用的全局共享状态
+
+```js
+import { ref, reactive, inject } from 'vue'
+// 使用 Symbol 得到一个唯一的 key 值
+const key = Symbol('data')
+
+export function provideData(app) {
+  const count = ref(0)
+  const state = reactive({ age: 25 })
+  
+  function incrementCount() { count.value++ }
+  function incrementAge() { state.age++ }
+  
+  app.provide(key, {
+    count, state, incrementCount, incrementAge
+  })
+}
+
+export function injectData() {
+  return inject(key)
+}
+```
+
+```js
+// 在 main.js 文件中
+const app = createApp(App)
+provideData(app) // 在实例上提供共享的状态
+app.mount('#app')
+```
+
+```html
+<!-- 在组件中使用 -->
+<script setup>
+  import { injectData } from './store/'
+  
+  const useData = injectData()
+  useData.count.value
+  useData.state.age
+</script>
 ```
 
 

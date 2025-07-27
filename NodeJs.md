@@ -1,66 +1,98 @@
-# Node.js ?
+# Node?
 
-Node.js 不是一门语言，不是库，不是框架，而是一个基于`Chrome V8`引擎的 JavaScript 运行环境（平台）
-简单来说就是 Node.js 可以解析和执行 JavaScript 代码，可以代替浏览器，使用`C++`语言开发
+Node不是一门语言，不是框架，而是一个基于`Chrome V8`引擎的JavaScript运行环境（平台）
+简单来说就是 Node.js 可以解析和执行JavaScript代码，使用`C++`语言开发
 特性：
 
-- non-blocking I/O model（非阻塞 IO 模型，异步）
+- non-blocking I/O(Input/Output) model（非阻塞 IO 模型，异步）
 - lightweight and efficient（轻量和高效）
 
+Node中的全局对象是`global`
 
+```js
+console.log(global)
+```
 
-## 搭建 Web 服务器后台
+安装`@types/node`第三方库，方便开发时的语法提示
 
-```javascript
-//加载 http 核心模块
-var http = require('http')
-//使用createServer（）方法创建一个 web 服务器
-var server = http.createServer()
-//注册 request 请求事件，当有客户端请求过来时，自动触发事件，然后执行第二个参数（回调函数）
-server.on('request'，function(request, response) {
-  console.log('收到客户端的请求了')
-  response.end('这是响应的数据内容！')
-
-  // 解决向客户端发送响应数据时出现乱码的情况：
- // 告诉浏览器按照 utf-8 编码格式去解析响应数据
-  response.setHeader('Content-Type', 'text/html;charset=utf-8')
- // 在 http 协议中，Content-Type 就是告诉客户端收到的数据是什么类型的；
-})
-//绑定端口号，启动服务器：
-server.listen(8000，function() {
-  console.log('服务器已启动，可以通过 http://127.0.0.1:8000/ 来进行访问')
-})
+```shell
+npm i @types/node -D
 ```
 
 
 
-## 命令行工具
+# `ES Module`支持
 
-* npm（node）
-* git（C 语言）
-* hexo（node）
+node14版本后开始正式支持`ESM`模块规范，16版本后完全稳定的`ESM`支持，与`CommonJS`并存
 
+如何开启使用`ESM`模块化？
 
+- 全局开启：在`package.json`中添加`"type": "module"`，所有`.js`后缀文件默认视为`ESM`规范
+- 局部开启：使用`.mjs`扩展名，无需设置 `"type": "module"`，则该文件使用`ESM`规范
 
-## 运行 JavaScript 代码
+```js
+// 导入模块
+import fs from 'fs'
+import { debounce } from './utils.js'
+import * as tools from './tools.js'
 
-在文件位置打开终端，输入：`node FileName.js`
+// 导出
+export const data = 'hello'
+export default () => console.log('default export')
+```
 
+使用`CommonJS`规范
 
+- 全局开启：若未设置 `"type": "module"`，默认支持`.js`后缀文件，也可设置`"type": "commonjs"`
+- 局部开启：使用`.cjs`文件后缀，则强制该文件为`CommonJS`规范
 
-## REPL
+```js
+// 导入模块
+const fs = require('fs')
+const { customFunction } = require('./utils.js')
 
-在终端中以Node.JS来运行JavaScript代码
+// 导出模块
+exports.data = 'hello'
+module.exports = function() { console.log('export') }
+```
 
-```shell
-node + enter(回车键)
+可以混合使用两种规范吗？Yes！
+
+```js
+// ESM 中混入 CJS 模块
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url) // 需借助 createRequire 兼容
+const cjsModule = require('./cjs-module.cjs')
+```
+
+```js
+// CJS 中混入 ESM 模块（需异步）
+async function loadESM() {
+  const esmModule = await import('./esm-module.mjs')
+  esmModule.default()
+}
+```
+
+**请注意！在`ES Module`规范中，无法直接使用`__dirname`和`__filename`**
+
+需借助`import.meta.url`，它返回当前模块文件的url，格式为`file:///path/to/module.js`
+
+![image-20250727180452044](./assets/image-20250727180452044.png)
+
+```js
+import { dirname } from 'path'
+import { fileURLToPath } from 'url'
+const filename = fileURLToPath(import.meta.url) // 文件url转为系统路径
+console.log(filename, 'filename')
+const dir = dirname(filename) // 得到目录路径
+console.log(dir, 'dirname')
 ```
 
 
 
 # `CommonJS`规范
 
-**在node中，由于有且仅有一个入口文件（启动文件）**
+**在node中，有且仅有一个入口文件（启动文件）**
 而开发一个应用肯定会涉及到多个文件配合，因此，node对模块化的需求比浏览器端要大的多
 
 ![image-20250628163322200](./assets/image-20250628163322200.png)
@@ -96,16 +128,18 @@ CommonJS具体规范如下：
   3. 为了方便导出，node在初始化完`module.exports`后，又声明了一个变量`exports = module.exports`
 
      ```js
-     (function() {
+     (function(module, exports, __dirname, __pathname) {
        module.exports = {}
        var exports = module.exports
        /** 模块中的代码 **/
+       
+       // 真正导出的是 module.exports 对象
        return module.exports
      })()
      ```
 
-- 为了避免反复加载同一个模块，node默认开启了模块缓存
-  如果加载的模块已经被加载过了，则会自动使用之前的导出结果
+- 为了避免反复加载同一个模块，node开启了模块缓存，如果模块已经被加载过了，则会自动使用之前的导出结果
+  通过查询`require.cache`中有没有该模块判断是否有缓存
 
 > [!NOTE]
 >
@@ -118,25 +152,61 @@ CommonJS具体规范如下：
 `require`既可以加载node中的核心模块，也可以加载引入js文件
 其作用是：执行被加载模块中的代码，并得到被加载模块中的`exports`导出
 
+`require()`中可以填写：
+
+- 绝对路径
+  ```js
+  require('/Users/kein/Documents/Kyle/study/Node/index.js')
+  ```
+
+- 相对路径
+  ```js
+  require('./modules/test.js')
+  ```
+
+  如果省略后缀名不写，会自动补全去查找，按`.js`、`.json`、`.node`、`.mjs`补全
+  举个例子，当执行 `require('./utils')` 时，查找顺序为：
+
+  ```
+  ./utils.js
+  ./utils.json
+  ./utils.node
+  ./utils.mjs
+  ```
+
+  若指定的路径是个目录，会按下面的步骤处理：
+
+  1. 查看该目录下是否有`package.json`文件，并且其中指定了入口文件`main`字段，例如：
+
+     ```json
+     {
+       "name": "my-package",
+       "main": "lib/index.js"
+     }
+     ```
+
+     这种情况下，Node会加载`./utils/lib/index.js`文件
+
+  2. 没有`package.json`和`main`字段，尝试加载目录下的`index.js`、`index.json`或者`index.node`文件
+
+- 模块名称
+
+  1. 查找是否有内置模块，如`path`、`fs`等
+  2. 查找有没有`node_modules/path.js`文件
+  3. 查找有没有`node_modules/path/入口文件`
+  4. 依次查找上级目录中的`node_modules`目录，直到根目录
+  5. 转换成绝对路径，导入模块
+
+  ```js
+  // 导入核心模块
+  const path = require('path')
+  // 导入第三方模块
+  const axios = require('axios')
+  ```
+
 > [!NOTE]
 >
-> 引入js文件时，一定要用相对路径书写，且路径中要以`./`或`../`开头
-
-```javascript
-// 导入核心模块
-const path = require('path')
-// 导入第三方模块
-const axios = require('axios')
-// 导入js文件
-const module = require('./module_file.js')
-```
-
-查找规则：
-
-1. 查找是否有内置模块`path`
-2. 查找当前目录中有没有`node_modules/path.js`文件
-3. 查找当前目录中有没有`node_modules/path/入口文件`
-4. 依次查找上级目录中有没有`node_modules/path/入口文件`，直到根目录
+> 导入模块的路径最终都会转换成绝对路径
 
 
 
@@ -149,23 +219,17 @@ node中是模块作用域，默认文件中所有的成员只在当前文件模�
 ```javascript
 /** 使用 exports 导出 **/
 exports.a = 'Kein'
-exports.b = ['22','19','52','13','14']
 exports.c = {
-  name: 'Kein',
-  agr: 22,
-  sex: 'male'
+  name: 'Kein'
 }
 ```
 
 ```javascript
 /** 同样也可以使用 module.exports 来导出 **/
-
 module.exports = 'Kein'
-
 module.exports = {
   name: 'Kein',
   agr: 22,
-  sex: 'male',
   print: function(){
     console.log(this.name + this.age)
   }
@@ -187,6 +251,18 @@ console.log(exports === module.exports) // true
 exports.name = 'Kein'
 // 等价于
 module.exports.name = 'Kein'
+
+// 模块文件中的 this 等于 exports
+console.log(this === exports) // true
+console.log(this === module.exports) // true
+
+// 但是当我将 module.exports 或者 exports 直接复制修改后
+module.exports = { count: 0 }
+console.log(this === module.exports) // false
+console.log(this === exports) // true
+
+console.log(module.exports) // { count: 0 }
+console.log(exports) // { name: 'Kein' }
 ```
 
 
@@ -321,7 +397,6 @@ node root -g # 全局安装的 node_modules 的位置
 
 查看包信息
 ```shell
-npm view 包名 [子信息] # 命令语法
 npm view react
 npm view react version # 查看 react 中的 version 信息
 ```
@@ -365,15 +440,13 @@ npm config delete 配置项
     "serve": "vue-cli-service serve --open",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
-  },
+  }
 }
 ```
 
 运行`package.json`文件中`scripts`中的脚本
 
 ```shell
-npm run 脚本名称
-
 # 'serve' 为脚本名称，'npx vue-cli-service serve --open' 为实际执行的指令
 npm run serve
 ```
@@ -453,7 +526,7 @@ console.log(config.custom_key) // 'nodejs'
 
 
 
-### 语义版本
+## 语义版本
 
 语义版本的书写规则非常丰富，下面列出了一些常见的书写方式
 
@@ -506,12 +579,12 @@ node中有一个全局变量`global`（可以类比浏览器环境的`window`）
    ```json
    {
      "scripts": {
-       "dev": "export NODE_ENV=development node index.js"
+       "dev": "export NODE_ENV=development && node index.js"
      }
    }
    ```
 
-   **为了避免不同系统的设置方式的差异可以使用第三方库`cross-env`对环境变量进行设置**
+   为了避免不同系统的设置方式的差异可以使用第三方库`cross-env`对环境变量进行设置
 
    ```shell
    npm install cross-env -D
@@ -560,6 +633,512 @@ pnpm -v
 # pnpx 使用本地CLI工具
 pnpx vue-cli-service serve
 ```
+
+
+
+# 内置模块
+
+## `os`
+
+提供了与操作系统进行交互的实用工具，可以获取有关计算机系统的信息
+
+```js
+import os from 'os'
+
+// 返回操作系统换行符，在不同操作系统下的换行符可能不一样, \n 或 \r\n
+console.log(os.EOL)
+
+// 返回操作系统的 CPU 架构，如 x64、arm64 等
+console.log(os.arch())
+
+// 返回操作系统的平台，如 darwin、win32、linux 等
+console.log(os.platform())
+
+// 返回操作系统的 CPU 信息，包括型号、速度、核心数等，格式为数组
+console.log(os.cpus().length)
+
+// 返回操作系统的可用内存大小，单位为字节(byte)
+console.log(os.freemem() / 1024 / 1024 + ' MB')
+
+// 返回操作系统的总内存大小，单位为字节(byte)
+console.log(os.totalmem() / 1024 / 1024 + ' MB')
+
+// 返回操作系统的网络接口信息，格式为对象
+console.log(os.networkInterfaces())
+
+// 返回操作系统的主机名
+console.log(os.hostname())
+
+// 返回当前用户的目录路径
+console.log(os.homedir())
+
+// 返回操作系统的临时目录路径
+console.log(os.tmpdir())
+```
+
+
+
+## `path`
+
+提供了处理和转换文件路径的实用工具，可跨平台统一路径格式
+
+```js
+// 导入
+import path from 'path' // EMS
+// const path = require('path') // CMJ
+
+/** 路径分隔符常量 **/
+// path.sep: 返回当前系统的路径分隔符，输出: \ 或 /
+console.log('分隔符:', path.sep)
+
+// path.delimiter: 返回环境变量路径分隔符,如 Windows 为`;`，POSIX 为`:`
+console.log(path.delimiter)
+console.log(process.env.PATH.split(path.delimiter))
+
+/** 路径处理方法 **/
+// path.join([...paths]): 拼接路径片段，自动处理多余分隔符和相对路径，可以传递多个参数
+const filePath = path.join('/dir', 'subdir', 'file.txt')
+// 输出: /dir/subdir/file.txt (POSIX) 或 \dir\subdir\file.txt (Windows)，分隔符不同
+
+// path.resolve([...paths]): 将一系列路径或路径段解析为绝对路径，直到构造出绝对路径
+console.log(path.resolve('src', 'index.js')) // /current/working/dir/src/index.js (基于当前工作目录)
+console.log(path.resolve('/foo', 'bar', '../baz')) // 输出: /foo/baz
+
+// path.normalize(path): 规范化路径，处理`.`、`..`和多余分隔符
+console.log(path.normalize('/foo/bar//baz/../qux')) // 输出: /foo/bar/qux
+
+/** 路径解析方法 **/
+// path.parse(path): 将路径解析为对象，包含根目录、目录、文件名、扩展名等
+const parsed = path.parse('/home/user/dir/file.txt')
+// 输出:
+{
+  root: '/',
+  dir: '/home/user/dir',
+  base: 'file.txt',
+  ext: '.txt',
+  name: 'file'
+}
+
+// path.format(pathObj): 从对象反序列化为路径字符串，与`path.parse`相反
+const pathStr = path.format({
+  dir: '/home/user',
+  base: 'file.txt'
+}) // 输出: /home/user/file.txt
+
+/** 相对路径与绝对路径 **/
+// path.isAbsolute(path): 判断路径是否为绝对路径
+console.log(path.isAbsolute('/dir/file.txt')) // 输出: true
+console.log(path.isAbsolute('file.txt')) // 输出: false
+
+// path.relative(from, to): 计算从 from 到 to 的相对路径
+const relativePath = path.relative('/home/user/dir', '/home/user/other') // 输出: ../other
+
+// path.basename(path[, ext]): 返回路径的最后一部分（文件名或目录名），可指定扩展名以去除
+console.log(path.basename('/dir/subdir/file.txt')) // file.txt
+console.log(path.basename('/dir/subdir/file.txt', '.txt')) // file
+
+// 返回路径的目录部分
+path.dirname('/dir/subdir/file.txt') // 输出: /dir/subdir
+
+// 返回路径的扩展名（包括 .），若无扩展名则返回空字符串
+console.log(path.extname('file.txt')) // '.txt'
+console.log(path.extname('file')) // ''
+console.log(path.extname('file.txt.md')) // '.md'
+```
+
+
+
+## `url`
+
+提供了处理和解析`URL`的工具
+
+Node.js支持现代浏览器的`URL`构造函数，`WHATWG API (new URL())`
+
+```js
+const myUrl = new URL('https://user:pass@example.com:8080/path?query=value#hash') // WHATWG API
+console.log(myUrl.host) // 输出: example.com:8080
+console.log(myUrl.hostname) // 输出: example.com
+console.log(myUrl.port) // 输出: 8080
+// ...
+```
+
+```js
+const url = require('url') // 引入模块
+const url = 'https://nodejs.org/docs/latest/api/url.html'
+
+// 解析url字符串为对象
+const urlObj = new url.URL(url) // 也可以直接 new URL()
+url.parse(url) // 效果和上面一样
+
+// 从url对象生成url字符串
+url.format(myURL) // 'https://nodejs.org/docs/latest/api/url.html'
+
+// 根据基础url解析相对路径
+url.resolve('https://example.com/a/b', '../c/d') // https://example.com/a/c/d
+
+// 解析查询字符串为对象（通过第二个参数true启用）
+const parsedQuery = url.parse('https://example.com?name=John&age=30', true)
+console.log(parsedQuery.query) // { name: 'John', age: '30' }
+// 更现代的查询参数处理方式，使用 URL 构造函数：
+const myUrl = new URL('https://example.com?name=John&age=30')
+myUrl.searchParams.get('name') // 'John'
+myUrl.searchParams.append('city', 'New York')
+myUrl.searchParams.toString() // 'name=John&age=30&city=New%20York'
+```
+
+
+
+## `util`
+
+提供了一系列实用工具函数，用于简化常见的编程任务，如对象序列化、回调函数转换、调试输出等
+
+```js
+import util from 'util'
+import fs from 'fs'
+
+// 将CallBack回调风格的函数转换为返回Promise的函数
+const readFile = util.promisify(fs.readFile)
+readFile('./example.txt', 'utf8')
+  .then(data => console.log(data))
+  .catch(err => console.error(err))
+
+// 将Promise函数转换为CallBack回调风格
+async function asyncFunction() { return '结果' }
+const callbackFunction = util.callbackify(asyncFunction)
+callbackFunction((err, result) => {
+  if (err) throw err
+  console.log(result) // 输出: 结果
+})
+
+// 实现原型链继承，Node.js旧版语法，ES6后推荐使用class extends
+util.inherits('class', 'parentClass')
+
+// 如果value_1和value_2存在深度严格相等，则返回true，否则返回false，判断两值是否严格相等
+util.isDeepStrictEqual('value_1', 'value_2')
+
+// 为不同类型的内置对象提供类型检查
+util.types.isAnyArrayBuffer()
+
+// 判断是否为arguments对象
+function foo() {
+  util.types.isArgumentsObject(arguments) // true
+}
+```
+
+
+
+## `stream`
+
+`stream`是Node中处理**大量数据或连续数据**的抽象接口，数据分块处理，无需一次性加载全部内容
+而`fs.createReadStream`和`fs.createWriteStream`是继承自`stream`模块实现的文件流操作
+
+**什么是文件流？**
+内存数据和磁盘文件数据之间的流动，就是文件流
+
+**流的分类**
+
+- **可读流`Readable`**：如`fs.createReadStream`、`HTTP`请求、`process.stdin`
+- **可写流`Writable`**：如`fs.createWriteStream`、`HTTP`响应、`process.stdout`
+- **双向流`Duplex`**：同时支持读写，如网络套接字
+- **转换流`Transform`**：在读写过程中转换数据，如`zlib`压缩、`crypto`加密
+
+**核心特性**
+
+- **事件驱动**：通过`on('data')`、`on('end')`等监听数据流动
+- **背压`Backpressure`**：自动控制数据传输速率，避免内存溢出
+- **管道`Pipe`**：通过`stream.pipe()`连接多个流，简化数据处理流程
+
+
+
+## `fs`
+
+提供了与文件系统进行交互的能力，支持同步、异步、流式等多种操作方式
+
+> [!NOTE]
+>
+> 在Node中文件操作的路径是相对于执行Node命令所在目录的路径，默认即项目的根目录
+
+注意事项：
+
+- **异步优先**：避免使用同步方法，如 `readFileSync`，以免阻塞事件循环，除非有需求要同步
+- **错误处理**：异步操作都应包含错误处理，`.catch()`或`try/catch`
+- **大文件处理**：对于大文件，使用流`createReadStream`和`createWriteStream`，而非一次性读取
+- **路径问题**：使用`path`模块处理路径，确保跨平台兼容性
+
+```js
+const fs = require('fs')
+const path = require('path')
+const os = require('os')
+```
+
+### 读取文件
+
+```js
+const filename = path.resolve(__dirname, './files/word.txt') // 获取文件路径
+// 读取文件 CallBack 模式
+fs.readFile(filename, (err, data) => {
+  if (err) {
+    console.log(err)
+  } else {
+    // console.log(data) // 默认读取的是 Buffer 数据
+    console.log(data.toString('utf-8')) // 用 utf-8 编码格式转为字符串
+  }
+})
+// promise 写法
+fs.promises.readFile(filename).then(data => {
+  console.log(data.toString('utf-8'))
+}).catch(err => {
+  console.log(err)
+})
+```
+
+### 写入文件
+
+**注意**：写入文件需要正确路径，目录不存在或错误会导致失败
+
+```js
+const filename = path.resolve(__dirname, './files/word.txt') 
+const content = 'hello world, hello NodeJs'
+fs.writeFile(filename, content, (err) => {
+  if (err) {
+    console.log(err)
+  } else {
+    console.log('写入成功')
+  }
+})
+// promise 写法
+fs.promises.writeFile(filename, os.EOL + content, {
+  encoding: 'utf-8', // 编码格式
+  flag: 'a', // 写入模式：w 写入，a 追加
+}).then(() => {
+  console.log('写入成功')
+}).catch(err => {
+  console.log(err)
+})
+
+// fs.appendFile() 追加文件内容
+fs.appendFile(filename, content, (err) => {
+  if (err) {
+    console.log(err)
+  } else {
+    console.log('追加成功')
+  }
+})
+
+// 手写复制文件
+const imageFilename = path.resolve(__dirname, './image/portrait.jpg')
+const targetFilename = path.resolve(__dirname, './image/portrait_copy.jpg')
+fs.promises.readFile(imageFilename).then(data => {
+  const buffer = Buffer.from(data)
+  fs.promises.writeFile(targetFilename, buffer).then(() => {
+    console.log('复制成功')
+  }, (err) => {
+    console.log(err)
+  })
+}).catch(err => {
+  console.log(err)
+})
+```
+
+### 删除文件
+
+```js
+// 当指定路径没有目标目录或文件时，会执行错误回调
+const filename = path.resolve(__dirname, './files/test.js')
+fs.promises.unlink(filename).then(() => {
+  console.log('删除成功')
+}).catch(err => {
+  console.log(err)
+})
+```
+
+### 获取文件信息
+
+```js
+// 获取文件信息，可以用来判断文件是否存在
+const filename = path.resolve(__dirname, './files/word.txt')
+fs.promises.stat(filename).then(stat => {
+  console.log(stat.size)
+  console.log(stat.isFile()) // true
+  console.log(stat.isDirectory()) // falsexx
+  console.log(new Date(stat.birthtime).toLocaleString())
+}).catch(err => {
+  console.log(err)
+})
+
+// fs.readdir() 获取目录中的文件和子目录，子目录中文件无法读取到
+const dirname = path.resolve(__dirname, './files')
+fs.promises.readdir(dirname).then(files => {
+  console.log(files)
+}).catch(err => {
+  console.log(err)
+})
+```
+
+### 创建/删除目录
+
+```js
+// 创建目录，如果目录已存在则不会再创建，执行失败的回调
+const dirname = path.resolve(__dirname, './media')
+fs.promises.mkdir(dirname).then(() => {
+  console.log('创建成功')
+}).catch(err => {
+  console.log(err.message)
+})
+// 删除目录，不存在则执行错误回调
+fs.promises.rmdir(dirname).then(() => {
+  console.log('删除成功')
+}).catch(err => {
+  console.log(err.message)
+})
+```
+
+### 流式读取
+
+`fs.createReadStream()`函数返回的是`stream`中`Readable`的子类`ReadStream`的实例
+
+可监听事件：
+文件打开`open`、文件读取`data`、暂停读取`pause`、恢复读取`resume`、读取完成`end`、读取错误`error`、文件关闭`close`
+
+```js
+const filename = path.resolve(__dirname, './files/largeTxt.txt')
+const stream = fs.createReadStream(filename, {
+  encoding: null, // 编码格式，默认是 null，返回 Buffer 类型的数据
+  highWaterMark: 256, // 一次读取的字节数 byte
+  start: 0, // 开始读取的位置
+  // end: 1024 * 1024 * 5, // 结束读取的位置
+  autoClose: true, // 读取完成后自动关闭文件流，默认 true
+})
+// 读取事件监听：
+```
+
+监听文件读取`data`事件，每次读取`highWaterMark`字节数的数据，`chunk`为读取到的数据
+**注意：注册`data`事件后，才会开始读取文件内容**
+
+```js
+stream.on('data', chunk => {
+  console.log(chunk.toString('utf-8'))
+})
+
+// 手动关闭流读取文件，则之后不会再触发`data`事件，会出发`close`事件
+stream.close()
+stream.on('close', () => {
+  console.log('文件关闭')
+})
+```
+
+### 流式写入
+
+`fs.createWriteStream()`函数返回的是`stream`中`Writable`的子类`WriteStream`的实例
+
+可监听事件：文件打开`open`、写入队列清空`drain`、写入完成`finish`、写入错误`error`...
+
+```js
+const writeStream = fs.createWriteStream(filename, {
+  encoding: 'utf-8', // 写入文件的编码格式
+  flag: 'w', // 写入模式：w 写入，a 追加
+  highWaterMark: 128, // 一次最多写入的字节数 byte，默认是 16 * 1024 byte
+  start: 0, // 开始写入的位置
+  // end: 1024 * 1024 * 5, // 结束写入的位置
+  autoClose: true, // 写入完成后自动关闭文件流，默认 true
+})
+const flag = writeStream.write(os.EOL + 'hello world')
+// flag 为 true 表示当前写入的字节数小于 highWaterMark，后续写入的数据不用排队，可以直接写入
+// flag 为 false 表示当前写入的字节数大于等于 highWaterMark，后续数据需要排队
+console.log(flag) // true
+// 所以要特别注意背压问题，因为写入队列是内存中的数据，是有限的
+
+// 告诉写入流后续没有数据了，会触发写入流的 finish 事件，参数为最后的写入数据
+writeStream.end(os.EOL + 'hello node')
+
+// 文件写入队列清空事件，表明后续数据不用排队，可以直接写入
+writeStream.on('drain', () => {
+  // 写入队列清空后再写入数据，可以缓解背压问题
+  writeStream.write(os.EOL + 'hello node')
+  console.log('写入队列清空')
+})
+```
+
+缓解背压问题的流式文件复制
+
+```js
+const filename = path.resolve(__dirname, './image/portrait.jpg')
+const copyFilename = path.resolve(__dirname, './image/portraitCopy.jpg')
+
+const rs = fs.createReadStream(filename, {
+  encoding: null,
+  highWaterMark: 256,
+  start: 0,
+  autoClose: true
+})
+const ws = fs.createWriteStream(copyFilename, {
+  encoding: null,
+  highWaterMark: 256
+})
+rs.on('data', (chunk) => {
+  // 将读取的内容写入文件，如果 highWaterMark 已满，则暂停读取
+  const flag = ws.write(chunk)
+  if (!flag) rs.pause()
+})
+ws.on('drain', () => {
+  // 文件写入对列清空，恢复文件读取
+  rs.resume()
+})
+rs.on('end', () => {
+  ws.end()
+  console.log('copy done')
+})
+```
+
+使用`pipe`管道高级用法，自动处理背压问题
+
+```js
+rs.pipe(ws) // 数据从 rs 流向 ws
+rs.on('end', () => {
+  console.log('copy done')
+})
+```
+
+### 转换流
+
+```js
+// pipe 管道高级用法
+const { Transform } = require('stream')
+const fs = require('fs')
+const path = require('path')
+
+const filename = path.resolve(__dirname, './files/largeTxt.txt')
+const copyFilename = path.resolve(__dirname, './files/largeTxtUppercase.txt')
+// 创建一个将文本转为大写的转换流
+const upperCaseTransform = new Transform({
+  transform(chunk, encoding, callback) {
+    this.push(chunk.toString('utf-8').toUpperCase())
+    callback()
+  },
+  flush(callback) {
+    console.log('转换完成')
+    callback()
+  }
+})
+// 使用管道组合流：读取文件 → 转换为大写 → 写入新文件
+fs.createReadStream(filename)
+  .pipe(upperCaseTransform)
+  .pipe(fs.createWriteStream(copyFilename), {
+    end: true
+  })
+```
+
+
+
+## `net`
+
+net
+
+
+
+## `http`
+
+http
 
 
 
@@ -719,6 +1298,31 @@ if (url === '/') {
 // 绑定端口号，启动服务器：
 server.listen(8000, function() {
   console.log('服务器已启动，可以通过 http://127.0.0.1:8000 来进行访问')
+})
+```
+
+
+
+# 搭建 Web 服务器后台
+
+```javascript
+//加载 http 核心模块
+var http = require('http')
+//使用createServer（）方法创建一个 web 服务器
+var server = http.createServer()
+//注册 request 请求事件，当有客户端请求过来时，自动触发事件，然后执行第二个参数（回调函数）
+server.on('request'，function(request, response) {
+  console.log('收到客户端的请求了')
+  response.end('这是响应的数据内容！')
+
+  // 解决向客户端发送响应数据时出现乱码的情况：
+ // 告诉浏览器按照 utf-8 编码格式去解析响应数据
+  response.setHeader('Content-Type', 'text/html;charset=utf-8')
+ // 在 http 协议中，Content-Type 就是告诉客户端收到的数据是什么类型的；
+})
+//绑定端口号，启动服务器：
+server.listen(8000，function() {
+  console.log('服务器已启动，可以通过 http://127.0.0.1:8000/ 来进行访问')
 })
 ```
 
@@ -1160,140 +1764,29 @@ server.listen(8000, function() {
 
 # nodemon
 
-> 第三方命令行工具`nodemon`，可以帮助解决频繁修改代码重启服务器的问题；
->
-> `nodemon`是一个基于 Node.JS 开发的第三方命令行工具，需要 npm 下载安装；
->
-> ```shell
-> npm install nodemon --global
-> ```
+第三方命令行工具`nodemon`，可以帮助解决频繁修改代码重启服务器的问题；
 
-> ```shell
-> # Mac 电脑上安装出现权限不够的问题：
-> # The operation was rejected by your operating system.
-> # npm ERR! It is likely you do not have the permissions to access this file as the current user.
-> # 在命令前面加上 sudo，则为切换为有权限的用户再执行安装；
-> sudo npm install nodemon --global
-> ```
+`nodemon`是一个基于 Node.JS 开发的第三方命令行工具，需要 npm 下载安装；
 
-> 安装完成后，用 nodemon 代替 node 来启动服务；
->
-> 只要`Ctrl + s`保存文件，服务会自动重启；
->
-> ```shell
-> nodemon app.js
-> ```
+```shell
+npm install nodemon --global
+```
 
+```shell
+# Mac 电脑上安装出现权限不够的问题：
+# The operation was rejected by your operating system.
+# npm ERR! It is likely you do not have the permissions to access this file as the current user.
+# 在命令前面加上 sudo，则为切换为有权限的用户再执行安装；
+sudo npm install nodemon --global
+```
 
+安装完成后，用 nodemon 代替 node 来启动服务；
 
+只要`Ctrl + s`保存文件，服务会自动重启；
 
-
-# url
-
-[Official Website API](http://nodejs.cn/api/url.html)
-
-> Node.JS 中的路径操作核心模块；
->
-> ```javascript
-> const url = require('url');
-> ```
-
-
-
-#### url.parse()
-
-> 将路径解析成为一个方便操作的**对象**；
->
-> url.parse([^urlString], [^parseQueryString])
->
-> ```javascript
-> let parseUrl = url.parse(request.url, true);
-> ```
-
-[^urlString]:要解析的 URL 字符串；
-[^parseQueryString]:布尔值，为 true 时，表示将**查询字符串**转为一个对象；
-
-
-
-###### .pathname
-
-> 单独获取不包含**查询字符串**的路径部分，不包含`?`之后的内容；
->
-> ```javascript
-> let pathName = parseUrl.pathname;
-> ```
-
-
-
-###### .query
-
-> 单独获取**查询字符串**的数据；
->
-> ```javascript
-> let formData = parseUrl.query;
-> ```
-
-
-
-
-
-# Path
-
-> Node.JS 中的路径操作核心模块
->
-> ```javascript
-> // 直接在文件中加载引用；
-> const path = require('path');
-> ```
-
-
-
-#### path.basename()
-
-> 获取一个路径中的文件的名字（默认包含后缀扩展，例如 `index.js` ）；
-
-
-
-#### path.dirname()
-
-> 获取一个路径中的目录部分；
-
-
-
-#### path.extname()
-
-> 获取一个路径中的文件的后缀扩展名部分；
-
-
-
-#### path.parse()
-
-> 把一个路径转换成一个对象；
->
-> ```javascript
-> var path = require('path');
-> var dealPath = path.parse('c:/user/application/project/app.js');
-> // 此时 dealPath 是被模块方法转换成了一个对象；
-> dealPath:{
->     root: 'c:/',
->     dir: 'c:/user/application/project',
->     base: 'app.js',
->     ext: '.js',
->     name: 'app'
-> }
-> ```
-
-
-
-#### path.join()
-
-> 建议需要进行路径拼接时，使用`path.join()`方法，避免手动拼接出错；
-
-
-
-#### path.isAbsolute()
-
-> 判断一个路径是否是绝对路径；
+```shell
+nodemon app.js
+```
 
 
 
@@ -1303,7 +1796,7 @@ server.listen(8000, function() {
 >
 > 在文件操作中，相对路径是不太可靠的；
 >
-> 因为在 Node 中文件操作的路径是相对于执行 Node 命令所在目录的路径；
+> 因为；
 >
 > 建议在文件操作中统一使用***动态的绝对路径***：`__dirname`或者`__filename`；
 

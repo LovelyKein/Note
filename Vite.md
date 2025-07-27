@@ -15,3 +15,28 @@
 当需要打包到生产环境时，`vite`使用传统的`rollup`进行打包，因此，`vite`的主要优势在开发阶段
 
 另外，由于`vite`利用的是`ES Module`，因此在代码中不可以使用`CommonJS`规范的代码
+
+
+
+
+
+# 第三方库
+
+
+
+## `vite-plugin-inspect`
+
+用于调试检查Vite插件的中间状态
+
+```js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import Inspect from 'vite-plugin-inspect'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [vue(), Inspect()],
+})
+
+```
+
