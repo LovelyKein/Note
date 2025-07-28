@@ -1132,13 +1132,59 @@ fs.createReadStream(filename)
 
 ## `net`
 
-net
+提供了基于`TCP`协议的网络通信能力，可以实现进程间的通信`IPC`和网络通信`TCP/IP`
+
+```js
+import net from 'net'
+// 创建一个服务
+const server = net.createServer((socket) => {
+	console.log('客户端已连接')
+	socket.on('data', (data) => {
+		const dataStr = data.toString()
+		console.log(dataStr)
+		const byteLength = Buffer.from(data).byteLength
+		console.log(byteLength)
+	})
+	socket.write('hello client') // 服务端向客户端发送数据
+})
+// 监听 5000 端口
+server.listen(5000, () => {
+	console.log('server is running on port 5000')
+})
+// 创建一个客户端连接
+const client = net.createConnection(
+	{
+		port: 5000,
+		host: 'localhost',
+	},
+	() => {
+		console.log('服务器已连接')
+    // 向服务端发送消息
+		client.write('hello server')
+	}
+)
+```
+
+`net.Socket`是`TCP`套接字或流式进程间通信端点的抽象
+`net.createConnection()`会返回一个`net.Socket`，用户可以使用它与服务器进行通信
+
+### `Socket`
+
+在计算机网络中，`Socket`是一个抽象概念，用于实现不同设备或进程间的通信
+它是网络编程的基础接口，让应用程序能够通过网络发送和接收数据
+
+`Socket`通信基于{客户端-服务器}的`C/S`模型，主要基于两种传输协议：
+
+- `TCP(Transmission Control Protocol)`：面向连接、可靠、有序的字节流协议
+- `UDP(User Datagram Protocol)`：无连接、不可靠、快速的数据报协议
+
+核心特性：`Socket`是**全双工（Full-duplex）**的，即双方可同时发送和接收数据
 
 
 
 ## `http`
 
-http
+`http`模块
 
 
 
@@ -1220,8 +1266,6 @@ nvm root
 
 
 # IP 地址和 端口号
-
-
 
 ## IP 地址
 
@@ -1325,61 +1369,6 @@ server.listen(8000，function() {
   console.log('服务器已启动，可以通过 http://127.0.0.1:8000/ 来进行访问')
 })
 ```
-
-
-
-# 页面渲染
-
-在网页中，根据需求不同，分为`客户端渲染`和`服务端渲染`
-一般都是根据场景和需求，两者结合起来使用；
-
-
-
-## 客户端渲染
-
-一般请求两次以上，客户端渲染不利于SEO搜索引擎优化，但客户端的异步渲染体验感更好（不刷新页面）
-
-1. 第一次请求拿到的是静态的页面数据；
-
-   此时客户端收到了服务器响应的页面数据；
-   
-   从上到下依次解析，如果发现`AJAX`请求或带有`src`和`href`属性的标签，则再次发送新的请求
-
-2. 第二次请求拿到的是动态数据
-
-   此时收到了服务器响应的`AJAX`响应数据
-   
-   模版引擎开始渲染页面上的动态数据
-
-
-
-## 服务端渲染
-
-一次响应完整的页面给客户端：直接在服务端用模版引擎把页面渲染好
-服务端渲染是可以被爬虫抓取到的；
-
-
-
-# 客户端重新定向
-
-一般用于表单提交后，页面自动跳转到指定页面的url地址
-
-1. 设置响应的状态码
-
-   第一步临时重定向，将响应的状态码设置为 `302`
-   
-   ```javascript
-   response.statusCode = 301 // 永久重定向
-   response.statusCode = 302 // 临时重定向
-   ```
-
-2. 设置响应头的`Location`属性
-
-   在响应头中通过设置Location属性来告诉客户端要重定向的页面地址
-   
-   ```javascript
-   response.setHeader('Location','urlAddress')
-   ```
 
 
 
@@ -1710,58 +1699,6 @@ server.listen(8000，function() {
 > var privacyData = md5('要加密的数据');
 > ```
 
-
-
-#### json web token
-
-> 是实现`token`技术的一种解决方案；
->
-> 由三部分组成： `header(头)`、`payload(载体)`、`signature(签名)`；
-
-
-
-###### Install
-
-> ```shell
-> npm install jsonwebtoken --save
-> ```
-
-
-
-###### Use
-
-> 加载模块；
->
-> ```javascript
-> const jwt = require('jsonwebtoken')
-> ```
->
-> 语法：
->
-> ```javascript
-> jwt.sign(payload, secretOrPrivateKey, [options, callback])
-> ```
->
-> [^payload]:加密的载体，可以是`Object`、`buffer`或`String`；
-> [^secretOrPrivateKey]:加密私钥；
->
-> ```javascript
-> // 对称加密；
-> const token = jwt.sign(
->   {
->     username: 'Kein',
->     password: '123456'
->   },'secretKeys')
-> 
-> // 解码；
-> const decode = jwt.verify(token,'secretKeys')
-> // decode = {username: 'Kein',password: '123456'};
-> ```
-
-
-
-
-
 # nodemon
 
 第三方命令行工具`nodemon`，可以帮助解决频繁修改代码重启服务器的问题；
@@ -1790,19 +1727,7 @@ nodemon app.js
 
 
 
-# Node.JS 中的其他成员
-
-> 在每个文件中，除了 `require()` 和 `exports` 等模块相关API之外，还有两个特殊成员；
->
-> 在文件操作中，相对路径是不太可靠的；
->
-> 因为；
->
-> 建议在文件操作中统一使用***动态的绝对路径***：`__dirname`或者`__filename`；
-
-
-
-#### __dirname
+# __dirname
 
 > 动态地获取当前文件模块所属目录的绝对路径；
 >
@@ -1814,7 +1739,7 @@ nodemon app.js
 
 
 
-#### __filename
+# __filename
 
 > 动态地获取当前文件模块的绝对路径；
 >
@@ -1823,5 +1748,3 @@ nodemon app.js
 > console.log(__filename);
 > // __filename = /Users/zoukai/Desktop/NodeJs/Practise/blog/app.js
 > ```
-
-[^补充]:require()加载模块中的路径标识和文件操作的路径标识不一样，不受影响；
