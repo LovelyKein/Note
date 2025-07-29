@@ -1214,7 +1214,47 @@ async function handleFile(filename) {
 
 # Node的生命周期
 
+![image-20250729210057145](./assets/image-20250729210057145.png)
 
+- `timers`：当定时器的延迟时间到达后，回调会被放入此阶段的`timers`队列
+- `poll`：轮询队列，绝大部分回调都会进入该队列，例如文件的读取、监听用户的请求，运作方式为：
+  如果`poll`中有回调，依次执行回调、直到清空队列
+  如果`poll`中没有，等待其他队列出现回调，然后进入该队列执行回调
+  如果其他队列也没有，则一直等待到出现为止
+
+- `check`：检查阶段，`setImmediate`的回调函数会立即进入这个队列等待运行
+- `Promise & nextTick`：在执行完该阶段事件循环之前，都要先清空这两个队列中的回调
+  在`EMS`规范下，`Promise`优先；在`CMJ`规范下，`nextTick`优先执行
+
+**异步回调的优先级：`ESM`规范下，优先执行清空`Promise`微队列，`CMJ`规范下，优先执行清空`nextTick`**
+
+```js
+setTimeout(() => {
+  console.log(1)
+}, 0)
+
+setImmediate(() => {
+  console.log(2)
+})
+
+process.nextTick(() => {
+  console.log(3)
+  process.nextTick(() => {
+    console.log(4)
+  })
+})
+
+console.log(5)
+
+Promise.resolve().then(() => {
+  console.log(6)
+  process.nextTick(() => {
+    console.log(7)
+  })
+})
+// ES Module 规范下输出顺序：5 6 3 7 4 2 1
+// CommonJS 规范下输出顺序：5 3 4 6 7 1 2
+```
 
 
 
