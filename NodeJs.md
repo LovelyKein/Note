@@ -644,34 +644,24 @@ pnpx vue-cli-service serve
 
 ```js
 import os from 'os'
-
 // 返回操作系统换行符，在不同操作系统下的换行符可能不一样, \n 或 \r\n
 console.log(os.EOL)
-
 // 返回操作系统的 CPU 架构，如 x64、arm64 等
 console.log(os.arch())
-
 // 返回操作系统的平台，如 darwin、win32、linux 等
 console.log(os.platform())
-
 // 返回操作系统的 CPU 信息，包括型号、速度、核心数等，格式为数组
 console.log(os.cpus().length)
-
 // 返回操作系统的可用内存大小，单位为字节(byte)
 console.log(os.freemem() / 1024 / 1024 + ' MB')
-
 // 返回操作系统的总内存大小，单位为字节(byte)
 console.log(os.totalmem() / 1024 / 1024 + ' MB')
-
 // 返回操作系统的网络接口信息，格式为对象
 console.log(os.networkInterfaces())
-
 // 返回操作系统的主机名
 console.log(os.hostname())
-
 // 返回当前用户的目录路径
 console.log(os.homedir())
-
 // 返回操作系统的临时目录路径
 console.log(os.tmpdir())
 ```
@@ -692,32 +682,24 @@ import path from 'path' // EMS
 console.log('分隔符:', path.sep)
 
 // path.delimiter: 返回环境变量路径分隔符,如 Windows 为`;`，POSIX 为`:`
-console.log(path.delimiter)
-console.log(process.env.PATH.split(path.delimiter))
+process.env.PATH.split(path.delimiter)
 
 /** 路径处理方法 **/
 // path.join([...paths]): 拼接路径片段，自动处理多余分隔符和相对路径，可以传递多个参数
-const filePath = path.join('/dir', 'subdir', 'file.txt')
+path.join('/dir', 'subdir', 'file.txt')
 // 输出: /dir/subdir/file.txt (POSIX) 或 \dir\subdir\file.txt (Windows)，分隔符不同
 
 // path.resolve([...paths]): 将一系列路径或路径段解析为绝对路径，直到构造出绝对路径
-console.log(path.resolve('src', 'index.js')) // /current/working/dir/src/index.js (基于当前工作目录)
-console.log(path.resolve('/foo', 'bar', '../baz')) // 输出: /foo/baz
+path.resolve('src', 'index.js') // /current/working/dir/src/index.js (基于当前工作目录)
+path.resolve('/foo', 'bar', '../baz') // 输出: /foo/baz
 
 // path.normalize(path): 规范化路径，处理`.`、`..`和多余分隔符
-console.log(path.normalize('/foo/bar//baz/../qux')) // 输出: /foo/bar/qux
+path.normalize('/foo/bar//baz/../qux') // 输出: /foo/bar/qux
 
 /** 路径解析方法 **/
 // path.parse(path): 将路径解析为对象，包含根目录、目录、文件名、扩展名等
 const parsed = path.parse('/home/user/dir/file.txt')
-// 输出:
-{
-  root: '/',
-  dir: '/home/user/dir',
-  base: 'file.txt',
-  ext: '.txt',
-  name: 'file'
-}
+// 输出: { root: '/', dir: '/home/user/dir', base: 'file.txt', ext: '.txt', name: 'file' }
 
 // path.format(pathObj): 从对象反序列化为路径字符串，与`path.parse`相反
 const pathStr = path.format({
@@ -727,38 +709,35 @@ const pathStr = path.format({
 
 /** 相对路径与绝对路径 **/
 // path.isAbsolute(path): 判断路径是否为绝对路径
-console.log(path.isAbsolute('/dir/file.txt')) // 输出: true
-console.log(path.isAbsolute('file.txt')) // 输出: false
+path.isAbsolute('/dir/file.txt') // 输出: true
+path.isAbsolute('file.txt') // 输出: false
 
 // path.relative(from, to): 计算从 from 到 to 的相对路径
-const relativePath = path.relative('/home/user/dir', '/home/user/other') // 输出: ../other
+path.relative('/home/user/dir', '/home/user/other') // 输出: ../other
 
 // path.basename(path[, ext]): 返回路径的最后一部分（文件名或目录名），可指定扩展名以去除
-console.log(path.basename('/dir/subdir/file.txt')) // file.txt
-console.log(path.basename('/dir/subdir/file.txt', '.txt')) // file
+path.basename('/dir/subdir/file.txt') // file.txt
+path.basename('/dir/subdir/file.txt', '.txt') // file
 
 // 返回路径的目录部分
 path.dirname('/dir/subdir/file.txt') // 输出: /dir/subdir
 
 // 返回路径的扩展名（包括 .），若无扩展名则返回空字符串
-console.log(path.extname('file.txt')) // '.txt'
-console.log(path.extname('file')) // ''
-console.log(path.extname('file.txt.md')) // '.md'
+path.extname('file.txt') // '.txt'
+path.extname('file') // ''
 ```
 
 
 
 ## `url`
 
-提供了处理和解析`URL`的工具
-
-Node.js支持现代浏览器的`URL`构造函数，`WHATWG API (new URL())`
+提供了处理和解析`URL`的工具，Node支持现代浏览器的`URL`构造函数，`WHATWG API (new URL())`
 
 ```js
 const myUrl = new URL('https://user:pass@example.com:8080/path?query=value#hash') // WHATWG API
-console.log(myUrl.host) // 输出: example.com:8080
-console.log(myUrl.hostname) // 输出: example.com
-console.log(myUrl.port) // 输出: 8080
+myUrl.host // 输出: example.com:8080
+myUrl.hostname // 输出: example.com
+myUrl.port // 输出: 8080
 // ...
 ```
 
@@ -778,7 +757,7 @@ url.resolve('https://example.com/a/b', '../c/d') // https://example.com/a/c/d
 
 // 解析查询字符串为对象（通过第二个参数true启用）
 const parsedQuery = url.parse('https://example.com?name=John&age=30', true)
-console.log(parsedQuery.query) // { name: 'John', age: '30' }
+parsedQuery.query // { name: 'John', age: '30' }
 // 更现代的查询参数处理方式，使用 URL 构造函数：
 const myUrl = new URL('https://example.com?name=John&age=30')
 myUrl.searchParams.get('name') // 'John'
@@ -810,15 +789,11 @@ callbackFunction((err, result) => {
   console.log(result) // 输出: 结果
 })
 
-// 实现原型链继承，Node.js旧版语法，ES6后推荐使用class extends
-util.inherits('class', 'parentClass')
-
 // 如果value_1和value_2存在深度严格相等，则返回true，否则返回false，判断两值是否严格相等
 util.isDeepStrictEqual('value_1', 'value_2')
 
 // 为不同类型的内置对象提供类型检查
 util.types.isAnyArrayBuffer()
-
 // 判断是否为arguments对象
 function foo() {
   util.types.isArgumentsObject(arguments) // true
@@ -1168,9 +1143,64 @@ const client = net.createConnection(
 `net.Socket`是`TCP`套接字或流式进程间通信端点的抽象
 `net.createConnection()`会返回一个`net.Socket`，用户可以使用它与服务器进行通信
 
-### `Socket`
+
+
+## `http`
+
+是构建Web服务器和客户端的核心工具，基于`HTTP/1.1`协议实现，建立在`net`模块之上
+核心功能：
+
+- **创建`HTTP`服务器**：监听端口，处理客户端请求
+- **发起`HTTP`客户端请求**：向其他服务器发送请求
+- **流处理**：基于`stream`模块，高效处理大文件和实时数据
+
+```js
+const http = require('http')
+const path = require('path')
+const fs = require('fs')
+
+// 发起客户端请求
+const request = http.request(options, callback)
+
+// 创建http服务器
+const server = http.createServer(async (req, res) => {
+	console.log('请求地址：', req.url)
+	// 此处可以用 new URL() 来解析请求的信息，req.method 是请求的方法
+	// 根据得到的信息，可以根据请求的路径来响应不同的内容，例如搭建静态资源服务器
+	const reqUrl = new URL(req.url, 'http://localhost:5000')
+	const pathname = reqUrl.pathname.substring(1) // 去除掉'/'
+	const filename = path.resolve(__dirname, 'public', pathname) // 拼接到public目录下的资源
+	try {
+		const file = await handleFile(filename)
+		res.statusCode = 200
+		res.end(file)
+	} catch (error) {
+		res.statusCode = 404
+		res.end(error)
+	}
+})
+// 监听端口服务
+server.listen(5000, () => {
+	console.log('server is running at http://localhost:5000')
+})
+
+async function handleFile(filename) {
+	try {
+		await fs.promises.access(filename)
+		const file = await fs.promises.readFile(filename)
+		return file
+	} catch (error) {
+		return '404 not found'
+	}
+}
+```
+
+
+
+# `Socket`
 
 在计算机网络中，`Socket`是一个抽象概念，用于实现不同设备或进程间的通信
+
 它是网络编程的基础接口，让应用程序能够通过网络发送和接收数据
 
 `Socket`通信基于{客户端-服务器}的`C/S`模型，主要基于两种传输协议：
@@ -1182,9 +1212,9 @@ const client = net.createConnection(
 
 
 
-## `http`
+# Node的生命周期
 
-`http`模块
+
 
 
 
@@ -1265,11 +1295,11 @@ nvm root
 
 
 
-# IP 地址和 端口号
+# IP地址和 端口号
 
 ## IP 地址
 
-IP 地址由 4 部分数字组成，每部分数字对应8位二进制数字，各部分之间用小数点分开，例如：`211.152.65.112`
+IP 地址由4部分数字组成，每部分数字对应8位二进制数字，各部分之间用小数点分开，例如：`211.152.65.112`
 Internet上的每台主机都分配了一个专门的地址，是唯一的；
 
 
@@ -1344,37 +1374,6 @@ server.listen(8000, function() {
   console.log('服务器已启动，可以通过 http://127.0.0.1:8000 来进行访问')
 })
 ```
-
-
-
-# 搭建 Web 服务器后台
-
-```javascript
-//加载 http 核心模块
-var http = require('http')
-//使用createServer（）方法创建一个 web 服务器
-var server = http.createServer()
-//注册 request 请求事件，当有客户端请求过来时，自动触发事件，然后执行第二个参数（回调函数）
-server.on('request'，function(request, response) {
-  console.log('收到客户端的请求了')
-  response.end('这是响应的数据内容！')
-
-  // 解决向客户端发送响应数据时出现乱码的情况：
- // 告诉浏览器按照 utf-8 编码格式去解析响应数据
-  response.setHeader('Content-Type', 'text/html;charset=utf-8')
- // 在 http 协议中，Content-Type 就是告诉客户端收到的数据是什么类型的；
-})
-//绑定端口号，启动服务器：
-server.listen(8000，function() {
-  console.log('服务器已启动，可以通过 http://127.0.0.1:8000/ 来进行访问')
-})
-```
-
-
-
-# Socket
-
-网络上的两个程序通过一个**双向**的通信连接实现数据的交换，连接的一端称为一个 Socket 
 
 
 
