@@ -1,4 +1,4 @@
-# Node?
+# NodeJS?
 
 Node不是一门语言，不是框架，而是一个基于`Chrome V8`引擎的JavaScript运行环境（平台）
 简单来说就是 Node.js 可以解析和执行JavaScript代码，使用`C++`语言开发
@@ -1212,7 +1212,7 @@ async function handleFile(filename) {
 
 
 
-# Node的生命周期
+# `NodeJS`的生命周期
 
 ![image-20250729210057145](./assets/image-20250729210057145.png)
 
@@ -1223,7 +1223,7 @@ async function handleFile(filename) {
   如果其他队列也没有，则一直等待到出现为止
 
 - `check`：检查阶段，`setImmediate`的回调函数会立即进入这个队列等待运行
-- `Promise & nextTick`：在执行完该阶段事件循环之前，都要先清空这两个队列中的回调
+- `Promise & nextTick`：在结束该阶段事件循环之前，都要先清空这两个队列中的回调
   在`EMS`规范下，`Promise`优先；在`CMJ`规范下，`nextTick`优先执行
 
 **异步回调的优先级：`ESM`规范下，优先执行清空`Promise`微队列，`CMJ`规范下，优先执行清空`nextTick`**
@@ -1254,6 +1254,151 @@ Promise.resolve().then(() => {
 })
 // ES Module 规范下输出顺序：5 6 3 7 4 2 1
 // CommonJS 规范下输出顺序：5 3 4 6 7 1 2
+```
+
+
+
+# 操作数据库`Control Database`
+
+在`NodeJS`环境下，使用JS语言对数据库中的数据执行增删改查的`DML`操作
+
+
+
+## `Use MySQL`
+
+```shell
+npm install mysql2
+```
+
+```js
+const MySQL = require('mysql2')
+
+// 创建与数据库连接
+const connection = MySQL.createConnection({
+  host: 'localhost',
+  port: 3306,
+  user: 'root',
+  password: '123456',
+  database: 'test',
+  multipleStatements: true, // 允许执行多个 SQL 语句
+})
+
+// 执行CRUD操作
+connection.query(
+  'SELECT `name`, `age` FROM `staff`;', // sql语句
+  (err, res) => {
+  if (err) {
+    console.log(err.message)
+  }
+  console.log('查询结果', res)
+})
+
+// 为了防止连接泄漏，应该在查询完成后关闭连接
+connection.end()
+
+// 使用SQL预编译模版，避免直接将用户输入拼接到 SQL 语句中，存在 SQL 注入风险
+// SQL注入：注入额外的SQL语句到最终查询中，导致结果与预期不符
+// 实际开发中，尽量使用MySQL提供的变量预编译模版，而不是直接拼接 SQL 语句
+const SQL = `
+SELECT * FROM staff
+WHERE id = ? AND name = ?;
+`
+connection.execute(
+  SQL,
+  [1, 'Kyle'], // 预编译参数，对应模版中的 ? 占位符
+  (err, res) => {
+    if (err) {
+      console.log(err.message)
+    }
+    console.log('查询结果', res)
+  }
+)
+```
+
+使用`Promise`风格的`API`
+
+```js
+const MySQLPromise = require('mysql2/promise')
+// 异步执行CRUD操作
+async function queryAsync() {
+  const connection = await MySQLPromise.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '123456',
+    database: 'test'
+  })
+  const [res] = await connection.query('SELECT `name`, `age` FROM `staff`;')
+  console.log('查询结果', res)
+  connection.end() // 关闭连接
+}
+queryAsync()
+```
+
+使用连接池管理与数据后的连接
+
+```js
+// 使用连接池
+const pool = MySQL.createPool({
+  host: 'localhost',
+  port: 3306,
+  user: 'root',
+  password: '123456',
+  database: 'test',
+  waitForConnections: true, // 当连接池中的连接数已用尽时，是否等待其他查询完成
+  connectionLimit: 10, // 连接池中的最大连接数
+  queueLimit: 0, // 连接池中的连接请求队列最大长度，0 表示不限制
+  multipleStatements: true, // 允许执行多个 SQL 语句
+  // 连接池中的连接在空闲时间超过 idleTimeout 毫秒后，将被自动关闭
+  idleTimeout: 1000 * 60 * 60, // 1 小时
+  // 连接池中的连接在被创建后，距离上次使用时间超过 maxIdle 毫秒后，将被自动关闭
+  maxIdle: 1000 * 60 * 60, // 1 小时
+})
+// 执行查询
+pool.execute(
+  SQL,
+  [1, 'Kyle'],
+  (err, res) => {
+    if (err) {
+      console.log(err.message)
+    }
+    console.log('查询结果', res)
+  }
+)
+```
+
+
+
+## `ORM`
+
+`Object Relational Mapping`对象关系映射，通过`ORM`框架，可以自动的把程序中的对象和数据库关联
+`ORM`框架会隐藏具体的数据库底层细节，让开发者使用同样的数据操作接口，完成对不同数据库的操作，其优势为：
+
+- 开发者不用关心数据库，仅需关心对象
+- 可轻易的完成数据库的移植
+- 无须拼接复杂的`SQL`语句即可完成精确查询
+
+![image-20250803150735091](./assets/image-20250803150735091.png)
+
+`NodeJS`中的`ORM`框架第三方库有：`sequelize`、`typeorm`、`mongoose`、`Prisma`
+
+
+
+# `MD5`加密
+
+对不能明文显示或传输的数据使用哈希算法进行单向加密，其特点为：
+
+- `hash`加密算法的其中一种
+- 可以将任何一个字符串，加密成一个固定长度的字符串
+- 同样的源字符串加密得到的结果固定一致
+- 单向加密，只能加密不能解密
+
+```shell
+npm install md5
+```
+
+```js
+const md5 = require('md5')
+const privacyData = md5('要加密的数据')
 ```
 
 
@@ -1708,35 +1853,6 @@ server.listen(8000, function() {
 > ```
 
 
-
-# 数据加密
-
-> 为保证用户数据的安全性和隐私性；
-
-
-
-#### md5
-
-> 数据加密第三方模块；
-
-
-
-###### Install
-
-> ```shell
-> npm install md5 --save
-> ```
-
-
-
-###### Use
-
-> ```javascript
-> // 加载数据加密第三方模块;
-> var md5 = require('md5');
-> 
-> var privacyData = md5('要加密的数据');
-> ```
 
 # nodemon
 
