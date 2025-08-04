@@ -1168,12 +1168,14 @@ const server = http.createServer(async (req, res) => {
 	// 此处可以用 new URL() 来解析请求的信息，req.method 是请求的方法
 	// 根据得到的信息，可以根据请求的路径来响应不同的内容，例如搭建静态资源服务器
 	const reqUrl = new URL(req.url, 'http://localhost:5000')
-	const pathname = reqUrl.pathname.substring(1) // 去除掉'/'
+	const pathname = reqUrl.pathname.substring(1) // 去除掉'/'，否则为绝对路径了
 	const filename = path.resolve(__dirname, 'public', pathname) // 拼接到public目录下的资源
+  res.setHeader('Content-Type', 'text/html;charset=utf-8') // 响应头
 	try {
 		const file = await handleFile(filename)
 		res.statusCode = 200
 		res.end(file)
+    // res.write() 可以使用多次，但最后一定要使用 end 来结束响应，否则客户端会一直等待
 	} catch (error) {
 		res.statusCode = 404
 		res.end(error)
@@ -1383,7 +1385,11 @@ pool.execute(
 
 
 
-# `MD5`加密
+# 第三方库
+
+
+
+## 数据加密`md5`
 
 对不能明文显示或传输的数据使用哈希算法进行单向加密，其特点为：
 
@@ -1399,6 +1405,100 @@ npm install md5
 ```js
 const md5 = require('md5')
 const privacyData = md5('要加密的数据')
+```
+
+
+
+## 数据验证`validate.js`
+
+```js
+const validate = require('validate')
+// 被验证的数据
+const obj = { name: 'Kyle' }
+// 设置验证规则
+const rule = {
+  // 根据被验证对象中的字段分别进行验证
+  name: {
+    presence: {
+      allowEmpty: false
+    },
+    type: 'string',
+    length: {
+      minimum: 2,
+      maximum: 5
+    }
+  }
+}
+// 验证结果，如果通过验证，则为`undefined`，如果不通过，则为错误信息
+const result = validate.validate(obj, rule)
+```
+
+
+
+## 日志记录`log4js`
+
+- 日志级别：例如调试日志、信息日志、错误日志等
+- 日志分类：例如`SQL`日志、请求日志
+- 日志出口：应该把日志写到哪？书写格式是什么
+
+```js
+const log4js = require('log4js') // 下载并引入依赖
+const path = require('path')
+// 定义日志配置
+log4js.configure({
+  // 日志出口
+  appenders: {
+    // 定义一个`sql`的日志出口
+    sql: {
+      type: 'file', // 日志类型为`file`文件
+      filename: path.resolve(__dirname, './logs/sql/logging.log'), // 日志文件的储存路径
+      maxLogSize: 1024 * 1024, // 单个日志文件最大字节叔
+      backups: 5, // 备份日志文件数
+      // 自定义日志输出格式，更多配置详见文档
+      layout: { type: 'basic' }
+    },
+    default: {
+      type: 'file',
+      filename: path.resolve(__dirname, './logs/default/logging.log')
+    }
+  },
+  // 日志分类
+  categories: {
+    // 定义一个`sql`的日志分类
+    sql: {
+      appenders: ['sql'], // 定义该分类使用`sql`出口的配置写入日志
+      level: 'all', // 该分类的日志级别
+    },
+    // 必需要定义一个`default`分类
+    default: {
+      appenders: ['default'],
+      level: 'all'
+    }
+  }
+})
+// 当进程程序退出时，确保日志记录完成
+process.on('exit', () => {
+  log4js.shutdown()
+})
+// 日志记录器实例
+const logger = log4js.getLogger()
+// 设置日志级别
+logger.level = 'all'
+// 写入日志记录
+logger.info('Info messages')
+logger.error('Error messages')
+
+// 导出分类中的logger
+const sqlLogger = log4js.getLogger('sql')
+
+// 搭配`sequelize`框架的`logging`配置自动写入日志
+new Sequelise('数据库名', '账号', '密码', {
+  host: '主机',
+  dialect: '数据库类型',
+  logging: (msg) => {
+    sqlLogger.debug(msg)
+  }
+})
 ```
 
 
@@ -1493,173 +1593,103 @@ Internet上的每台主机都分配了一个专门的地址，是唯一的；
 
 所有需要联网通信的应用程序都必须要占有一个端口号
 端口号用来定位服务器（主机）上具体的应用程序，作用是表示一台计算机中的特定进程所提供的服务
-端口号的范围在 0 ～ 65535；
-
-```javascript
-// 加载 http 核心模块：
-var http = require('http')
-// 加载 文件操作 核心模块：
-var fs = require('fs')
-// 使用createServer（）方法创建一个 web 服务器：
-var server = http.createServer()
-// 注册 request 请求事件，当有客户端请求过来时，自动触发事件，然后执行第二个参数（回调函数）：
-// 回调函数中接受两个参数：request、response
-
-// request（请求对象）：可以获取客户端的一些请求信息，例入请求路径；
-
-// response（响应对象）：可以给客户端发送响应的内容；
-// response（响应对象）有一个方法：response.write（），可以给客户端发送响应数据；
-// response.write（）可以使用多次，但最后一定要使用 end 来结束响应，否则客户端会一直等待！
-server.on('request', function(request, response) {
-console.log('收到客户端请求了！')
-console.log('请求路径是：' + request.url)
-
-  // response.write('Hello')
-// response.write('Node.js')
-// // 告诉客户端，响应已结束，可以呈现给用户了
-// response.end()
-
-// 更简单的书写，发送响应数据的同时，结束响应；
-// 给客户端发送的响应数据只能是二进制数据或者字符串；
-// response.end('Hello,Node,js')
-
-
-// 解决向客户端发送响应数据时出现乱码的情况
-// 告诉浏览器按照 utf-8 编码格式去解析响应数据；
-response.setHeader('Content-Type', 'text/html;charset=utf-8')
-// 在 http 协议中，Content-Type 就是告诉客户端收到的数据是什么类型的
-
-
-// 根据请求路径的不同，响应所不同的数据：
-
-// 1、获取请求路径
-// 请求路径都是以 / 开头的
-// request.url 获取的是端口号后面的那一部分路径
-var url = request.url
-// 2、判断路径，处理请求
-if (url === '/') {
-   response.end('<h2 style="color:red">这个页面是：Index Page</h2>')
-} else if (url === '/login') {
-   response.end('<h4>登录页面：Login Page</h4>');
-} else if (url === '/casePage') {
-   fs.readFile('./resource/index.html',function(error,data){
-      if(error){
-        response.end('<h3 style="color:red">没有读取到文件数据</h3>')
-      }else{
-        response.end(data.toString())
-      }
-   })
-} else {
-   response.end('Not Found! Is Error Page')
-}
-})
-
-// 绑定端口号，启动服务器：
-server.listen(8000, function() {
-  console.log('服务器已启动，可以通过 http://127.0.0.1:8000 来进行访问')
-})
-```
+端口号的范围在 0 ～ 65535
 
 
 
-# Express
+# 框架`express`
 
-> [Express 中文网](https://www.expressjs.com.cn/)
->
-> 基于 [Node.js](https://nodejs.org/en/) 平台，快速、开放、极简的 Web 框架
->
-> 原生的 http 核心模块在某些方面不足以满足开发需求；
->
-> 使用 express 提高效率，代码更统一；
+[Express 中文网](https://www.expressjs.com.cn/)
+基于NodeJS平台的快速、开放、极简的`Web`服务框架，代替原生`http`模块在某些方面不足以满足开发需求
 
 
 
 #### 安装
 
-> ```shell
-> npm install express --save
-> ```
+```shell
+npm install express
+```
 
 
 
 #### 基本语法
 
-> ```javascript
-> //加载express模块；
-> var express = require('express');
-> //创建服务器应用程序；
-> var app = express();
-> //当请求路径是‘/’，提交方法是‘get’时，触发callback回调函数；
-> app.get('/', function(request, response) {
-> 	response.send(`Hello World!`)
-> })
-> 
-> //开启监听8000端口服务；
-> app.listen(8000, function() {
-> 	console.log('server is beging')
-> })
-> ```
+```javascript
+//加载express模块；
+var express = require('express');
+//创建服务器应用程序；
+var app = express();
+//当请求路径是‘/’，提交方法是‘get’时，触发callback回调函数；
+app.get('/', function(request, response) {
+	response.send(`Hello World!`)
+})
+
+//开启监听8000端口服务；
+app.listen(8000, function() {
+	console.log('server is beging')
+})
+```
 
 
 
 #### 基本路由
 
-> 路由处理，不同的请求对应不同的处理：
->
-> 请求方法
->
-> 请求路径
->
-> 请求的回调函数
+路由处理，不同的请求对应不同的处理：
+
+请求方法
+
+请求路径
+
+请求的回调函数
 
 
 
 ###### get
 
-> 当以 ‘GET’的方式请求 ‘/index’路径时，执行对应的处理函数；
->
-> ```javascript
-> //加载express模块；
-> var express = require('express');
-> //创建服务器应用程序；
-> var app = express();
-> 
-> app.get('/index',(request,response)=>{
->   response.send('Hello World !');
-> })
-> ```
+当以 ‘GET’的方式请求 ‘/index’路径时，执行对应的处理函数；
+
+```javascript
+//加载express模块；
+var express = require('express');
+//创建服务器应用程序；
+var app = express();
+
+app.get('/index',(request,response)=>{
+response.send('Hello World !');
+})
+```
 
 
 
 ###### post
 
-> 当以 ‘POST’的方式请求 ‘/index’路径时，执行对应的处理函数；
->
-> ```javascript
-> //加载express模块；
-> var express = require('express');
-> //创建服务器应用程序；
-> var app = express();
-> 
-> app.post('/index',(request,response)=>{
->   response.send('Submit Method Is POST !');
-> })
-> ```
+当以 ‘POST’的方式请求 ‘/index’路径时，执行对应的处理函数；
+
+```javascript
+//加载express模块；
+var express = require('express');
+//创建服务器应用程序；
+var app = express();
+
+app.post('/index',(request,response)=>{
+response.send('Submit Method Is POST !');
+})
+```
 
 
 
 #### 静态资源服务
 
-> 可以直接访问该指定目录下的所有资源；
->
-> ```javascript
-> //加载express模块；
-> var express = require('express');
-> //创建服务器应用程序；
-> var app = express();
-> //这样可以通过 /public/xxx 的url路径访问  public 文件目录下的所有资源；
-> app.use('/public/',express.static('./public/'));
-> ```
+可以直接访问该指定目录下的所有资源；
+
+```javascript
+//加载express模块；
+var express = require('express');
+//创建服务器应用程序；
+var app = express();
+//这样可以通过 /public/xxx 的url路径访问  public 文件目录下的所有资源；
+app.use('/public/',express.static('./public/'));
+```
 
 
 
@@ -1671,138 +1701,138 @@ server.listen(8000, function() {
 
 ###### 安装
 
-> ```shell
-> npm install art-template --save
-> npm install express-art-template --save
-> ```
+```shell
+npm install art-template --save
+npm install express-art-template --save
+```
 
 
 
 ###### 配置
 
-> ```javascript
-> // 加载express模块；
-> var express = require('express');
-> // 创建服务器应用程序；
-> var app = express();
-> 
-> // 配置使用 art-template 模版引擎；
-> // 第一个参数 ‘art’ 表示渲染 ‘.art’ 格式文件时，才会使用 art-tempalte 模版引擎去渲染页面；
-> // 
-> app.engine('art', require('express-art-template'));
-> ```
+```javascript
+// 加载express模块；
+var express = require('express');
+// 创建服务器应用程序；
+var app = express();
+
+// 配置使用 art-template 模版引擎；
+// 第一个参数 ‘art’ 表示渲染 ‘.art’ 格式文件时，才会使用 art-tempalte 模版引擎去渲染页面；
+// 
+app.engine('art', require('express-art-template'));
+```
 
 
 
 ###### 使用
 
-> ```javascript
-> // 语法
-> response.render('template',{data});
-> // express 为 art-template 模版引擎提供了一个 render()方法；
-> ```
+```javascript
+// 语法
+response.render('template',{data});
+// express 为 art-template 模版引擎提供了一个 render()方法；
+```
 
 [^template]:要渲染的页面，路径会默认去项目中的 `views` 目录中寻找该页面文件；
 [^data]:模版引擎要渲染的动态数据；
 
-> ```javascript
-> app.get('/index', function (request, response) {
->     // express 为 art-template 配置了一个 response.render() 方法来渲染页面；
->     // 默认会去 views 目录中查找 index.art 页面文件;
->     response.render('index.art', {
->        user: {
->          name: 'aui',
->          tags: ['art', 'template', 'nodejs']
->        }
->     })
-> })
-> ```
+```javascript
+app.get('/index', function (request, response) {
+ // express 为 art-template 配置了一个 response.render() 方法来渲染页面；
+ // 默认会去 views 目录中查找 index.art 页面文件;
+ response.render('index.art', {
+    user: {
+      name: 'aui',
+      tags: ['art', 'template', 'nodejs']
+    }
+ })
+})
+```
 
 
 
 #### 获取POST请求体数据
 
-> [body-parser](https://www.npmjs.com/package/body-parser)
->
-> express提供的 request.query 只能获取`GET`请求体的查询字符串数据；
->
-> express中没有获取表单 `POST`请求体的API，需要使用第三方包`body-parser`；
+[body-parser](https://www.npmjs.com/package/body-parser)
+
+express提供的 request.query 只能获取`GET`请求体的查询字符串数据；
+
+express中没有获取表单 `POST`请求体的API，需要使用第三方包`body-parser`；
 
 
 
 ###### 安装
 
-> ```shell
-> npm install body-parser --save
-> ```
+```shell
+npm install body-parser --save
+```
 
 
 
 ###### 配置
 
-> ```javascript
-> var express = require('express')
-> //加载 body-parser 模块；
-> var bodyParser = require('body-parser')
-> var app = express()
->  
-> app.use(bodyParser.urlencoded({ extended: false }))
-> app.use(bodyParser.json())
-> ```
+```javascript
+var express = require('express')
+//加载 body-parser 模块；
+var bodyParser = require('body-parser')
+var app = express()
+
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
+```
 
 
 
 ###### 使用
 
-> ```javascript
-> app.post('/submit',function(request,response){
->   //与 ‘GET’ 请求时，express自带的request.query一样都能拿到表单数据对象；
->   var formData = request.body;
-> })
-> ```
+```javascript
+app.post('/submit',function(request,response){
+//与 ‘GET’ 请求时，express自带的request.query一样都能拿到表单数据对象；
+var formData = request.body;
+})
+```
 
 
 
 #### 重定向
 
-> ```javascript
-> response.redirect('/');
-> 
-> //原生 http 实现方式
-> response.statusCode = 302;
-> response.setHeader('Location','/');
-> ```
+```javascript
+response.redirect('/');
+
+//原生 http 实现方式
+response.statusCode = 302;
+response.setHeader('Location','/');
+```
 
 
 
 #### 包装路由
 
-> 一般开发时，为了让代码看起来美观简洁，每个文件都有专门的功能；
->
-> 将客户端的路由请求处理放在单独的文件中；
->
-> ```javascript
-> // router.js
-> // express 提供了专门包装路由的方法：
-> var router = express.Router();
-> 
-> // 请求主页面；
-> router.get('/', function(request, response){
->   	response.render('index.html');
-> })
-> 
-> // 导出 router 路由容器；
-> module.exports = router;
-> ```
->
-> ```javascript
-> // app.js
-> //路由请求处理请查看 ‘router.js’ 文件；
-> var router = require('./router.js');
-> 
-> // 将 路由容器挂载到 app 服务上；
-> app.use(router);
-> ```
+一般开发时，为了让代码看起来美观简洁，每个文件都有专门的功能；
+
+将客户端的路由请求处理放在单独的文件中；
+
+```javascript
+// router.js
+// express 提供了专门包装路由的方法：
+var router = express.Router();
+
+// 请求主页面；
+router.get('/', function(request, response){
+	response.render('index.html');
+})
+
+// 导出 router 路由容器；
+module.exports = router;
+```
+
+```javascript
+// app.js
+//路由请求处理请查看 ‘router.js’ 文件；
+var router = require('./router.js');
+
+// 将 路由容器挂载到 app 服务上；
+app.use(router);
+```
 
 
 
@@ -1810,47 +1840,47 @@ server.listen(8000, function() {
 
 #### express-session
 
-> 主要用于记录登录状态的第三方模块；
->
-> 默认`session`数据是内存存储，服务器一旦重启就会丢失；
+主要用于记录登录状态的第三方模块；
+
+默认`session`数据是内存存储，服务器一旦重启就会丢失；
 
 
 
 ###### 下载
 
-> ```shell
-> npm install express-session --save
-> ```
+```shell
+npm install express-session --save
+```
 
 
 
 ###### 配置
 
-> ```javascript
-> // 加载 express-session 模块；记录登录状态；
-> var session = require('express-session');
-> // 配置模块；
-> app.use(session({
-> // 配置加密字符串，会在原有的加密基础上加上这个字符串后再次加密；
-> 	secret: 'keyboard cat',
-> 	resave: false,
-> // 是否每次刷新初始化页面都添加发送一个识别钥匙；
-> 	saveUninitialized: true
-> }));
-> ```
+```javascript
+// 加载 express-session 模块；记录登录状态；
+var session = require('express-session');
+// 配置模块；
+app.use(session({
+// 配置加密字符串，会在原有的加密基础上加上这个字符串后再次加密；
+	secret: 'keyboard cat',
+	resave: false,
+// 是否每次刷新初始化页面都添加发送一个识别钥匙；
+	saveUninitialized: true
+}));
+```
 
 
 
 ###### 使用
 
-> ```javascript
-> // 添加
-> request.session.user = userdata;
-> response.redirect('/');
-> 
-> // 获取
-> console.log(request.session.user);
-> ```
+```javascript
+// 添加
+request.session.user = userdata;
+response.redirect('/');
+
+// 获取
+console.log(request.session.user);
+```
 
 
 
