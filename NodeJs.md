@@ -1269,6 +1269,7 @@ Promise.resolve().then(() => {
 ## `Use MySQL`
 
 ```shell
+# 为数据库安装驱动程序
 npm install mysql2
 ```
 
@@ -1382,6 +1383,29 @@ pool.execute(
 ![image-20250803150735091](./assets/image-20250803150735091.png)
 
 `NodeJS`中的`ORM`框架第三方库有：`sequelize`、`typeorm`、`mongoose`、`Prisma`
+
+
+
+## `Sequelize`
+
+一个基于`Promise`的`NodeJS`中的`ORM`框架，具有强大的事务支持，关联关系，预读和延迟加载，读取复制等功能
+
+```shell
+npm install --save sequelize
+# 再为所选数据库安装驱动程序
+npm install --save mysql2
+```
+
+连接到数据库，[详细文档](https://www.sequelize.cn/core-concepts/model-basics)
+
+```js
+const sequelize = new Sequelize('database', 'username', 'password', {
+  host: 'localhost',
+  port: '3306',
+  dialect: 'mysql',
+  logging: '日志'
+})
+```
 
 
 
@@ -1503,6 +1527,35 @@ new Sequelise('数据库名', '账号', '密码', {
 
 
 
+## `nodemon`
+
+解决频繁修改代码重启服务器的问题
+
+```shell
+npm install nodemon -D
+# 非全局安装，使用`npx`运行`node_modules`中本地的脚本
+npx nodemon app.js
+```
+
+项目目录下新建`nodemon.json`配置文件，详见[文档](https://github.com/remy/nodemon)
+
+```json
+{
+  "ignore": [
+    "node_modules",
+    "package.json",
+    "package-lock.json",
+    "nodemon.json"
+  ],
+  "watch": [ "**/*.js" ],
+  "env": {
+    "NODE_ENV": "development"
+  }
+}
+```
+
+
+
 # 如何发布包？
 
 1. 移除淘宝镜像源，如果有
@@ -1597,244 +1650,147 @@ Internet上的每台主机都分配了一个专门的地址，是唯一的；
 
 
 
-# 框架`express`
+# `Express`
 
-[Express 中文网](https://www.expressjs.com.cn/)
+[express 文档](https://www.expressjs.com.cn/)
 基于NodeJS平台的快速、开放、极简的`Web`服务框架，代替原生`http`模块在某些方面不足以满足开发需求
-
-
-
-#### 安装
 
 ```shell
 npm install express
 ```
 
-
-
-#### 基本语法
-
 ```javascript
-//加载express模块；
-var express = require('express');
-//创建服务器应用程序；
-var app = express();
-//当请求路径是‘/’，提交方法是‘get’时，触发callback回调函数；
-app.get('/', function(request, response) {
-	response.send(`Hello World!`)
+const express = require('express')
+const app = express()
+// 配置请求映射，如果请求方法和请求路径均满足匹配，则处理函数执行
+// app.请求方法('请求路径', callback)
+app.get('/hello', (req, res) => {
+  // req.headers 请求头
+  // req.path 请求路径
+  // req.query // 查询参数
+  
+  res.send(`Hello World!`) // 内部会自动调用 end
+  // 重定向
+  res.status(301).header('location', 'https://www.bilibili.com/').end()
+  // 或者
+  res.redirect(301, 'https://www.bilibili.com/')
 })
 
-//开启监听8000端口服务；
-app.listen(8000, function() {
+// 同时也可以类似于`vue-router`一样的动态路由
+app.put('/artical/:id', (req, res) => {
+  // req.params 获取动态参数
+})
+
+// 匹配所有请求请求方法和路径
+app.all('*', () => {})
+
+// 中间件,静态资源访问通过`/static/xxx`路径访问public文件目录下的资源
+// 当路径以`/static`开头，会截取后面的`path`路径到项目目录`public`下去查找文件
+// 找到文件，则直接返回文件内容，没找到报404
+app.use('/static', express.static(path.resolve(__dirname, './public')))
+
+// 开启监听8000端口服务
+app.listen(8000, () => {
 	console.log('server is beging')
 })
 ```
 
 
 
-#### 基本路由
+## 中间件`MiddleWare`
 
-路由处理，不同的请求对应不同的处理：
+![image-20250805173449591](./assets/image-20250805173449591.png)
 
-请求方法
+中间件本质上是一个函数
+能够访问请求对象`request`、响应对象`res`以及程序的请求 - 响应循环中的下一个中间件函数`next`
+函数中需要手动调用`next()`方法执行到后续中间件去处理，将请求传递给下一个中间件
 
-请求路径
+合理使用中间件可以使代码结构更清晰，职责更单一，提高代码的可维护性和可扩展性
 
-请求的回调函数
+中间件使用注意点：
 
+1. 中间件按照它们被定义的顺序执行，**先注册，先执行**
+2. 不调用`next()`，请求会被卡在当前中间件，客户端会一直等待响应，请求会被阻塞
+3. 路由处理，例如`app.get()`，本质上也是一种中间件
+4. **如果发送了响应体`res.send()`，会终结请求 - 响应循环，后续中间件不再执行**
+5. 对所有路径生效的中间件，会先于限定路由的中间件，因为注册更早
+6. **通常放在所有中间件和路由的最后，这样才能捕获前面产生的所有错误**
+7. 响应没有结束，如果后续已经没有了中间件，则直接响应`404`
+8. 如果中间件发生了错误，例如`throw Error`，相当于调用了`next(错误对象)`
+   则寻找后续的错误处理中间件，如果没有错误处理中间件，则响应`500`
 
+```js
+const app = express()
+// 定义一个中间件
+const myMiddleware = (req, res, next) => {
+  console.log('Request URL:', req.url)
+  // 调用 next() 让请求进入下一个中间件
+  next()
+}
+// 通常使用`.use`来使用中间件
+app.use(myMiddleware) // 全局中间件，件任何请求过来都会被触发执行，且优先被执行
+```
 
-###### get
+怎么限定中间件只对特定路径生效？
 
-当以 ‘GET’的方式请求 ‘/index’路径时，执行对应的处理函数；
-
-```javascript
-//加载express模块；
-var express = require('express');
-//创建服务器应用程序；
-var app = express();
-
-app.get('/index',(request,response)=>{
-response.send('Hello World !');
+```js
+// 只对`/user`路径生效的中间件
+app.use('/user', (req, res, next) => {
+  console.log('访问了 /user 相关路径')
+  next()
 })
 ```
 
+错误处理中间件有四个参数，必须指定四个参数才能被识别为错误处理中间件
+
+```js
+export.errMiddleware = (err, req, res, next) => {
+  res.status(500).send({
+    code: 500,
+    msg: err.message
+  })
+}
+```
+
+同样，`express`内置了一些常用的中间件
+
+```js
+// 解析`JSON`格式的请求体
+app.use(express.json())
+
+// 解析`URL-encoded`格式的请求体
+app.use(express.urlencoded({ extended: true }))
+
+// 提供静态文件服务
+app.use(express.static('public'))
+
+```
 
 
-###### post
 
-当以 ‘POST’的方式请求 ‘/index’路径时，执行对应的处理函数；
+## 路由
+
+一般开发时，为了让代码看起来美观简洁，将客户端的路由请求处理放在单独的路由文件中
 
 ```javascript
-//加载express模块；
-var express = require('express');
-//创建服务器应用程序；
-var app = express();
+// userRouter.js
+// express 提供了专门包装路由的方法
+const router = express.Router()
 
-app.post('/index',(request,response)=>{
-response.send('Submit Method Is POST !');
-})
-```
-
-
-
-#### 静态资源服务
-
-可以直接访问该指定目录下的所有资源；
-
-```javascript
-//加载express模块；
-var express = require('express');
-//创建服务器应用程序；
-var app = express();
-//这样可以通过 /public/xxx 的url路径访问  public 文件目录下的所有资源；
-app.use('/public/',express.static('./public/'));
-```
-
-
-
-#### 使用art-template
-
-[使用手册](http://aui.github.io/art-template/express/)
-
-
-
-###### 安装
-
-```shell
-npm install art-template --save
-npm install express-art-template --save
-```
-
-
-
-###### 配置
-
-```javascript
-// 加载express模块；
-var express = require('express');
-// 创建服务器应用程序；
-var app = express();
-
-// 配置使用 art-template 模版引擎；
-// 第一个参数 ‘art’ 表示渲染 ‘.art’ 格式文件时，才会使用 art-tempalte 模版引擎去渲染页面；
-// 
-app.engine('art', require('express-art-template'));
-```
-
-
-
-###### 使用
-
-```javascript
-// 语法
-response.render('template',{data});
-// express 为 art-template 模版引擎提供了一个 render()方法；
-```
-
-[^template]:要渲染的页面，路径会默认去项目中的 `views` 目录中寻找该页面文件；
-[^data]:模版引擎要渲染的动态数据；
-
-```javascript
-app.get('/index', function (request, response) {
- // express 为 art-template 配置了一个 response.render() 方法来渲染页面；
- // 默认会去 views 目录中查找 index.art 页面文件;
- response.render('index.art', {
-    user: {
-      name: 'aui',
-      tags: ['art', 'template', 'nodejs']
-    }
- })
-})
-```
-
-
-
-#### 获取POST请求体数据
-
-[body-parser](https://www.npmjs.com/package/body-parser)
-
-express提供的 request.query 只能获取`GET`请求体的查询字符串数据；
-
-express中没有获取表单 `POST`请求体的API，需要使用第三方包`body-parser`；
-
-
-
-###### 安装
-
-```shell
-npm install body-parser --save
-```
-
-
-
-###### 配置
-
-```javascript
-var express = require('express')
-//加载 body-parser 模块；
-var bodyParser = require('body-parser')
-var app = express()
-
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
-```
-
-
-
-###### 使用
-
-```javascript
-app.post('/submit',function(request,response){
-//与 ‘GET’ 请求时，express自带的request.query一样都能拿到表单数据对象；
-var formData = request.body;
-})
-```
-
-
-
-#### 重定向
-
-```javascript
-response.redirect('/');
-
-//原生 http 实现方式
-response.statusCode = 302;
-response.setHeader('Location','/');
-```
-
-
-
-#### 包装路由
-
-一般开发时，为了让代码看起来美观简洁，每个文件都有专门的功能；
-
-将客户端的路由请求处理放在单独的文件中；
-
-```javascript
-// router.js
-// express 提供了专门包装路由的方法：
-var router = express.Router();
-
-// 请求主页面；
-router.get('/', function(request, response){
-	response.render('index.html');
+// 路由处理
+router.get('/', function(req, res) {
+	res.render('index.html')
 })
 
-// 导出 router 路由容器；
-module.exports = router;
+// 导出 router 路由容器
+module.exports = router
 ```
 
 ```javascript
-// app.js
-//路由请求处理请查看 ‘router.js’ 文件；
-var router = require('./router.js');
-
-// 将 路由容器挂载到 app 服务上；
-app.use(router);
+const userRouter = require('./userRouter.js')
+// 将 路由容器挂载到 app 服务上
+app.use(userRouter)
 ```
-
-
 
 
 
@@ -1881,36 +1837,6 @@ response.redirect('/');
 // 获取
 console.log(request.session.user);
 ```
-
-
-
-# nodemon
-
-第三方命令行工具`nodemon`，可以帮助解决频繁修改代码重启服务器的问题；
-
-`nodemon`是一个基于 Node.JS 开发的第三方命令行工具，需要 npm 下载安装；
-
-```shell
-npm install nodemon --global
-```
-
-```shell
-# Mac 电脑上安装出现权限不够的问题：
-# The operation was rejected by your operating system.
-# npm ERR! It is likely you do not have the permissions to access this file as the current user.
-# 在命令前面加上 sudo，则为切换为有权限的用户再执行安装；
-sudo npm install nodemon --global
-```
-
-安装完成后，用 nodemon 代替 node 来启动服务；
-
-只要`Ctrl + s`保存文件，服务会自动重启；
-
-```shell
-nodemon app.js
-```
-
-
 
 # __dirname
 
