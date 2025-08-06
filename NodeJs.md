@@ -1199,6 +1199,15 @@ async function handleFile(filename) {
 
 
 
+## `crypto`
+
+数据加密模块
+
+```js
+```
+
+
+
 # `Socket`
 
 在计算机网络中，`Socket`是一个抽象概念，用于实现不同设备或进程间的通信
@@ -1556,6 +1565,54 @@ npx nodemon app.js
 
 
 
+## `cookie-parser`
+
+解析`cookie`的`express`中间件
+使用之后，会在`req`对象中注入`.cookies`属性，用于获取所有请求传递过来的`cookie`
+在`res`对象中注入`.cookie()`方法，用于设置`cookie`
+
+```shell
+npm install cookie-parser
+```
+
+```js
+const cookieParser = require('cookie-parser')
+// 使用
+app.use(cookieParser())
+
+// 在路由中使用
+app.post('/login', (req, res) => {
+  // 获取`cookie`
+  console.log(req.cookies.token, 'req.cookies')
+  // 获取签名加密后的`cookie`
+  console.log(req.signedCookies.token, 'req.signedCookies')
+  
+  // 设置`cookie`
+  res.cookie('token', 'test', {
+    path: '/',
+    domain: 'localhost',
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 毫秒
+    signed: true // 签名加密
+  })
+  // 其他代码...
+})
+```
+
+
+
+## `path-to-regexp`
+
+```js
+const pathToReRegexp = require('path-to-regexp')
+
+// 得到一个能匹配该路由规则的正则表达式
+const reg = pathToReRegexp('/api/student/:id')
+reg.test('/api/student/237671') // true
+```
+
+
+
 # 如何发布包？
 
 1. 移除淘宝镜像源，如果有
@@ -1630,23 +1687,6 @@ nvm use 18.19.1
 # 查看nvm的文件位置
 nvm root
 ```
-
-
-
-# IP地址和 端口号
-
-## IP 地址
-
-IP 地址由4部分数字组成，每部分数字对应8位二进制数字，各部分之间用小数点分开，例如：`211.152.65.112`
-Internet上的每台主机都分配了一个专门的地址，是唯一的；
-
-
-
-## 端口号
-
-所有需要联网通信的应用程序都必须要占有一个端口号
-端口号用来定位服务器（主机）上具体的应用程序，作用是表示一台计算机中的特定进程所提供的服务
-端口号的范围在 0 ～ 65535
 
 
 
@@ -1758,43 +1798,100 @@ export.errMiddleware = (err, req, res, next) => {
 // 解析`JSON`格式的请求体
 app.use(express.json())
 
-// 解析`URL-encoded`格式的请求体
+// 解析`application/x-www-form-urlencoded`格式的请求体
+// 参数格式与`get`的查询参数格式类似，但放在请求体中，形如：username=admin&password=123456
 app.use(express.urlencoded({ extended: true }))
 
 // 提供静态文件服务
 app.use(express.static('public'))
-
 ```
 
 
 
-## 路由
+## 路由包装
 
 一般开发时，为了让代码看起来美观简洁，将客户端的路由请求处理放在单独的路由文件中
+并且因为路由处理本质上也是一种中间件，所以可以这样写，代码结构更整齐
 
 ```javascript
-// userRouter.js
-// express 提供了专门包装路由的方法
-const router = express.Router()
+const studentRouter = express.Router()
 
-// 路由处理
-router.get('/', function(req, res) {
-	res.render('index.html')
+// 路由处理，当请求路径是`/api/student/add`时会被捕获
+studentRouter.post('/add', (req, res) => {
+  console.log(req.body, 'req.body')
+  console.log(req.query, 'req.query')
+  console.log(req.params, 'req.params')
+  console.log(req.cookies, 'req.cookies')
+  
+  res.send('<h1>Hello!</h1>')
 })
 
 // 导出 router 路由容器
-module.exports = router
+module.exports = studentRouter
 ```
 
 ```javascript
-const userRouter = require('./userRouter.js')
-// 将 路由容器挂载到 app 服务上
-app.use(userRouter)
+const userRouter = require('./studentRouter.js')
+app.use('/api/student', studentRouter)
 ```
 
 
 
-#### express-session
+## 登录&认证
+
+1. 使用`cookie-parser`中间件，让`express`拥有解析和设置`cookie`的能力
+
+   ```js
+   // 解析 Cookie 中间件，下载依赖`cookie-parser`
+   // 使用之后，会在req对象中注入cookies属性，用于获取所有请求传递过来的cookie
+   // 在res对象中注入cookie方法，用于设置cookie
+   const cookieParser = require('cookie-parser')
+   app.use(cookieParser())
+   // 此处再使用一个验证`cookie`的中间件
+   ```
+
+2. 登录成功后，设置`cookie`，适配浏览器和其他客户端
+
+   ```js
+   // 设置`cookie`，这一步在实际工作中需要加密，不能明文传输
+   const value = 'W0921052'
+   res.cookie('token', value, {
+     path: '/',
+     domain: 'localhost',
+     httpOnly: true,
+     maxAge: 1000 * 60 * 60 * 24 * 7, // 毫秒
+   })
+   
+   // 为了适配其他客户端（app、智能终端...），手动设置在`header`中
+   res.header('authorization', value)
+   ```
+
+3. 对后续请求进行认证（简易版），`cookie`需要被加密后再解密
+
+   ```js
+   const needAuth = ['/api/student/add']
+   
+   // 验证`cookie`的中间件
+   module.exports = (req, res, next) => {
+     // 验证哪些路由需要验证
+     if (!needAuth.includes(req.path)) {
+       next()
+     }
+     // 从请求头中获取`cookie`
+     const token = req.cookies.token || req.headers.authorization
+     if (!token) {
+       res.status(403).send('未登录')
+       return
+     }
+     console.log('验证成功')
+     req.token = token
+     next()
+   }
+   ```
+
+
+
+# express-session
 
 主要用于记录登录状态的第三方模块；
 
