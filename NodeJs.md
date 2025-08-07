@@ -1208,6 +1208,30 @@ async function handleFile(filename) {
 
 
 
+## `cors`
+
+NodeJs中封装了处理跨域请求的内置模块
+
+```js
+const core = require('cors')
+
+// express
+app.use(cors({
+  origin(origin, callback) {
+    if (whiteList.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('not allow'))
+    }
+  },
+  // 默认携带cookie的凭证请求还是会跨域
+  // 设置该字段为`true`，则相当于`res.header('access-control-allow-credentials', true)`
+  credentials: true
+}))
+```
+
+
+
 # `Socket`
 
 在计算机网络中，`Socket`是一个抽象概念，用于实现不同设备或进程间的通信
