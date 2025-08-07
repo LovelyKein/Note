@@ -1861,7 +1861,7 @@ app.use('/api/student', studentRouter)
 
 
 
-## 登录&认证
+## `Cookie`登录&认证
 
 1. 使用`cookie-parser`中间件，让`express`拥有解析和设置`cookie`的能力
 
