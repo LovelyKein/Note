@@ -1593,7 +1593,6 @@ npx nodemon app.js
 
 解析`cookie`的`express`中间件
 使用之后，会在`req`对象中注入`.cookies`属性，用于获取所有请求传递过来的`cookie`
-在`res`对象中注入`.cookie()`方法，用于设置`cookie`
 
 ```shell
 npm install cookie-parser
@@ -1612,7 +1611,7 @@ app.post('/login', (req, res) => {
   console.log(req.signedCookies.token, 'req.signedCookies')
   
   // 设置`cookie`
-  res.cookie('token', 'test', {
+  res.cookie('token', '123456', {
     path: '/',
     domain: 'localhost',
     httpOnly: true,
@@ -1633,6 +1632,75 @@ const pathToReRegexp = require('path-to-regexp')
 // 得到一个能匹配该路由规则的正则表达式
 const reg = pathToReRegexp('/api/student/:id')
 reg.test('/api/student/237671') // true
+```
+
+
+
+## `express-session`
+
+用于记录登录状态的中间件模块，`session`数据默认是内存存储，服务器一旦重启就会丢失
+
+自`1.5.0`版本起，模块正常运行不再需要使用`cookie-parser`中间件，可以直接在`req/res`上读写`Cookie`
+
+```shell
+npm install express-session --save
+```
+
+```javascript
+const session = require('express-session')
+// 注册中间件
+app.use(session({
+  // 配置加密字符串，会在原有的加密基础上加上这个字符串后再次加密
+  // 建议将密钥配置在环境变量中
+  secret: 'keyboard cat',
+  // 设置`cookie`中的`key`属性的值，即名称
+  name: 'sessionId',
+  resave: false,
+  // 是否每次刷新初始化页面都添加发送一个识别钥匙
+  saveUninitialized: true,
+  // SessionID 载体`cookie`的配置
+  cookie: {
+    secure: true,
+    httpOnly: true,
+    maxAge: null,
+    path: '/'
+  }
+}))
+
+app.post('/api/login', (req, res) => {
+  if (判断用户名和密码是否正确) {
+    // 登录成功，设置`session`数据
+    request.session.user = userdata
+  } else {
+    res.status(500).send('登录出错')
+  }
+})
+// 权限控制中间件 - 验证用户是否登录
+app.use((req, res, next) => {
+  if (req.session && req.session.user) {
+    return next() // 已登录，继续处理请求
+  }
+  // 未登录，重定向到登录页
+  res.status(500).send('请先登录账号')
+})
+
+// 退出登录，销毁`session`
+req.session.destroy()
+```
+
+
+
+## `connect-history-api-fallback`
+
+配合`express`框架，解决前端项目带包后在`history`路由模式下访问非根路径路由报错`404`错误
+
+```js
+const history = require('connect-history-api-fallback')
+app.use(history())
+
+// 静态资源目录（Vue打包后的dist目录）
+const staticDir = path.join(__dirname, '../client/dist')
+app.use(express.static(staticDir))
 ```
 
 
@@ -1915,51 +1983,9 @@ app.use('/api/student', studentRouter)
 
 
 
-# express-session
-
-主要用于记录登录状态的第三方模块；
-
-默认`session`数据是内存存储，服务器一旦重启就会丢失；
-
-
-
-###### 下载
-
-```shell
-npm install express-session --save
-```
-
-
-
-###### 配置
-
-```javascript
-// 加载 express-session 模块；记录登录状态；
-var session = require('express-session');
-// 配置模块；
-app.use(session({
-// 配置加密字符串，会在原有的加密基础上加上这个字符串后再次加密；
-	secret: 'keyboard cat',
-	resave: false,
-// 是否每次刷新初始化页面都添加发送一个识别钥匙；
-	saveUninitialized: true
-}));
-```
-
-
-
-###### 使用
-
-```javascript
-// 添加
-request.session.user = userdata;
-response.redirect('/');
-
-// 获取
-console.log(request.session.user);
-```
-
 # __dirname
+
+
 
 > 动态地获取当前文件模块所属目录的绝对路径；
 >
