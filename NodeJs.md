@@ -821,7 +821,7 @@ function foo() {
 
 - **事件驱动**：通过`on('data')`、`on('end')`等监听数据流动
 - **背压`Backpressure`**：自动控制数据传输速率，避免内存溢出
-- **管道`Pipe`**：通过`stream.pipe()`连接多个流，简化数据处理流程
+- **管道`Pipe`**：通过`stream.pipe()`连接多个流，简化数据处理流程，自动传输数据（文件读写流、`HTTP`请求响应流）
 
 
 
@@ -1705,6 +1705,130 @@ app.use(express.static(staticDir))
 
 
 
+## `multer`
+
+`multer`是一个用于处理`NodeJS`中请求体为`multipart/form-data`类型数据的中间件，**主要用于处理文件上传**
+不建议全局注册，只在对应的路由中注册使用
+
+```shell
+npm install multer
+```
+
+```js
+const express = require('express')
+const multer = require('multer')
+const path = require('path')
+const app = express()
+
+// 配置存储引擎 - 存储到磁盘
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    // 指定文件存储目录，确保目录已存在，否则会报错
+    cb(null, path.resolve(__dirname, './uploads'))
+  },
+  filename: function (req, file, cb) {
+    // 提取后缀名
+    const ext = path.extname(file.originalname)
+    cb(null, Date.now() + '-' + file.fieldname + ext)
+  }
+})
+
+// 文件过滤函数 - 只允许特定类型的文件
+const fileFilter = (req, file, cb) => {
+  // 接受图片文件
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true)
+  } else {
+    // 拒绝其他类型文件
+    cb(new Error('只允许上传图片文件!'), false)
+  }
+}
+
+// 初始化 multer 中间件
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 1024 * 1024 * 5 // 限制文件大小为 5MB
+  },
+  fileFilter
+});
+
+// 上传方法：single ｜ array | fields | none | any
+// 单文件上传
+app.post('/upload/single', upload.single('avatar'), (req, res) => {})
+// 多文件上传 - 接受名为 'photos' 的字段，最多上传 5 个文件
+app.post('/upload/multiple', upload.array('photos', 5), (req, res) => {})
+// 处理不同字段的文件上传
+app.post('/upload/fields', upload.fields([
+  { name: 'avatar', maxCount: 1 },
+  { name: 'gallery', maxCount: 8 }
+]), (req, res) => {})
+
+// 上传成功后，文件信息会被添加到请求对象中：req.file | req.files
+```
+
+
+
+## `jimp`
+
+是一个纯JS实现的图像处理库，跨平台，兼容在NodeJS环境和浏览器中运行
+
+- 提供图像缩放、裁剪、旋转、滤镜、颜色调整等基础操作，以及文字叠加、图像合成（水印）等进阶功能
+- 支持`Promise`异步处理，可以链式调用
+
+适用场景：
+
+- **NodeJS后端**：批量处理用户上传的图像（如压缩、加水印）
+- **前端浏览器**：在客户端实时处理图像（如头像裁剪、滤镜预览）
+- **工具脚本**：快速编写图像处理脚本（如批量转换格式、生成缩略图）
+
+```js
+const Jimp = require('jimp')
+const path = require('path')
+
+// 实现给图片增加文字水印的功能
+async function processImage() {
+  // 读取图像
+  const image = await Jimp.read(path.resolve(__dirname, './resource/input.jpg'))
+  await image
+    .resize(400, Jimp.AUTO) // 宽度400，高度按比例自适应
+    .greyscale() // 转为灰度图
+    .print(
+      await Jimp.loadFont(Jimp.FONT_SANS_16_WHITE), // 加载字体
+      10, 10, // 文字位置（x, y）,左上角为原点
+      'Hello Jimp!' // 文字内容
+    )
+    .write(path.resolve(_dirname, './resource/waterMark.jpg')) // 保存输出
+}
+processImage().catch(err => console.error('错误：', err))
+```
+
+
+
+## `http-proxy-middleware`
+
+一个基于NodeJS的`HTTP`代理中间件库，主要用于在开发环境中实现API请求代理，解决前端开发中常见的跨域问题
+前端工程化项目（如 React、Vue、Webpack、Vite等）的本地开发中的代理`proxy`配置项就是基于此的封装
+
+```js
+const express = require('express')
+const { createProxyMiddleware } = require('http-proxy-middleware')
+
+const app = express()
+
+// 配置代理规则，当以`proxy_api`开头的请求会被转发
+app.use('/proxy_api', createProxyMiddleware({ 
+  target: 'http://api.example.com',  // 目标服务器地址
+  changeOrigin: true,                // 改变请求头中的 Host 字段
+  pathRewrite: {                     // 路径重写规则
+    '^/proxy_api': ''                // 将 /api 前缀去掉
+  }
+}))
+app.listen(5000)
+```
+
+
+
 # 如何发布包？
 
 1. 移除淘宝镜像源，如果有
@@ -1727,7 +1851,7 @@ app.use(express.static(staticDir))
    ```
 
 4. 创建工程根目录，并使用`npm int`初始化，确认初始化的配置，确认包名，包名不能有大写字母
-   包名即使发布在npm上的名称，也是安装依赖时的名称
+   包名即是发布在npm上的名称，也是安装依赖时的名称
 
    ```json
    {
@@ -1910,11 +2034,7 @@ const studentRouter = express.Router()
 
 // 路由处理，当请求路径是`/api/student/add`时会被捕获
 studentRouter.post('/add', (req, res) => {
-  console.log(req.body, 'req.body')
-  console.log(req.query, 'req.query')
-  console.log(req.params, 'req.params')
-  console.log(req.cookies, 'req.cookies')
-  
+  console.log(req.body, req.query, req.params, req.cookies)
   res.send('<h1>Hello!</h1>')
 })
 
@@ -1976,10 +2096,101 @@ app.use('/api/student', studentRouter)
        return
      }
      console.log('验证成功')
-     req.token = token
+     req.token = token // 交给后续处理
      next()
    }
    ```
+
+
+
+# 请求代理`Proxy`
+
+![image-20250810002925337](./assets/image-20250810002925337.png)
+
+
+
+# 二维码
+
+一种**矩阵式二维条码**，它通过在平面上分布黑白相间的图形（矩阵点），来记录数据符号信息
+与传统的一维条码（如商品包装上的条形码）相比，二维码能存储更多类型的数据，且具有更高的信息密度和纠错能力
+
+
+
+## 工作原理
+
+- **信息编码**：将需要存储的信息（如文字、网址）按照特定算法转换为黑白像素的矩阵图案
+
+  深色为1，白色为0，不同的黑白组合代表不同的二进制数据
+
+- **位置探测组**：二维码的三个角各有一个方形定位图案，帮助扫码设备快速识别二维码的位置、大小和方向
+
+- **解码**：扫码设备捕捉到二维码图像通过分析黑白像素的分布，将其还原为原始信息并执行相应操作（如跳转网页、显示文字等）
+
+- **纠错等级**：分为`L | M | Q | H`四个等级，等级越高容错越高，但信息表达量越少
+
+  这也是为什么有些二维码某些区域破损了也可以扫出来
+
+- **版本**：二维码有40个版本（1～40），版本越高，矩阵尺寸越大
+
+  Version 1 为 21×21 像素，Version 40 为 177×177 像素，可存储的信息越多
+
+
+
+## 生成二维码
+
+### 服务端
+
+```shell
+npm install qrcode
+```
+
+```js
+const QRCode = require('qrcode')
+const path = require('path')
+
+const url = 'https://www.bilibili.com/?_enter_from=new_home_page'
+const qrcodePath = path.join(__dirname, './image/qrcode.png')
+// 直接二维码图片
+QRCode.toFile(qrcodePath, url, {
+  color: {
+    dark: '#00F',  // Blue dots
+    light: '#ffffff' // white background
+  }
+}, (err) => {
+  if (err) throw err
+  console.log('done')
+})
+// 生成 base64 编码的二维码
+QRCode.toDataURL(url, {
+  color: {
+    dark: '#00F',
+    light: '#ffffff'
+  }
+}, (err, dataURL) => {
+  if (err) throw err
+  console.log(dataURL)
+})
+```
+
+### 浏览器端
+
+```html
+<!-- 引入库 -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+<!-- HTML容器 -->
+<div id="qrcode"></div>
+<script>
+  // 生成二维码
+  new QRCode(document.getElementById("qrcode"), {
+    text: "https://example.com", // 二维码内容
+    width: 128,                 // 宽度
+    height: 128,                // 高度
+    colorDark: "#000000",       // 前景色
+    colorLight: "#ffffff",      // 背景色
+    correctLevel: QRCode.CorrectLevel.H // 纠错等级（H最高）
+  })
+</script>
+```
 
 
 
