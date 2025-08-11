@@ -1,16 +1,18 @@
 # NodeJS?
 
-Node不是一门语言，不是框架，而是一个基于`Chrome V8`引擎的JavaScript运行环境（平台）
-简单来说就是 Node.js 可以解析和执行JavaScript代码，使用`C++`语言开发
-特性：
-
-- non-blocking I/O(Input/Output) model（非阻塞 IO 模型，异步）
-- lightweight and efficient（轻量和高效）
-
-Node中的全局对象是`global`
+NodeJS不是一门语言，不是框架，而是一个基于`Chrome V8`引擎的JavaScript运行环境（平台）
+简单来说就是NodeJS可以解析和执行JavaScript代码，使用`C++`语言开发
+特性：**轻量和高效、非阻塞`I/O`模型（异步）**
 
 ```js
+// NodeJS中的全局对象是`global`
 console.log(global)
+
+// 动态地获取当前文件所属目录的绝对路径
+console.log(__dirname)
+
+// 动态地获取当前文件的绝对路径
+console.log(__filename)
 ```
 
 安装`@types/node`第三方库，方便开发时的语法提示
@@ -18,6 +20,13 @@ console.log(global)
 ```shell
 npm i @types/node -D
 ```
+
+NodeJS组成原理：
+
+![image-20250811192704858](./assets/image-20250811192704858.png)
+
+V8引擎的扩展和对扩展的编译，是通过一个工具`gyp`
+某些第三方库需要使用`node-gyp`工具进行构建，因此可能需要先全局安装`node-gyp`模块
 
 
 
@@ -72,6 +81,8 @@ async function loadESM() {
   esmModule.default()
 }
 ```
+
+
 
 **请注意！在`ES Module`规范中，无法直接使用`__dirname`和`__filename`**
 
@@ -1210,7 +1221,7 @@ async function handleFile(filename) {
 
 ## `cors`
 
-NodeJs中封装了处理跨域请求的内置模块
+NodeJS中封装了处理跨域请求的内置模块
 
 ```js
 const core = require('cors')
@@ -1229,21 +1240,6 @@ app.use(cors({
   credentials: true
 }))
 ```
-
-
-
-# `Socket`
-
-在计算机网络中，`Socket`是一个抽象概念，用于实现不同设备或进程间的通信
-
-它是网络编程的基础接口，让应用程序能够通过网络发送和接收数据
-
-`Socket`通信基于{客户端-服务器}的`C/S`模型，主要基于两种传输协议：
-
-- `TCP(Transmission Control Protocol)`：面向连接、可靠、有序的字节流协议
-- `UDP(User Datagram Protocol)`：无连接、不可靠、快速的数据报协议
-
-核心特性：`Socket`是**全双工（Full-duplex）**的，即双方可同时发送和接收数据
 
 
 
@@ -2193,27 +2189,3 @@ QRCode.toDataURL(url, {
 ```
 
 
-
-# __dirname
-
-
-
-> 动态地获取当前文件模块所属目录的绝对路径；
->
-> ```javascript
-> // 当一个文件的目录为: /Users/zoukai/Desktop/NodeJs/Practise/blog/app.js
-> console.log(__dirname);
-> // __dirname = /Users/zoukai/Desktop/NodeJs/Practise/blog
-> ```
-
-
-
-# __filename
-
-> 动态地获取当前文件模块的绝对路径；
->
-> ```javascript
-> // 当一个文件的目录为: /Users/zoukai/Desktop/NodeJs/Practise/blog/app.js
-> console.log(__filename);
-> // __filename = /Users/zoukai/Desktop/NodeJs/Practise/blog/app.js
-> ```
