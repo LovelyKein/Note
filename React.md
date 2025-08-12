@@ -2039,78 +2039,40 @@ console.log(vDom instanceof Obiect) // true
 
 
 
-## 懒加载( lazyLoad )
+## 懒加载`lazyLoad `
 
+```jsx
+// 引入 lazy、Suspense 方法
+import React, { Component, lazy, Suspense } from "react"
+import { Link, BrowserRouter, Route } from "react-router-dom"
 
+// import About from './components/about/about' 正常静态引入
 
-### 原本写法
+// 动态引入组件
+const About = lazy(() => import('./components/about/about'))
+const Home = lazy(() => import('./components/home/home'))
 
-> ```jsx
-> import React, { Component } from "react";
-> // 引入 react-router-dom
-> import { Link, BrowserRouter, Route } from "react-router-dom";
-> // 引入组件
-> import Home from "./components/home/home";
-> import About from "./components/about/about";
-> 
-> function App() {
->   return (
->     <div className="App">
->       <BrowserRouter>
->         <div className="nav">
->           <Link className="link" to={"/home"}>Home</Link>
->           <Link className="link" to={"/about"}>About</Link>
->         </div>
->         <div className="display">
->           <Route path={"/home"} component={Home} />
->           <Route path={"/about"} component={About} />
->         </div>
->       </BrowserRouter>
->     </div>
->   );
-> }
-> 
-> export default App;
-> ```
-
-
-
-### 懒加载写法
-
-> ```jsx
-> // 组件懒加载
-> 
-> // 引入 lazy、Suspense 方法
-> import React, { Component, lazy, Suspense } from "react";
-> 
-> import { Link, BrowserRouter, Route } from "react-router-dom";
-> 
-> // 动态引入组件
-> const About = lazy(() => import('./components/about/about'))
-> const Home = lazy(() => import('./components/home/home'))
-> 
-> function App() {
->   return (
->     <div className="App">
->       <BrowserRouter>
->         <div className="nav">
->           <Link className="link" to={"/home"}>Home</Link>
->           <Link className="link" to={"/about"}>About</Link>
->         </div>
->         <div className="display">
->           {/* 通过 <Suspense> 指定在动态加载组件内容文件之前显示一个 自定义的 loading 界面 */}
->           <Suspense fallback={<h1>Loading...</h1>}>
->             <Route path={"/home"} component={Home} />
->             <Route path={"/about"} component={About} />
->           </Suspense>
->         </div>
->       </BrowserRouter>
->     </div>
->   );
-> }
-> 
-> export default App;
-> ```
+function App() {
+return (
+ <div className="App">
+   <BrowserRouter>
+     <div className="nav">
+       <Link className="link" to={"/home"}>Home</Link>
+       <Link className="link" to={"/about"}>About</Link>
+     </div>
+     <div className="display">
+       {/* 通过 <Suspense> 指定在动态加载组件内容文件之前显示一个 自定义的 loading 界面 */}
+       <Suspense fallback={<h1>Loading...</h1>}>
+         <Route path={"/home"} component={Home} />
+         <Route path={"/about"} component={About} />
+       </Suspense>
+     </div>
+   </BrowserRouter>
+ </div>
+)
+}
+export default App
+```
 
 
 

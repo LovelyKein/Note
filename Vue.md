@@ -3244,11 +3244,6 @@ export default {
 
 
 
-## 路径简写
-
-在 Vue 的配置中，路径中的`@`符号代表`src`文件夹，可以用`@`符号代替书写
-在**样式文件**中也可以使用`@`符号，但是前面要加`~`，例如`~@`
-
 ## 页面刷新
 
 在 Vue 中刷新页面的方案
@@ -3302,6 +3297,8 @@ this.$router.replace(this.$route.query.redirect)
 <!-- 推荐使用 -->
 ```
 
+
+
 ## 错误捕捉
 
 统一处理捕捉组件发生错误时的信息
@@ -3317,6 +3314,8 @@ export default {
   }
 }
 ```
+
+
 
 ## 404页面
 
@@ -4115,63 +4114,8 @@ app.use(router).mount("#app")
 
 
 
-# `TypeScript & Vue`
+# `SSR`
 
+`SSR - Server Side Render`服务端渲染
+`CSR - Client Side Render`客户端渲染：页面内容通过JS执行形成
 
-
-## 路径别名
-
-目前 ts 对`@`指向`src`目录的提示是不支持的，vite 默认也是不支持的，需要手动配置 @ 符号的指向；
-
-```json
-// tsconfig.json 文件
-{
- "compilerOptions": {
-    "baseUrl": "./",
-    "paths": {
-      "@/*": ["src/*"],
-      "#/*": ["types/*"]
-    }
- },
- "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
-}
-```
-
-此时只是增加了 TS 文件中书写`@`路径别名的语法提示，vite 编译的时候依然不认识`@`会报错；
-
-```typescript
-// vite.config.ts 文件
-import path from 'path';
-export default defineConfig({
-  plugins: [vue()],
-  resolve: {
-    alias: {
-      "@": path.join(__dirname, 'src'),
-      "#": path.join(__dirname, 'types')
-    }
-  }
-})
-```
-
-[^Tip]:引入 path 报错，是因为缺少了 ts 的一些声明配置，安装`npm i -D @types/node`关于 node 库的 ts 类型声明；
-
-
-
-## `$ref`类型
-
-在 TS 中声明`this.$refs['xxx']`的类型；
-
-```vue
-<!-- 1. 元素类型是 html 元素 -->
-<canvas ref="canvas" />
-<script lang='ts'>
-const canvas = this.$refs.canvas as HTMLCanvasElement
-</script>
-
-<!-- 2. 元素类型是 子组件 -->
-<Three ref="three" />
-<script lang='ts'>
-import Three from '@/components/three/Three.vue'
-const threeComponent = this.$refs.three as InstanceType<typeof Three>
-</script>
-```
