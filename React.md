@@ -1,263 +1,190 @@
-# React ?
+# `React` ?
 
-[React Chinese Website](https://react.docschina.org)
+[官方文档](https://react.docschina.org)
 
-用于构建**用户界面**的 JavaScript 库，将**数据**渲染为**HTML视图**的开源库，由 Facebook 开发
+用于构建用户界面的JavaScript库，将数据渲染为`HTML`视图的开源库，由`Facebook`开发
 
-1. **组件化**开发，**声明式编码**，提高效率和复用率
-2. 利用`React Native`可以进行移动端开发
-3. `VDOM`+`Diffing`，尽量减少与真实 DOM 的交互
+- 轻量原生，核心代码均由JS书写，不依赖其他库，只依赖原生JS语言
+- 易扩展，对代码封装度低
+- 组件化开发，声明式编码，提高效率和复用率
+- 单向数据流
 
 
 
-### 虚拟`DOM`
+# `JSX`语法
 
-React 的优势就在于不会直接操作**真实 DOM**，性能更好
+**全称`JavaScript XML`，是`React`定义的一种类似`XML`的`JavaScript`扩展语法**
+本质是`React.createElement()`的语法糖，用来简化创建`React`元素
+即一段`JSX`内容，本质上是一个对象
 
-**虚拟 DOM**本质是一个**对象**
+使用`JSX`来描述页面时，需要遵守一些语法规则：
 
-**虚拟 DOM**最终会被 React 转化成真实的 DOM，呈现在页面上
+- 混入`JavaScript表达式`要写在`{}`大括号中，代码注释要用`{/* 注释 */}`包裹
+
+- 样式的类名要用`className`，不能用`class`
+
+  原因：虚拟`DOM`实质上是对象，避免与保留关键词`class`同名
+
+- 标签内联样式要用`style={{ key: value }}`的形式
+
+- 虚拟`DOM`只能有一个**根标签**，可以用`<> </>`空白标签包裹
+
+- 标签必须闭合
+
+- 自定义标签
+
+  - 首字母小写（小驼峰），转为`HTML`标签元素，没有则报错
+  - 首字母大写（大驼峰），寻找对应的组件，若没有定义，则报错
+
+- `JSX`允许在模板中插入数组，会自动展开成员放入模板
+
+**`JSX`最终对会被编译成调用`React.createElement()`方法来创建`React`元素**
 
 ```jsx
-// 虚拟 DOM
-const vDom = <h1>Hello React</h1>；
-console.log(vDom instanceof Obiect) // true
+function App () {
+  // JSX 本质是一个 VDOM 对象
+  const tagText = 'Hello JSX'
+  const tagId = 'demo'
+  return (
+    <div>
+      <h2 className="title" id={tagId}>{tagText}</h2>
+      <p style={{color:'orange', fontSize:'16px'}}>Learning</p>
+      <input type="text"/>
+      <grade>A+</grade>
+    </div>
+  )
+}
+export default App
+```
+
+```jsx
+const vDom = React.createElement('div', {
+  id: 'title'
+}, 'Hello React')
+<!-- 等价于 -->
+<div id="title">'Hello React'</div>
 ```
 
 
 
-### JSX
-
-> 全称`JavaScript XML`；
->
-> 是 React 定义的一种类似 XML 的 JavaScript 扩展语法；
->
-> 本质是`React.createElement()`的语法糖；
->
-> 用来**简化创建虚拟 DOM **；
-
-
-
-#### 语法( Grammar )
-
-> 1. 定义虚拟 DOM 时，不需要加`""`引号；
->
-> 2. 混入 JavaScript 语法要写在`{}`大括号中；
->
-> 3. 样式的类名要用`className`，不能用`class`[^Reason]；
->
-> 4. 标签内联样式要用`style={{ key: value }}`的形式；
->
-> 5. 虚拟 DOM 只能有一个**根标签**；
->
-> 6. 标签必须闭合；
->
-> 7. 自定义标签；
->
-> > 首字母小写，转为 html 标签元素，没有则报错；
-> >
-> > 首字母大写，寻找对应的**组件**，若没有定义，则报错；
->
-> ```jsx
-> const tagText = 'Hello JSX';
-> const tagId = 'demo';
-> // 创建虚拟 DOM；
-> const vDom = (
->   <div>
->     <h2 className="title" id={tagId}>{tagText}</h2>
->     <p style={{color:'orange',fontSize:'16px'}}>Learning</p>
->     <input type="text"/>
->     <grade>A+</grade>
->   </div>
-> )
-> ```
-
-[^Reason]: 避免和 ES6 中类`class`的关键词产生冲突，虚拟 DOM 实质上是对象；
-
-
-
-
-
-## 组件( Component )
-
-> ```html
-> <body>
->     <!-- 准备好一个容器 -->
->     <div id="demo"></div>
-> 
->     <!-- 引入 react 核心库 -->
->     <script src="../cdn-js/react.development.js"></script>
->     <!-- 引入 react-dom 支持操作 DOM -->
->     <script src="../cdn-js/react-dom.development.js"></script>
->     <!-- 引入 babel将 jsx 转换为 js -->
->     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-> 
->     <!-- type 为 babel，表示写的是 jsx 语法，并且让 babel 去编译解析 -->
->     <script type="text/babel">
->    // 使用 jsx 语法创建虚拟 DOM；
->    // 此处不需要加引号，因为是 jsx 语法；
->    const vDom = <h1>Hello React</h1>
->    // 渲染虚拟 DOM 到页面；
->    ReactDOM.render(vDom,document.getElementById('demo'))
->     </script>
-> </body>
-> ```
->
-> 使用 React 提供的`createElement`方法创建**虚拟DOM**；
->
-> ```html
-> <!-- 不使用 jsx 创建虚拟 DOM -->
-> <script type="text/javascript">
->     const vDom = React.createElement('h1', {
->        id: 'title'
->     }, 'Hello React')
->     ReactDOM.render(vDom, document.getElementById('demo'))
-> </script>
-> ```
-
-
-
-### 类型
-
-> 在 React 中有**函数组件**和**类式组件**；
+# 组件`Component`
 
 
 
 #### 函数式( Function )
 
-> 编译渲染流程
->
-> 1. React 解析组件标签，找到`FunComponent`组件；
-> 2. 发现是函数式组件，随即调用函数；
-> 3. 将函数返回的 VDOM 转为 TDOM ，呈现在页面上；
->   
->   ```jsx
-> // 创建函数式组件；
-> function FunComponent() {
->   // this 是 undefined，因为 babel 编译后开启了严格模式；
->   // 全局下的 this 不指向 window，而是 undefined；
->   console.log(this);
->   return <h2>我是函数式组件</h2>
-> }
-> ReactDOM.render(
->   // 书写组件标签，首字母必须大写；
->   <FunComponent/>,
->   document.getElementById('demo')
-> )
->   ```
+编译渲染流程
+
+1. React 解析组件标签，找到`FunComponent`组件；
+2. 发现是函数式组件，随即调用函数；
+3. 将函数返回的 VDOM 转为 TDOM ，呈现在页面上；
+
+```jsx
+// 创建函数式组件
+function MyComponent () {
+  // this 是 undefined，因为 babel 编译后开启了严格模式；
+  // 全局下的 this 不指向 window，而是 undefined；
+  console.log(this)
+  return(
+     <h2>我是函数式组件</h2>
+  )
+}
+```
 
 
 
 #### 类式( Class )
 
-> 编译渲染流程
->
-> 1. React 解析组件标签，找到`ClassComponent`组件；
-> 2. 发现是类式组件，随即使用 new 创建实例对象；
-> 3. 通过实例找到原型对象上的 render 方法；
-> 4. 将 render 方法返回的 VDOM 转为 TDOM ，呈现在页面上；
-> ```jsx
-> // 创建类式组件；
-> class ClassComponent extends React.Component {
->   // render 在 ClassComponent 的原型对象上，供实例对象使用；
->   render(){
->     // render 中的 this 指向 ClassComponent 组件实例对象；
->     console.log(this);
->     return <h2>我是类式组件</h2>
->   }
-> }
-> ReactDOM.render(
->   // 书写组件标签，首字母必须大写；
->   <ClassComponent/>,
->   document.getElementById('demo')
-> )
+编译渲染流程
 
+1. React 解析组件标签，找到`ClassComponent`组件；
+2. 发现是类式组件，随即使用 new 创建实例对象；
+3. 通过实例找到原型对象上的 render 方法；
+4. 将 render 方法返回的 VDOM 转为 TDOM ，呈现在页面上；
+```jsx
+// 创建类式组件；
+class ClassComponent extends React.Component {
+  // render 在 ClassComponent 的原型对象上，供实例对象使用；
+  render(){
+    // render 中的 this 指向 ClassComponent 组件实例对象
+    return <h2>我是类式组件</h2>
+  }
+}
 
-
-### 标签
-
-> 组件标签可以**双标签**，也可以**单标签**；
->
-> ```jsx
-> // 单标签
-> <MyComponent />
-> 
-> // 双标签
-> <MyComponent>内容</MyComponent>
-> 
-> // 如果是双标签，组件标签之间的内容会被当作属性 props.children 传递给自组件
-> ```
+// 书写组件标签，首字母必须大写
+<ClassComponent/>
+```
 
 
 
 ### 简写
 
-> 利用类的赋值语句写法；
->
-> ```jsx
-> class Weather extends React.Component {
->      render() {
->        // 读取 state 中的属性；
->        const { isHot } = this.state;
->        return (
->          <h2 onClick={this.changeWeather}>今天的天气{isHot ? "炎热" : "寒冷"}</h2>
->        );
->      }
->      state = {
->        isHot: false
->      }
->      changeWeather = () => {
->        // 箭头函数，固定 this 的指向不会改变；
->        const isHot = this.state.isHot
->        this.setState({
->          isHot: !isHot
->        })
->      }
-> }
-> ReactDOM.render(<Weather />, document.getElementById("demo"));
-> ```
+利用类的赋值语句写法；
+
+```jsx
+class Weather extends React.Component {
+  render() {
+    // 读取 state 中的属性；
+    const { isHot } = this.state;
+    return (
+      <h2 onClick={this.changeWeather}>今天的天气{isHot ? "炎热" : "寒冷"}</h2>
+    );
+  }
+  state = {
+    isHot: false
+  }
+  changeWeather = () => {
+    // 箭头函数，固定 this 的指向不会改变；
+    const isHot = this.state.isHot
+    this.setState({
+      isHot: !isHot
+    })
+  }
+}
+ReactDOM.render(<Weather />, document.getElementById("demo"));
+```
 
 
 
 ### 卸载
 
-> ```jsx
-> // 创建类式组件；
-> class ClassComponent extends React.Component {
->     // 卸载组件的方法
->     death = () => {
->        ReactDOM.unmountComponentAtNode(document.getElementById('demo'))
->     }
->     render(){
->        return <h2>我是类式组件</h2>
->     }
-> }
-> ReactDOM.render(<ClassComponent/>, document.getElementById('demo'))
-> ```
+```jsx
+// 创建类式组件；
+class ClassComponent extends React.Component {
+ // 卸载组件的方法
+ death = () => {
+    ReactDOM.unmountComponentAtNode(document.getElementById('demo'))
+ }
+ render(){
+    return <h2>我是类式组件</h2>
+ }
+}
+ReactDOM.render(<ClassComponent/>, document.getElementById('demo'))
+```
 
 
 
 ### constructor
 
-> 在 React 的类式组件中，constructor 可以不写，也可以写，区别在读取 props 的方式；
->
-> <img src="imags/react-constructor.png" alt="react-constructor" style="zoom:50%;" />
->
-> ```jsx
-> class Weather extends React.Component {
->   constructor(props) {
->     super(props)
->     this.haveDemo = this.changeWeather.bind(this)
->     // 当需要在 constructor 中通过实例对象读取 props 属性
->     // 则需要给 constructor()、super() 传递 props ;
->     console.log(this.props)
->   }
->   render() {
->     return ()
->   }
-> }
-> ReactDOM.render(<Weather />, document.getElementById("demo"))
-> ```
+在 React 的类式组件中，constructor 可以不写，也可以写，区别在读取 props 的方式；
+
+<img src="./assets/react-constructor.png" alt="react-constructor" style="zoom:50%;" />
+
+```jsx
+class Weather extends React.Component {
+constructor(props) {
+ super(props)
+ this.haveDemo = this.changeWeather.bind(this)
+ // 当需要在 constructor 中通过实例对象读取 props 属性
+ // 则需要给 constructor()、super() 传递 props ;
+ console.log(this.props)
+}
+render() {
+ return ()
+}
+}
+ReactDOM.render(<Weather />, document.getElementById("demo"))
+```
 
 [^Focus]: `constructor`尽量不用写；
 
@@ -265,39 +192,39 @@ console.log(vDom instanceof Obiect) // true
 
 ### 事件绑定( event )
 
-> ```jsx
-> class Weather extends React.Component {
->   constructor(props) {
->     super(props)
->     this.state = {
->       isHot: false,
->     }
->     // 改变 changeWeather() 的指向问题；
->     // 利用 bind 改变 this 指向 Weather ，生成一个新函数，复制给 this.haveDemo ；
->     this.haveDemo = this.changeWeather.bind(this)
->   }
->   render() {
->     // 读取 state 中的属性；
->     const { isHot } = this.state;
->     return (
->       <h2 onClick={this.haveDemo}>今天的天气{isHot ? "炎热" : "寒冷"}</h2>
->     );
->   }
->   changeWeather() {
->     // changeWeather() 方法在 Weather 的原型对象上，供实例对象使用；
->     // changeWeather() 此时被 <h2> 作为点击的回调函数直接调用，而不是被实例对象使用；
->     // 类中默认开启了局部的严格模式，所以此处 this 指向 undefined ；
->     console.log(this)
->     // 需要通过 setState 改变状态（state）中的数据；
->     // 且是一种合并更新，不是替换；
->     const isHot = this.state.isHot
->     this.setState({
->       isHot: !isHot
->     })
->   }
-> }
-> ReactDOM.render(<Weather />, document.getElementById("demo"));
-> ```
+```jsx
+class Weather extends React.Component {
+constructor(props) {
+ super(props)
+ this.state = {
+   isHot: false,
+ }
+ // 改变 changeWeather() 的指向问题；
+ // 利用 bind 改变 this 指向 Weather ，生成一个新函数，复制给 this.haveDemo ；
+ this.haveDemo = this.changeWeather.bind(this)
+}
+render() {
+ // 读取 state 中的属性；
+ const { isHot } = this.state;
+ return (
+   <h2 onClick={this.haveDemo}>今天的天气{isHot ? "炎热" : "寒冷"}</h2>
+ );
+}
+changeWeather() {
+ // changeWeather() 方法在 Weather 的原型对象上，供实例对象使用；
+ // changeWeather() 此时被 <h2> 作为点击的回调函数直接调用，而不是被实例对象使用；
+ // 类中默认开启了局部的严格模式，所以此处 this 指向 undefined ；
+ console.log(this)
+ // 需要通过 setState 改变状态（state）中的数据；
+ // 且是一种合并更新，不是替换；
+ const isHot = this.state.isHot
+ this.setState({
+   isHot: !isHot
+ })
+}
+}
+ReactDOM.render(<Weather />, document.getElementById("demo"));
+```
 
 
 

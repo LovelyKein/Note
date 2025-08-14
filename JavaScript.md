@@ -1,6 +1,6 @@
 
 
-# 属性描述符`Object.defineProperty`
+# 属性描述符`Object.defineProperty`😺
 
 是一个普通对象，用于描述或修改对象属性的相关特性
 vue2中使用`Object.defineProperty`来做到数据的响应式

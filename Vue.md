@@ -4079,33 +4079,26 @@ app.mount('#app')
 ```javascript
 // 引入组件式 API
 import { createRouter, createWebHashHistory } from "vue-router"
-
-// 引入路由组件
-import Home from "@/pages/home/index.vue";
-
-// 创建路由规则；
 const routes = [
   {
     name: "home",
     path: "/",
-    component: Home,
+    component: () => import('@/pages/home/index.vue')
   }
-];
-
-// 创建路由实例；
+]
+// 创建路由实例
 const router = createRouter({
   history: createWebHashHistory(),
-  routes,
-});
+  routes
+})
 
-// 导出实例；
-export default router;
+// 导出实例
+export default router
 
-
-// 在 main.js 文件中；
-import { createApp } from "vue";
-import App from "./App.vue";
-import router from "./router/index";
+// 在 main.js 文件中
+import { createApp } from "vue"
+import App from "./App.vue"
+import router from "./router/index"
 
 const app = createApp(App)
 // 使用路由配置
@@ -4118,4 +4111,16 @@ app.use(router).mount("#app")
 
 `SSR - Server Side Render`服务端渲染
 `CSR - Client Side Render`客户端渲染：页面内容通过JS执行形成
+
+
+
+![image-20250813181907853](./assets/image-20250813181907853.png)
+
+```shell
+npm install webpack webpack-cli webpack-merge webpack-dev-server html-webpack-plugin -D
+npm install vue@2 vue-template-compiler vue-server-renderer
+npm install babel-loader @babel/core @babel/preset-env -D
+npm install vue-style-loader css-loader vue-loader -D
+npm install express
+```
 

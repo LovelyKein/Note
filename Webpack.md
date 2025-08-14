@@ -1,8 +1,8 @@
-## Webpack ？
+# `Webpack`?
 
-> Webpack 是一种前端资源构建工具，一个静态模块打包器(module bundle)；
->
-> 前端项目工程化的具体解决方案；
+Webpack 是一种前端资源构建工具，一个静态模块打包器(module bundle)；
+
+前端项目工程化的具体解决方案；
 
 
 
