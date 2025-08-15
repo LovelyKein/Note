@@ -1,176 +1,240 @@
-## TypeScript ？
+# `TypeScript`?
 
-> 以 JavaScript 为基础构建的语言，是 JavaScript 的超集，扩展了 JavaScript ，并添加了类型校验；
+以`JavaScript`为基础构建的语言，是`JavaScript`的超集：**扩展了`JavaScript`语言，并添加了类型校验系统**
+所以TS可以在任何支持JS的平台上执行，但TS不能直接执行，需要编译成JS
+
+为什么需要`TypeScript`？
+
+JS作为动态类型、弱类型的解释型语言，变量类型仅在运行时确定，这意味着很多类型错误只能在代码运行时暴露：
+
+- 使用了不存在的变量、函数或成员
+- 把一个不确定的类型当作一个确定的类型处理
+- 在使用`null`或`undefined`的成员
+
+TS通过**静态类型检查**强制在编译阶段检查类型匹配，在编写代码时发现问题，大幅减少线上Bug
+
+- 静态类型检查，提前规避错误
+- 增强代码可读性与可维护性
+- 更好地支持复杂应用与工程化
+
+```shell
+# 安装
+npm install typescript --global
+```
+
+使用TS库自带的`tsc`脚本，将TS文件编译成JS文件运行
+
+```shell
+# 编译指定ts文件
+tsc filename.ts
+
+# 监视ts文件，发生改动时自动编译成js文件
+tsc filename.ts -w
+
+# 非全局安装需要加`npx`前缀
+npx tsc ./src/main.ts
+```
+
+
+
+# 配置文件`tsconfig.ts`
+
+初始化`tsconfig.json`配置文件
+
+```shell
+tsc --init
+```
+
+使用了配置文件后，使用`tsc`进行编译时，不能跟上文件名，否则会忽略配置文件
+`tsc`命令会直接将目录下的所有`.ts`后缀文件都编译
+
+```json
+{
+  // 编译选项
+  "compilerOptions": {
+    "target": "es2016", // 编译目标代码的版本标准
+    "module": "commonjs", // 编译目标使用的模块化标准
+    // 编译时需要包含的标准库类型定义文件`.d.ts`，会根据`target`配置自动设置
+    "lib": []，
+    // 指定编译文件存放的目录
+    "outDir": "./dist",
+  },
+  // 运行`tsc`脚本时哪些文件需要被编译
+  "inclued": ["src/**/*"],
+  // 排除编译
+  "exclude": ["node_modules"],
+  // inclued 和 exclude 可以不用显式配置，有默认值
+}
+```
+
+使用`nodemon`和`ts-node`第三方库，自动监视ts文件的改动并编译成js文件
+弥补`tsc`使用配置文件后，后面不能写文件名的缺陷
+`ts-node`库可以直接在内存中执行`.ts`文件并运行输出结果，无需预编译
+
+```json
+{
+  'scripts': {
+    // 观测src目录下的.ts后缀的文件的变动，然后执行`ts-node src/index.ts`
+    "dev": "nodemon --watch src -e ts --exec ts-node src/index.ts"
+  }
+}
+```
+
+> [!NOTE]
 >
-> 可以在任何支持 JavaScript 的平台上执行；
->
-> 但 TypeScript 不能直接被 JavaScript 解析器直接执行，需要编译成 JS；
+> `@types`是一个TS官方的类型库，其中包含了很多对JS代码的类型描述
+> 例如`JQuery`是用js写的，没有类型检查，安装`@types/jquery`为库添加类型定义
 
 
 
+# 类型约束
 
+仅需要在【变量、函数的参数、函数的返回值】位置加上`:类型`即可约束
+**类型定义后，不能再赋值为不许可类型的值**
 
-## 环境搭建
+ts在很多场景中可以完成类型推导
 
-> 1. 下载 Node.JS；
->
-> 2. 安装 TypeScript；
->
-> ```shell
-> # 使用 `npm` 全局安装
-> sudo npm install typescript --global
-> ```
->
-> 3. 创建一个 `ts` 文件；
-> 4. 使用 `tsc` 对 `ts` 文件进行编译；
->
-> ```shell
-> # 在要编译的 `ts` 文件所在的目录打开终端；执行编译命令；
-> 
-> tsc filename.ts
-> 
-> # 监视 TS 文件，发生改动时自动编译成 JS 文件；
-> tsc filename.ts -w
-> ```
+```ts
+let phone: string = '13455348745'
+
+function sum (a: number, b: number) {
+  return a + b
+}
+```
 
 
 
+# 基本类型
+
+```typescript
+// ；
 
 
-## 类型声明
-
-> 在 TS 中进行变量的数据类型的约束和声明；
->
-> ```typescript
-> // 在声明变量的时候指定数据类型；
-> 
-> // 语法 ---> 变量: 数据类型
-> let variableName: dataType;
-> ```
+```
 
 
 
 ### 基本类型
 
-> 对原始的基本类型数据进行类型声明和约束；
->
-> ```typescript
-> export {}; // 第一行增加这个是为了使文件里的变量不污染全局
-> ```
+对原始的基本类型数据进行类型声明和约束；
+
+```typescript
+export {}; // 第一行增加这个是为了使文件里的变量不污染全局
+```
 
 
 
 #### string
 
-> ```typescript
-> // 字符串 类型
-> 
-> let str: string = "2";
-> // str = 2，
-> // 此时赋值会报错，以为值的类型只能是 string 类型
-> 
-> // 如果不书写类型，typescript会根据数据来进行推断
-> let str = 'Hello'
-> // 此时 str 的数据类型为 string
-> ```
+```typescript
+// 字符串 类型
+
+let str: string = "2";
+// str = 2，
+// 此时赋值会报错，以为值的类型只能是 string 类型
+
+// 如果不书写类型，typescript会根据数据来进行推断
+let str = 'Hello'
+// 此时 str 的数据类型为 string
+```
 
 
 
 #### number
 
-> ```typescript
-> // 数字 类型
-> 
-> // 声明一个变量，同时指定它的数据类型是 number ；
-> // 数据类型设置为 number 后，在之后的使用过程中 a 的类型只能是 number ；
-> let a: number;
-> a = 10;
-> // a = 'hello';
-> // 此时会报错，不能将 string 类型数据赋值给 number 数据类型；
-> ```
+```typescript
+// 数字 类型
+
+// 声明一个变量，同时指定它的数据类型是 number ；
+// 数据类型设置为 number 后，在之后的使用过程中 a 的类型只能是 number ；
+let a: number;
+a = 10;
+// a = 'hello';
+// 此时会报错，不能将 string 类型数据赋值给 number 数据类型；
+```
 
 
 
 #### boolean
 
-> ```typescript
-> // 布尔 类型
-> 
-> let bool: boolean = true;
-> ```
+```typescript
+// 布尔 类型
+
+let bool: boolean = true;
+```
 
 
 
 #### **symbol**
 
-> ```typescript
-> // symbol 类型
-> 
-> let sy: symbol = Symbol();
-> ```
+```typescript
+// symbol 类型
+
+let sy: symbol = Symbol();
+```
 
 
 
 #### null
 
-> ```typescript
-> // null 类型，表示对象或者属性是空值
-> 
-> let nul:null = null;
-> ```
+```typescript
+// null 类型，表示对象或者属性是空值
+
+let nul:null = null;
+```
 
 
 
 #### undefined
 
-> ```typescript
-> // undefined 类型
-> 
-> let undef: undefined = undefined;
-> ```
+```typescript
+// undefined 类型
+
+let undef: undefined = undefined;
+```
 
 
 
 ### 非原始类型
 
-> 对非原始类型数据进行类型约束；
+对非原始类型数据进行类型约束；
 
 
 
 #### 对象( object )
 
-> ```typescript
-> // object 类型；
-> let obj: object = {name: 'Kein'}
-> let obj_1: object = [1, 2, 3] // 数组也属于对象类型
-> 
-> let objectData: { name: string, age: number } // 此书写方式可以约束对象中的属性
-> // 表示 objectData 对象中有 name 和 age 两个属性，前者为 string 类型， 后者为 number 类型
-> // 少书写其中一个或多个属性，或者多写属性，类型检查时都会报错
-> objectData = {
->   name: 'Kein',
->   age: 22
-> }
-> 
-> // 属性后面加 ? 号，表示该属性是可选的，可有可无，不书写也不会报错
-> let object_a: { name: string, grade?: string }
-> object_a = { name: 'Kein' }
-> 
-> // 表示该对象至少要有一个 name 属性，且为字符串类型值，其他属性的数据类型和个数都是任意的
-> let object_b: { name: string, [propName: string]: any }
-> object_b = { name: 'Kein', gender: 'Male', age: 23 }
-> 
-> // 不确定对象的属性时
-> let object_c: { [key: string]: string }
-> // 表示对象中属性和值的类型都是 string
-> 
-> // 错误例子
-> let obj1: object = 3
-> let obj2: object = "3"
-> let obj3: object = true
-> let obj4: object = null
-> let obj5: object = undefined
-> ```
+```typescript
+// object 类型；
+let obj: object = {name: 'Kein'}
+let obj_1: object = [1, 2, 3] // 数组也属于对象类型
+
+let objectData: { name: string, age: number } // 此书写方式可以约束对象中的属性
+// 表示 objectData 对象中有 name 和 age 两个属性，前者为 string 类型， 后者为 number 类型
+// 少书写其中一个或多个属性，或者多写属性，类型检查时都会报错
+objectData = {
+name: 'Kein',
+age: 22
+}
+
+// 属性后面加 ? 号，表示该属性是可选的，可有可无，不书写也不会报错
+let object_a: { name: string, grade?: string }
+object_a = { name: 'Kein' }
+
+// 表示该对象至少要有一个 name 属性，且为字符串类型值，其他属性的数据类型和个数都是任意的
+let object_b: { name: string, [propName: string]: any }
+object_b = { name: 'Kein', gender: 'Male', age: 23 }
+
+// 不确定对象的属性时
+let object_c: { [key: string]: string }
+// 表示对象中属性和值的类型都是 string
+
+// 错误例子
+let obj1: object = 3
+let obj2: object = "3"
+let obj3: object = true
+let obj4: object = null
+let obj5: object = undefined
+```
 
 [^Tip]:大Object，代表所有原始类型、非原始类型都 可以赋给 Object，严格模式下不包括null，undefined{}空对象类型和大 Object 一样；
 
@@ -178,13 +242,13 @@
 
 #### 数组( array )
 
-> ```typescript
-> // 数组 类型的声明
-> 
-> let arrayA: string[] // 表示字符串类型元素的数组
-> let arrayB: number[] // 表示数字类型元素的数组
-> let arrayC: {}[] // 表示对象类型元素的数组
-> ```
+```typescript
+// 数组 类型的声明
+
+let arrayA: string[] // 表示字符串类型元素的数组
+let arrayB: number[] // 表示数字类型元素的数组
+let arrayC: {}[] // 表示对象类型元素的数组
+```
 
 
 
@@ -302,16 +366,16 @@
 
 #### any
 
-> 任意类型，是官方提供的一个选择性**绕过静态类型检测**的作弊方式；
->
-> 非常不建议使用，**Any is Hell**(**Any** 是地狱)；
->
-> ```typescript
-> // any会绕过类型检测，所以下面不会有问题提示
-> let an: any
-> an.toFixed(2)
-> an[0] = 'any'
-> ```
+任意类型，是官方提供的一个选择性**绕过静态类型检测**的作弊方式
+
+非常不建议使用，因为对`any`类型的数据，ts完全不进行类型检查
+
+```typescript
+// any 会绕过类型检测，所以下面不会有问题提示
+let an: any
+an.toFixed(2)
+an[0] = 'any'
+```
 
 
 

@@ -1,7 +1,7 @@
 # `NodeJS`?
 
-NodeJS不是一门语言，不是框架，而是一个基于`Chrome V8`引擎的JavaScript运行环境（平台）
-简单来说就是NodeJS可以解析和执行JavaScript代码，使用`C++`语言开发
+NodeJS不是一门语言，不是框架，而是一个基于`Chrome V8`引擎的`JavaScript`运行环境（平台）
+简单来说就是`NodeJS`可以解析和执行`JavaScript`代码
 特性：**轻量和高效、非阻塞`I/O`模型（异步）**
 
 ```js
@@ -1583,10 +1583,7 @@ npx nodemon app.js
 ```json
 {
   "ignore": [
-    "node_modules",
-    "package.json",
-    "package-lock.json",
-    "nodemon.json"
+    "node_modules"
   ],
   "watch": [ "**/*.js" ],
   "env": {
