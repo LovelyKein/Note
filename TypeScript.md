@@ -60,6 +60,14 @@ tsc --init
     "outDir": "./dist",
     // 严格类型校验模式
     "strict": true,
+    // 打包时移除注释
+    "removeComments": true,
+    // // 不自动在文件顶部添加 'use strict'
+    "noImplicitUseStrict": false,
+    // 编译错误时不生成输出文件
+    "noEmitOnError": true,
+    // 模块解析策略
+    "moduleResolution": "node",
   },
   // 运行`tsc`脚本时哪些文件需要被编译
   "inclued": ["src/**/*"],
@@ -283,7 +291,6 @@ let addFn: addFnType = function (num1, num2) {
 // 可选参数，表示该参数可传可不传，默认值变成`undefined`
 // 可选参数必须出现在参数列表的末尾，不能在第一个
 function log(msg?: string): void {}
-// 调用函数时，`log()`或`log('message')`都可以
 
 // 参数默认值，有默认值的参数会自动变成可选参数
 function addFn1(num1: number, num2: number = 1) {
@@ -310,10 +317,16 @@ function combine(a: number | string, b: number | string): number | string {
   }
   throw new Error('参数类型错误')
 }
-
 combine(2, 3)
 combine('2', '3')
 // combine('2', 3) // 报错
+
+// 传递给目标函数的参数可以少，但不可以多
+function callBack (value: unknown, index: number, arr: unknown[]): void {}
+// 例如，`forEach`方法的回调函数目标签名提供的自变量为3个，但是可以少传递，但不可以多传递
+[1, 2, 3].forEach(callBack)
+
+// 要求返回必须返回，不要求返回则随意
 ```
 
 > [!NOTE]
@@ -327,7 +340,7 @@ combine('2', '3')
 
 一个固定长度的数组，并且数组中每一项元素的类型确定
 
-```typescript
+```ts
 let tupleA: [string, string]
 // 此时只允许该元组拥有 2 个元素，不能多也不能少，且类型都为`string`
 tupleA = ['Kein', 'Kyle']
@@ -339,7 +352,7 @@ tupleA = ['Kein', 'Kyle']
 
 以一个确定的值表示类型，即表示除了字面量之外的其他值都会报错
 
-```typescript
+```ts
 // 约束变量可能出现的值
 let gender: 'male' | 'female'
 gender = 'male'
@@ -552,71 +565,124 @@ zs = {
 
 通过 interface 接口来声明数据类型；
 
-可以将内联类型抽离出来，从而实现类型可复用；
+可以将内联类型抽离出来，从而实现类型可复用
+
+```ts
+// 接口的概念
+// 接口是一种类型，一种规范，一种约束
+// 用于约束类、对象、函数的契约(标准)
+// 和类型别名一样，不会出现在编译后的代码中
+
+interface User {
+  name: string
+  age: number
+  sex: 'male' | 'female'
+  email?: string,
+  // sayHello: () => void
+  // 另一种写法
+  sayHello(): void
+}
+
+// 使用接口约束一个函数和函数的参数和返回值
+interface AddFn {
+  (a: number, b: number): number
+}
+// 类型别名写法
+type AddFnType = {
+  (a: number, b: number): number
+}
+// 当大括号中没有具体属性字段时，大括号只是一个定界符，不是对象
+const add: AddFn = (a, b) => {
+  return a + b
+}
 
 
+const user: User = {
+  name: 'Kyle',
+  age: 25,
+  sex: 'male',
+  email: 'kein@example.com',
+  sayHello() {
+    console.log(`hello, my name is ${this.name}`)
+  },
+}
+
+// 接口的继承，子接口可以继承父接口的所有属性和方法
+// 但要注意，子接口不能覆写父接口中的相同成员为不同的类型
+// 例如，父接口中定义了`name: string`，子接口中定义了`name: number`，这是不允许的
+interface Student extends User {
+  // 只读修饰符，只能在接口定义时或构造函数中赋值，不会出现在编译后的代码中
+  readonly id: number
+}
+// 继承多个接口，实现多个接口的组合约束
+interface Child extends User, Student {
+  skills: string[]
+}
+
+
+```
 
 ### 声明类型
 
-> 使用接口定义变量和函数参数的类型；
->
-> ```typescript
-> // 定义对象的类型
-> interface PersonInfo {
-> name: string; // 不是类似对象般用 , 隔开，而是 ;
-> age: number;
-> }
-> let zhangsan: PersonInfo = {
-> name: "张三",
-> age: 20
-> }
-> 
-> // 定义数组的类型
-> interface ArrayNumber {
-> [idx: number]: number;
-> }
-> let arr1: ArrayNumber = [1, 2, 3]
-> 
-> // 定义函数的类型
-> interface PersonFn {
-> (p: PersonInfo): void;
-> }
-> let Person1: PersonFn = (obj: PersonInfo): void => {
-> console.log(obj.name, obj.age);
-> }
-> 
-> // 定义 类Class 的成员及类型
-> interface myInterface {
-> // 接口中所有属性都不能有实际的值；
-> // 接口中的方法都是抽象方法；
-> name: string;
-> age: number;
-> sayHello(): void;
-> };
-> 
-> // 用接口去限制类的属性和方法
-> // 用来定义一个类的结构，指定一个类中应该包含哪些属性和方法
-> class myClass implements myInterface {
-> name: string; // 声明 this.name 的数据类型
-> age: number;
-> constructor(name: string, age: number) {
->  this.name = name;
->  this.age = age;
-> }
-> sayHello = () => {
->  console.log('Hello !');
-> }
-> }
-> 
-> // 缺省和只读特性
-> interface PersonInfo {
-> name?: string; // 缺省
-> readonly height: number; // 只读
-> }
-> 
-> // 不限制属性名和属性值
-> interface AnyObj { [propname: string]: unknown }
-> ```
+使用接口定义变量和函数参数的类型；
+
+```typescript
+// 定义对象的类型
+interface PersonInfo {
+name: string; // 不是类似对象般用 , 隔开，而是 ;
+age: number;
+}
+let zhangsan: PersonInfo = {
+name: "张三",
+age: 20
+}
+
+// 定义数组的类型
+interface ArrayNumber {
+[idx: number]: number;
+}
+let arr1: ArrayNumber = [1, 2, 3]
+
+// 定义函数的类型
+interface PersonFn {
+(p: PersonInfo): void;
+}
+let Person1: PersonFn = (obj: PersonInfo): void => {
+console.log(obj.name, obj.age);
+}
+
+// 定义 类Class 的成员及类型
+interface myInterface {
+// 接口中所有属性都不能有实际的值；
+// 接口中的方法都是抽象方法；
+name: string;
+age: number;
+sayHello(): void;
+};
+
+// 用接口去限制类的属性和方法
+// 用来定义一个类的结构，指定一个类中应该包含哪些属性和方法
+class myClass implements myInterface {
+name: string; // 声明 this.name 的数据类型
+age: number;
+constructor(name: string, age: number) {
+this.name = name;
+this.age = age;
+}
+sayHello = () => {
+console.log('Hello !');
+}
+}
+
+// 缺省和只读特性
+interface PersonInfo {
+name?: string; // 缺省
+readonly height: number; // 只读
+}
+
+// 不限制属性名和属性值
+interface AnyObj { [propname: string]: unknown }
+```
 
 [^Tip]:很少使用接口类型来定义函数的类型，更多使用内联类型或类型别名配合箭头函数语法来定义函数类型；
 
@@ -624,52 +690,52 @@ zs = {
 
 ### 继承接口
 
-> 多个不同接口之间是可以实现继承的，会组合成一个新的接口；
->
-> 但是如果继承的接口被继承的接口有相同的属性，并且类型不兼容，那么就会报错；
->
-> ```typescript
-> interface NameInfo {
->   name: string;
-> }
-> interface AgeInfo {
->   age: number;
-> }
-> interface PersonInfo extends NameInfo, AgeInfo {
->   height: number;
-> }
-> let zs: PersonInfo = {
->   name: "张三",
->   age: 20,
->   height: 177
-> }
-> ```
+多个不同接口之间是可以实现继承的，会组合成一个新的接口；
+
+但是如果继承的接口被继承的接口有相同的属性，并且类型不兼容，那么就会报错；
+
+```typescript
+interface NameInfo {
+name: string;
+}
+interface AgeInfo {
+age: number;
+}
+interface PersonInfo extends NameInfo, AgeInfo {
+height: number;
+}
+let zs: PersonInfo = {
+name: "张三",
+age: 20,
+height: 177
+}
+```
 
 
 
 ### 接口合并
 
-> 多个相同名字的接口，会进行合并，得到一个新的接口；
->
-> **即：重复定义的接口类型，它的属性会叠加**；
->
-> 这个接口的特性一般用在扩展第三方库的接口类型；
->
-> ```typescript
-> interface PersonInfo {
->   name: string;
->   age: number;
-> }
-> interface PersonInfo {
->   name: string;
->   height: number;
-> }
-> let zs: PersonInfo = {
->   name: "张三",
->   age: 20,
->   height: 177
-> }
-> ```
+多个相同名字的接口，会进行合并，得到一个新的接口；
+
+**即：重复定义的接口类型，它的属性会叠加**；
+
+这个接口的特性一般用在扩展第三方库的接口类型；
+
+```typescript
+interface PersonInfo {
+name: string;
+age: number;
+}
+interface PersonInfo {
+name: string;
+height: number;
+}
+let zs: PersonInfo = {
+name: "张三",
+age: 20,
+height: 177
+}
+```
 
 
 
@@ -682,9 +748,8 @@ zs = {
 ```ts
 // 定义一个类型别名
 type User = { name: string; age: number; gender: 'male' | 'female' }
-
 const user: User = { name: 'Kyle', age: 25, gender: 'male' }
-
+// 复用
 function getUserList(): User[] {
   return [
     user,
@@ -693,7 +758,23 @@ function getUserList(): User[] {
 }
 ```
 
-某些情况下，接口 interface 接口和 type 类型别名没有太大区别
+类型别名通过交叉类型`&`实现接口的继承效果，但与接口继承不同的是，类型别名中相同成员的类型会被交叉类型`&`合并
+
+```ts
+type UserType = {
+  name: string
+  age: number
+  sex: 'male' | 'female'
+}
+type StudentType = {
+  id: number
+}
+// 表示`ChildType`类型必须同时满足`User、Student、Child`接口的约束
+// 
+type ChildType = UserType & StudentType & Child
+```
+
+某些情况下，接口`interface`接口和`type`类型别名没有太大区别
 
 类型别名可以针对接口没法覆盖的场景，例如组合类型、交叉类型等
 
@@ -735,299 +816,216 @@ let altitude: PersonHeight = 8848
 
 ### 泛型参数
 
-> 在函数执行传参时才确定参数数据的类型；
->
-> ```typescript
-> // 使用 泛型 对函数参数的类型进行声明
-> function getValue_1<T>(val: T): T {
->   return val
-> }
-> let g4: number = getValue_1<number>(3)
-> let g5: string = getValue_1<string>('4')
-> 
-> // 多个泛型
-> function add<T, G>(x: T, y: G): T {
->   return x + y
-> }
-> const result: string = add<string, number>('Kine', 23)
-> ```
+在函数执行传参时才确定参数数据的类型；
+
+```typescript
+// 使用 泛型 对函数参数的类型进行声明
+function getValue_1<T>(val: T): T {
+return val
+}
+let g4: number = getValue_1<number>(3)
+let g5: string = getValue_1<string>('4')
+
+// 多个泛型
+function add<T, G>(x: T, y: G): T {
+return x + y
+}
+const result: string = add<string, number>('Kine', 23)
+```
 
 
 
 ### 泛型类型
 
-> 在 TypeScript 中，类型本身就可以被定义为拥有不明确的类型参数的泛型；
->
-> 并且可以接收明确类型作为入参，从而衍生出更具体的类型；
->
-> ```typescript
-> // 定义数组类型
-> let arr: Array<number> = [1]
-> let arr1: Array<string> = [""];
-> 
-> // 类型别名
-> type typeFn<P> = (params: P) => P;
-> let fntype: typeFn<number> = (n: number) => {
->   return n
-> }
-> 
-> // 定义接口
-> interface TypeItf<P> {
->   name: P;
->   getName: (p: P) => P;
-> }
-> let t1: TypeItf<number> = {
->   name: 123,
->   getName: (n: number) => {
->     return n
->   }
-> };
-> let t2: TypeItf<string> = {
->   name: "123",
->   getName: (n: string) => {
->     return n
->   }
-> }
-> ```
+在 TypeScript 中，类型本身就可以被定义为拥有不明确的类型参数的泛型；
+
+并且可以接收明确类型作为入参，从而衍生出更具体的类型；
+
+```typescript
+// 定义数组类型
+let arr: Array<number> = [1]
+let arr1: Array<string> = [""];
+
+// 类型别名
+type typeFn<P> = (params: P) => P;
+let fntype: typeFn<number> = (n: number) => {
+return n
+}
+
+// 定义接口
+interface TypeItf<P> {
+name: P;
+getName: (p: P) => P;
+}
+let t1: TypeItf<number> = {
+name: 123,
+getName: (n: number) => {
+ return n
+}
+};
+let t2: TypeItf<string> = {
+name: "123",
+getName: (n: string) => {
+ return n
+}
+}
+```
 
 
 
 ### 泛型约束
 
-> 把泛型入参限定在一个相对更明确的集合内，以便对入参进行约束；
->
-> ```typescript
-> interface TypeItf<P extends string | number> {
->   name: P;
->   getName: (p: P) => P;
-> }
-> let t1: TypeItf<number> = {
->   name: 123,
->   getName: (n: number) => {
->     return n
->   }
-> }
-> let t2: TypeItf<string> = {
->   name: "123",
->   getName: (n: string) => {
->     return n
->   }
-> }
-> ```
+把泛型入参限定在一个相对更明确的集合内，以便对入参进行约束；
+
+```typescript
+interface TypeItf<P extends string | number> {
+name: P;
+getName: (p: P) => P;
+}
+let t1: TypeItf<number> = {
+name: 123,
+getName: (n: number) => {
+ return n
+}
+}
+let t2: TypeItf<string> = {
+name: "123",
+getName: (n: string) => {
+ return n
+}
+}
+```
 
 
 
+# 类型断言
 
+是一种告诉编译器，我知道我在干什么，你不要给我报错的方法
 
-# 类( class )
+```ts
+/* 类型断言有两种写法 */
 
-> ```typescript
-> class Person {
->      // 定义实例属性,实例属性需要通过实例化的对象去访问；
->      name: string = 'Kein'
-> 
->      // 在属性前加 static 关键字，定义类属性（静态属性），只能通过 class 类去访问；
->      static age: number = 22
-> 
->      // 在属性前加 readonly 关键字，表示这个属性只能读不能改；
->      readonly gender: string = 'Male'
-> 
->      // 定义方法；
->      sayHello() {
->        console.log('Hello!My Name Is' + this.name);
->      }
-> };
-> 
-> const people = new Person();
-> people.sayHello()
-> ```
+// 1. 尖括号语法：<type>
+let str: string = 'hello'
+let strLen: number = (<string>str).length
+
+// 2. as 语法：as type
+let str2: string = 'hello'
+let strLen2: number = (str2 as string).length
+```
 
 
 
-### 修饰符
+# 修饰符`readonly`
 
-> 通过修饰符做到控制属性和方法的访问；
->
-> [^public]:基类、子类、类外部都可以访问；
-> [^protected]:基类、子类可以访问，类外部不可以访问；
-> [^private]:基类可以访问，子类、类外部不可以访问；
-> [^readonly]:只读修饰符；
-> [^static]:静态属性，可以避免数据冗余，提升运行性能；
->
-> ```typescript
-> class Person {
->   public readonly name: string = '张三'; // 公共属性，且只读
->   protected age: number = 20;
->   private height: string = '180';
->   protected getPersonInfo():void {
->     console.log(this.name, this.age, this.height); // 基类里面三个修饰符都可以访问
->   }
->   static title: string = "个人信息";
-> }
-> 
-> class Male extends Person {
->   public getInfo():void {
->     console.log(this.name, this.age); // 子类只能访问 public、protected 修饰符的属性
->   }
-> }
-> 
-> let m = new Male()
-> console.log(m.name) // 类外部只能访问 public 修饰的属性
-> m.name = '李四' // name 属性使用只读修饰符，所以不能对name进行赋值修改操作
-> ```
+表示被修饰的数据只能在定义时或构造函数中赋值，不能在后续代码中修改
+
+只读修饰符不会出现在编译后的代码中
+
+```ts
+// 1. 修饰变量
+let arr: readonly number[] = [1, 2, 3]
+// 另一种写法
+const arr2: ReadonlyArray<number> = [1, 2, 3]
+// 只读数组的成员不能被修改，也不能被删除，但是可以被读取
+console.log(arr[0])
+// arr.push(4) // 报错，只读数组不能被修改
+
+// 2. 修饰某个属性
+interface Person {
+  name: string
+  age: number
+  sex: 'male' | 'female'
+  readonly id: number // 表示`id`字段只能在定义时赋值，后续不可更改
+}
+```
 
 
 
-### constructor()
+# 类`class`
 
-> 类 class 里面的构造函数，把公共属性写在里面；
->
-> ```typescript
-> class Car {
->      brand: string;
->      color: string;
->      maxSpeed: number;
->      isSale: boolean;
->      constructor(brand: string, color: string, maxSpeed: number, isSale: boolean) {
->        this.brand = brand;
->        this.color = color;
->        this.maxSpeed = maxSpeed;
->        this.isSale = isSale
->      }
-> };
-> 
-> const bmw = new Car('BMW', 'White', 300, true);
-> console.log(bmw);
-> ```
+```typescript
+class Person {
+  // 在TS中需要书写属性列表来明确类中的属性！
+  name: string = 'Kein'
+  // 在属性前加`static`修饰符，定义静态属性，只能通过类自身访问
+  static age: number = 22
+  // 在属性前加`readonly`修饰符，表示这个属性只能读不能改；
+  readonly gender: string = 'Male'
+  // 定义方法
+  sayHello() {
+    console.log('Hello!My Name Is' + this.name)
+  }
+}
+
+const people = new Person()
+people.sayHello()
+```
 
 
 
-### 类的继承
+## 修饰符
 
-> 子类使用继承后，会拥有父类的所有属性和方法；
->
-> 通过继承可以将多个类共有的属性和方法写在一个父类中；
->
-> 子类中的属性和方法与父类同名，使用子类的；
->
-> 子类的 constructor 构造函数必须通过 super 关键字调用；
->
-> ```typescript
-> // 类的继承；
-> class Animal {
->      species: string
->      age: number
->      gender: string
->      constructor(species: string, age: number, gender: string) {
->        this.species = species;
->        this.age = age;
->        this.gender = gender;
->      }
->      call() {
->        console.log(this.species + '的性别是：' + this.gender);
->      }
->   };
-> 
-> class Dog extends Animal {
->     // 子类的 constructor 构造函数必须通过 super 关键字调用；
->      // 否则就会对父类的 constructor 构造函数进行重写，而不是继承；
->      hair: string
->      voice: string
->      constructor(species: string, age: number, gender: string, hair: string, voice: string) {
->        // 调用父类的 constructor 构造函数；
->        super(species, age, gender)
->        this.hair = hair;
->        this.voice = voice
->      }
->      hairColor() {
->        console.log(this.species + '的毛发的颜色是' + this.hair)
->      }
->   };
-> 
-> var dog = new Dog('狗', 3, 'Male', '金色', '汪汪汪 ！');
-> dog.hairColor()
-> ```
+通过修饰符做到控制属性和方法的访问
+
+[^public]:基类、子类、类外部都可以访问；
+[^protected]:基类、子类可以访问，类外部不可以访问；
+[^private]:基类可以访问，子类、类外部不可以访问；
+[^readonly]:只读修饰符；
+[^static]:静态属性，可以避免数据冗余，提升运行性能；
+
+```typescript
+class Person {
+public readonly name: string = '张三'; // 公共属性，且只读
+protected age: number = 20;
+private height: string = '180';
+protected getPersonInfo():void {
+ console.log(this.name, this.age, this.height); // 基类里面三个修饰符都可以访问
+}
+static title: string = "个人信息";
+}
+
+class Male extends Person {
+public getInfo():void {
+ console.log(this.name, this.age); // 子类只能访问 public、protected 修饰符的属性
+}
+}
+
+let m = new Male()
+console.log(m.name) // 类外部只能访问 public 修饰的属性
+m.name = '李四' // name 属性使用只读修饰符，所以不能对name进行赋值修改操作
+```
 
 
 
-### 抽象类
+## 抽象类
 
-> 在类的前面加 `abstrsct` 关键词；
->
-> 抽象类不能用来直接实例化对象；
->
-> 抽象类的作用就是专门当作父类去被继承，是一种不能被实例化仅能被子类继承的特殊类；
->
-> ```typescript
-> abstract class Father {
->      name: string
->      age: number
->      constructor(name: string, age: number) {
->        this.name = name;
->        this.age = age;
->      }
->      // 定义一个抽象方法，在方法的前面加 abstract 关键字；
->      // 抽象方法只能定义在抽象类中，且子类必须对抽象类方法进行重写；
->      abstract sayHello(): void;
-> };
-> 
-> class Son extends Father {
->      // 重写父类的抽象方法；
->      sayHello() {
->        console.log('My Name Is ' + this.name);
->      }
-> };
-> let person = new Son('Kein', 22);
-> console.log(person);// Son { name: 'Kein', age: 22 };
-> ```
+在类的前面加 `abstrsct` 关键词，抽象类不能用来直接实例化对象
 
+作用就是专门当作父类去被继承，是一种不能被实例化仅能被子类继承的特殊类
 
+```typescript
+abstract class Father {
+  name: string
+  age: number
+  constructor(name: string, age: number) {
+    this.name = name;
+    this.age = age;
+  }
+  // 定义一个抽象方法，在方法的前面加 abstract 关键字；
+  // 抽象方法只能定义在抽象类中，且子类必须对抽象类方法进行重写；
+  abstract sayHello(): void;
+};
 
-### 属性封装
-
-> 对象属性的值可以被任意的修改将会导致对象中的数据变得非常不安全；
->
-> 类的 `get` 和 `set` 方法；
->
-> ```typescript
-> class Pro {
->      // 增加 peivate 关键字前缀，表示该属性私有化，外部无法访问；
->      // 默认的前缀是 public ，即公开性属性；
->      private _name: string;
->      private _age: number;
->      constructor(name: string, age: number) {
->        this._name = name;
->        this._age = age;
->      }
->      // 设置属性的读取和更改方法，让外界能访问到 private 私有属性；
->      // getAge(){
->      //   return this.age;
->      // }
->      // setAge(newValue: number){
->      //   this.age = newValue;
->      // }
-> 
->      // TS 中提供的get、set 属性的的方法；
->      get age() {
->        return this._age;
->      }
->      set age(newValue: number) {
->        if (newValue >= 0) {
->          this._age = newValue;
->        };
->      }
->   };
-> 
-> const one = new Pro('Kein', 22);
-> // 访问 name 属性；
-> console.log(one.age);
-> // 设置 name 属性；
-> one.age = 23;
-> ```
-
-[^注意]:属性的名称不能和 `get` 和 `set` 方法的名称一样，否则会报错；
-
-
+class Son extends Father {
+  // 重写父类的抽象方法；
+  sayHello() {
+    console.log('My Name Is ' + this.name);
+  }
+};
+let person = new Son('Kein', 22);
+console.log(person);// Son { name: 'Kein', age: 22 }
+```
 
 
 
@@ -1266,5 +1264,4 @@ let altitude: PersonHeight = 8848
  }
 }
 ```
-
 
