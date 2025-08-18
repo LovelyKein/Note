@@ -808,93 +808,114 @@ let altitude: PersonHeight = 8848
 
 # 泛型`<T>`
 
-指的是**类型参数化**，即将原来某种具体的类型进行参数化；
+**泛型的本质是【类型参数化】，即把类型作为参数传递给函数、类或接口**
+允许在定义函数、类或接口时不预先指定具体的类型，而是在使用时再指定类型参数
+让代码更加灵活、通用，同时还能保持类型安全
 
-设计泛型的目的在于有效约束类型成员之间的关系，比如函数参数和返回值、类或者接口成员和方法之间的关系；
+目的在于有效约束类型成员之间的关系，比如函数参数和返回值、类或者接口成员和方法之间的关系
 
-
-
-### 泛型参数
-
-在函数执行传参时才确定参数数据的类型；
-
-```typescript
-// 使用 泛型 对函数参数的类型进行声明
-function getValue_1<T>(val: T): T {
-return val
+```ts
+// 使用泛型约束函数参数的类型
+function find<T>(arr: T[], index: number): T {
+  if (index >= 0 && index < arr.length) {
+    return arr[index] as T
+  }
+  throw new Error(`Index ${index} is out of bounds`)
 }
-let g4: number = getValue_1<number>(3)
-let g5: string = getValue_1<string>('4')
-
-// 多个泛型
-function add<T, G>(x: T, y: G): T {
-return x + y
-}
-const result: string = add<string, number>('Kine', 23)
+// 在使用函数时，才能确定数组元素的类型
+const res = find<number>([1, 2, 3], 1) // 2
 ```
 
-
-
-### 泛型类型
-
-在 TypeScript 中，类型本身就可以被定义为拥有不明确的类型参数的泛型；
-
-并且可以接收明确类型作为入参，从而衍生出更具体的类型；
-
-```typescript
-// 定义数组类型
-let arr: Array<number> = [1]
-let arr1: Array<string> = [""];
-
-// 类型别名
-type typeFn<P> = (params: P) => P;
-let fntype: typeFn<number> = (n: number) => {
-return n
+```ts
+// 类型别名泛型
+type Callback<T> = (item: T, index: number) => boolean
+// 接口泛型
+interface Callback<T> {
+  (item: T, index: number): boolean
 }
 
-// 定义接口
-interface TypeItf<P> {
-name: P;
-getName: (p: P) => P;
+// `filter`函数接受一个泛型参数`T`
+function filter<T> (arr: T[], callback: Callback<T>): T[] {
+  const new_arr: T[] = []
+  arr.forEach((item, index) => {
+    if (callback(item, index)) {
+      new_arr.push(item)
+    }
+  })
+  return new_arr
 }
-let t1: TypeItf<number> = {
-name: 123,
-getName: (n: number) => {
- return n
-}
-};
-let t2: TypeItf<string> = {
-name: "123",
-getName: (n: string) => {
- return n
-}
+const f = filter<number>([1, 2, 3, 4, 5], (i) => i % 2 === 0)
+console.log(f) // [2, 4]
+```
+
+![image-20250818173719214](./assets/image-20250818173719214.png)
+
+```ts
+// 使用泛型约束类
+class ArrayHelper<T> {
+  arr: T[] = []
+  constructor(arr: T[]) {
+    this.arr = arr
+  }
 }
 ```
 
 
 
-### 泛型约束
+## 泛型约束
 
-把泛型入参限定在一个相对更明确的集合内，以便对入参进行约束；
+把泛型入参限定在一个相对更明确的集合内，以便对泛型的取值进行约束
 
 ```typescript
-interface TypeItf<P extends string | number> {
-name: P;
-getName: (p: P) => P;
-}
-let t1: TypeItf<number> = {
-name: 123,
-getName: (n: number) => {
- return n
-}
-}
-let t2: TypeItf<string> = {
-name: "123",
-getName: (n: string) => {
- return n
-}
+function nameToUpperCase<T>(obj: T): T {
+  // 此时会报错：类型`T`上不存在属性`name`
+  obj.name = obj.name.split(' ').map((s) => {
+    const n = s[0]?.toUpperCase() + s.substring(1)
+    return n
+  }).join('')
+  return obj
 }
 ```
+
+![image-20250818193104800](./assets/image-20250818193104800.png)
+
+这种情况下，我们希望约束一下泛型可选的类型，比如至少是一个对象，并且含有`name`属性
+
+```ts
+interface HasName {
+  name: string
+}
+// 通过`extends`继承，约束泛型入参至少满足`HasName`的特征
+function nameToUpperCase<T extends HasName>(obj: T): T {
+  // 函数体不变
+}
+```
+
+所以，传递参数时也许满足必要特征
+
+```ts
+const kyle = { name: 'kyle', age: 25 }
+const kyleUpper = nameToUpperCase(kyle)
+// 如果缺少`name`属性，不满足入参约束，则会报错
+```
+
+![image-20250818193610851](./assets/image-20250818193610851.png)
+
+
+
+## 多泛型
+
+可以定义多个泛型参数，每个参数之间用`,`逗号隔开
+
+```ts
+function mixArray<T, U>(arr1: T[], arr2: U[]): (T | U)[] {
+  return [...arr1, ...arr2]
+}
+const arr = mixArray([1, 2, 3], ['a', 'b', 'c'])
+console.log(arr) // [1, 2, 3, 'a', 'b', 'c']
+```
+
+![image-20250818194553247](./assets/image-20250818194553247.png)
 
 
 
@@ -945,21 +966,46 @@ interface Person {
 # 类`class`
 
 ```typescript
+type Gender = 'male' | 'female'
 class Person {
-  // 在TS中需要书写属性列表来明确类中的属性！
-  name: string = 'Kein'
-  // 在属性前加`static`修饰符，定义静态属性，只能通过类自身访问
-  static age: number = 22
-  // 在属性前加`readonly`修饰符，表示这个属性只能读不能改；
-  readonly gender: string = 'Male'
+  /* 在TS中需要书写属性列表来明确类中的成员！ */
+  name: string
+  age: number
+  gender: Gender
+  hobbys: string[] = ['reading']
+  /* 通过`?`问号表示为可选属性，需要时再赋值 */
+  phone?: string // 或者: `phone: string | undefined`
+  
+  // `readonly`只读修饰符，表示这个属性只能在初始化时赋值，之后可读不可改
+  readonly gender: Gender
+  
+  // `private`修饰符
+  private cardId: string
+  
+  // 构造器函数
+  constructor(name: string, age: number, gender: Gender) {
+    this.name = name
+    this.age = age
+    this.gender = gender
+  }
+  
   // 定义方法
   sayHello() {
     console.log('Hello!My Name Is' + this.name)
   }
 }
 
-const people = new Person()
+const people = new Person('Kyle', 25, 'male')
 people.sayHello()
+```
+
+如果某个属性，通过构造函数的参数传递并且不做任何处里的赋值给该属性，可以进行简写
+
+```ts
+class Person {
+  // 此时，不用书写属性列表声明`name`和`age`
+  constructor(public name: string, public age: number) {}
+}
 ```
 
 
@@ -968,12 +1014,15 @@ people.sayHello()
 
 通过修饰符做到控制属性和方法的访问
 
-[^public]:基类、子类、类外部都可以访问；
-[^protected]:基类、子类可以访问，类外部不可以访问；
-[^private]:基类可以访问，子类、类外部不可以访问；
-[^readonly]:只读修饰符；
-[^static]:静态属性，可以避免数据冗余，提升运行性能；
+`readonly`：只读修饰符，表示这个属性只能在初始化时赋值，之后可读不可改
 
+`public`：默认的访问修饰符，公开的，所有的代码均可访问
+
+`private`：私有的，只能在类中访问，外面不行
+
+`static`：静态属性修饰符，只可以通过类本身访问，实例无法使用
+
+[^protected]:基类、子类可以访问，类外部不可以访问；
 ```typescript
 class Person {
 public readonly name: string = '张三'; // 公共属性，且只读
@@ -1000,122 +1049,129 @@ m.name = '李四' // name 属性使用只读修饰符，所以不能对name进�
 
 ## 抽象类
 
-在类的前面加 `abstrsct` 关键词，抽象类不能用来直接实例化对象
+在类的前增加`abstrsct`修饰符，抽象类不能直接用`new`实例化对象，只能被当作父类继承
 
-作用就是专门当作父类去被继承，是一种不能被实例化仅能被子类继承的特殊类
+```ts
+// 抽象类不能被实例化，只能被继承
+abstract class Animal {
+  // 抽象属性，必须在子类中定义
+  abstract sex: string
+  // 抽象方法，必须在子类中实现
+  // 抽象方法只能定义在抽象类中，且子类必须对抽象类方法进行具体的实现
+  abstract eat(): void
 
-```typescript
-abstract class Father {
-  name: string
-  age: number
-  constructor(name: string, age: number) {
-    this.name = name;
-    this.age = age;
+  // 抽象类的正常属性和方法
+  legs?: number
+  sleep() {
+    console.log("睡")
   }
-  // 定义一个抽象方法，在方法的前面加 abstract 关键字；
-  // 抽象方法只能定义在抽象类中，且子类必须对抽象类方法进行重写；
-  abstract sayHello(): void;
-};
+}
+// let animal = new Animal() // 报错，抽象类不能直接实例化
 
-class Son extends Father {
-  // 重写父类的抽象方法；
-  sayHello() {
-    console.log('My Name Is ' + this.name);
+// 继承抽象父类
+class Dog extends Animal {
+  // 子类必须实现父类中的抽象方法
+  eat() {
+    console.log('吃')
   }
-};
-let person = new Son('Kein', 22);
-console.log(person);// Son { name: 'Kein', age: 22 }
+  // 子类必须实现父类中的抽象属性
+  sex: string = 'male'
+}
+
+let dog = new Dog()
+dog.legs = 4
+console.log(dog.legs) // 4
 ```
 
 
 
 # 类型工具( Tools )
 
-> 使用一些特定的限定词，诗定义类型时更加灵活；
+使用一些特定的限定词，定义类型时更加灵活
 
 
 
 ### declare
 
-> 类型增强；
->
-> ```html
-> <script>
->   var globalVar = 'globalVar变量'
->   var globalObj = { name: '', age: 20 }
->   function fn(str) {
->     console.log('fn函数' + str)
->   }
-> </script>
-> ```
->
-> 如果上面几个变量和函数没有在全局做声明，会报类型错误，在我们在 types 文件夹中创建 common.d.ts 文件；
->
-> ```typescript
-> declare var globalVar: string
-> type ObjType = { name: string; age: number }
-> declare var globalObj: ObjType
-> // 声明函数fn类型
-> declare function fn(s?: string): void
-> ```
+类型增强；
+
+```html
+<script>
+var globalVar = 'globalVar变量'
+var globalObj = { name: '', age: 20 }
+function fn(str) {
+ console.log('fn函数' + str)
+}
+</script>
+```
+
+如果上面几个变量和函数没有在全局做声明，会报类型错误，在我们在 types 文件夹中创建 common.d.ts 文件；
+
+```typescript
+declare var globalVar: string
+type ObjType = { name: string; age: number }
+declare var globalObj: ObjType
+// 声明函数fn类型
+declare function fn(s?: string): void
+```
 
 
 
 ### extends
 
-> 类、接口、类型继承；
->
-> ```typescript
-> type TypeFn<P> = P extends string | number ? P[] : P
-> let m: TypeFn<number> = [1, 2, 3]
-> let m1: TypeFn<string> = ['1', '2', '3']
-> let m2: TypeFn<boolean> = true
-> ```
+类、接口、类型继承；
+
+```typescript
+type TypeFn<P> = P extends string | number ? P[] : P
+let m: TypeFn<number> = [1, 2, 3]
+let m1: TypeFn<string> = ['1', '2', '3']
+let m2: TypeFn<boolean> = true
+```
 
 
 
 ### infer
 
-> 类型推断；
->
-> ```typescript
-> type ObjType<T> = T extends { name: infer N; age: infer A } ? [N, A] : [T]
-> let p: ObjType<{ name: string; age: number }> = ["张三", 1]
-> let p1: ObjType<{name: string}> = [{name: '张三'}]
-> ```
+类型推断；
+
+```typescript
+type ObjType<T> = T extends { name: infer N; age: infer A } ? [N, A] : [T]
+let p: ObjType<{ name: string; age: number }> = ["张三", 1]
+let p1: ObjType<{name: string}> = [{name: '张三'}]
+```
 
 
 
 ### keyof
 
-> 提取对象属性名、索引名、索引签名的类型；
->
-> ```typescript
-> interface NumAndStr {
->   name: string;
->   age: number;
->   [key: number]: string | number;
-> }
-> type TypeKey = keyof NumAndStr // number | 'name' | 'age'
-> let t:TypeKey = 'name'
-> ```
+提取对象属性名、索引名、索引签名的类型；
+
+```typescript
+interface NumAndStr {
+name: string;
+age: number;
+[key: number]: string | number;
+}
+type TypeKey = keyof NumAndStr // number | 'name' | 'age'
+let t:TypeKey = 'name'
+```
 
 
 
 ### in
 
-> 映射类型；
->
-> ```typescript
-> type NumAndStr = number | string
-> type TargetType = {
->   [key in NumAndStr]: string | number;
-> }
-> let obj: TargetType = {
->   1: '123',
->   "name": 123
-> }
-> ```
+映射类型；
+
+```typescript
+type NumAndStr = number | string
+type TargetType = {
+[key in NumAndStr]: string | number;
+}
+let obj: TargetType = {
+1: '123',
+"name": 123
+}
+```
 
 [^Focus]:`in`和`keyof`只能在**类型别名( type )**定义中使用；	
 
@@ -1123,21 +1179,21 @@ console.log(person);// Son { name: 'Kein', age: 22 }
 
 ### typeof
 
-> 在类型上下文中获取变量或者属性的类型；
->
-> ```typescript
-> // 推断变量的类型
-> let strA = "2"
-> type KeyOfType = typeof strA // string
-> // 反推出对象的类型作为新的类型
-> let person = {
->   name: '张三',
->   getName(name: string):void {
->     console.log(name)
->   }
-> }
-> type Person = typeof person
-> ```
+在类型上下文中获取变量或者属性的类型；
+
+```typescript
+// 推断变量的类型
+let strA = "2"
+type KeyOfType = typeof strA // string
+// 反推出对象的类型作为新的类型
+let person = {
+name: '张三',
+getName(name: string):void {
+ console.log(name)
+}
+}
+type Person = typeof person
+```
 
 
 
@@ -1145,38 +1201,38 @@ console.log(person);// Son { name: 'Kein', age: 22 }
 
 # 第三方库类型声明
 
-> 在项目中使用第三方库，使用 TS 对其进行类型声明；
+在项目中使用第三方库，使用 TS 对其进行类型声明；
 
 
 
-### jquery
+## jquery
 
-> ```typescript
-> console.log($("#app"))
-> $.ajax()
-> // 此时没有在全局声明，会报错误
-> ```
->
-> 新建全局类型声明文件夹`types`，在文件夹中新建`jquery.d.ts`文件对 jquery 进行类型声明；
->
-> ```typescript
-> declare function $(n: string):any
-> /* declare let $: object; 重复声明会报红 */
-> declare namespace $ {
->   function ajax():void;
-> }
-> ```
->
-> namespace 的扩展；
->
-> ```typescript
-> // 全局变量的声明文件主要有以下几种语法: declare var 声明全局变量
-> declare function // 声明全局方法
-> declare class // 声明全局类
-> declare enum // 声明全局枚举类型
-> declare namespace // 声明(含有某方法的)全局对象
-> // interface 和 type 声明全局类型
-> ```
+```typescript
+console.log($("#app"))
+$.ajax()
+// 此时没有在全局声明，会报错误
+```
+
+新建全局类型声明文件夹`types`，在文件夹中新建`jquery.d.ts`文件对 jquery 进行类型声明；
+
+```typescript
+declare function $(n: string):any
+/* declare let $: object; 重复声明会报红 */
+declare namespace $ {
+function ajax():void;
+}
+```
+
+namespace 的扩展；
+
+```typescript
+// 全局变量的声明文件主要有以下几种语法: declare var 声明全局变量
+declare function // 声明全局方法
+declare class // 声明全局类
+declare enum // 声明全局枚举类型
+declare namespace // 声明(含有某方法的)全局对象
+// interface 和 type 声明全局类型
+```
 
 
 
@@ -1184,23 +1240,23 @@ console.log(person);// Son { name: 'Kein', age: 22 }
 
 # 编译( Compile )
 
-> 配置自定义编译 TS 文件；
->
-> 项目根目录下创建 `tsconfig.json`  ts 编译器文件，将配置写在里面；
+配置自定义编译 TS 文件；
+
+项目根目录下创建 `tsconfig.json`  ts 编译器文件，将配置写在里面；
 
 
 
 #### include
 
-> 用来指定哪些 TS 文件在执行 `tsc` 命令时需要被编译；
->
-> ```json
-> {
->   "include":[
->     "./code/**/*.ts"
->   ]
-> }
-> ```
+用来指定哪些 TS 文件在执行 `tsc` 命令时需要被编译；
+
+```json
+{
+"include":[
+ "./code/**/*.ts"
+]
+}
+```
 
 [^/**]: 表示当前目录下的任意文件夹；
 [^/*]: 表示当前文件夹下的任意文件；
@@ -1209,15 +1265,15 @@ console.log(person);// Son { name: 'Kein', age: 22 }
 
 #### exclude
 
-> 用来指定哪些 TS 文件不需要被编译；
->
-> ```json
-> {
->   "exclude": [
->     "./code/**/*"
->   ]
-> }
-> ```
+用来指定哪些 TS 文件不需要被编译；
+
+```json
+{
+"exclude": [
+ "./code/**/*"
+]
+}
+```
 
 [^/**]: 表示当前目录下的任意文件夹；
 [^/*]: 表示当前文件夹下的任意文件；
