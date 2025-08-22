@@ -1906,7 +1906,7 @@ window.fuc // undefined
 
 
 
-# 类`class`
+# 类`class`🤏
 
 本质是一个函数，简单来说，类`class`就是构造函数的另一种写法（语法糖）
 
@@ -1919,7 +1919,7 @@ window.fuc // undefined
 ```js
 // 创建一个类
 class Animal {
-  // 字段初始化器（ES7），添加一个拥有默认值的实例属性
+  // 字段初始化器（ES7），实例属性
   legs = 4
   
   // 类的构造函数，用于传递参数，返回实例对象，通过`new`命令生成对象实例时，自动调用该方法
@@ -1954,11 +1954,13 @@ const dog = new Animal()
 
 
 
-## 静态属性`static`
+## 静态成员`static`
 
-类的静态属性不能通过实例或者原型来访问，只能通过类本身访问
+类的静态属性：不能通过实例或者原型来访问，只能通过类自身访问
 
-```js
+类的静态方法：只能通过类自身调用，且函数中的`this`指向类，而不是实例
+
+```ts
 class Animal {
   constructor() {}
   static species = '哺乳动物'
@@ -2274,6 +2276,21 @@ console.log(curriedCalculate(3, 4)) // 20
 ## 函数管道
 
 将多个单参函数组合起来，形成一个新的函数，这些函数中，前一个函数的输出，是后一个函数的输入
+
+
+
+# `this`指向
+
+大部分时候，`this`的指向取决于函数的调用方式，需要代码执行时动态确定
+
+- 如果直接调用函数（全局调用），`this`指向全局对象或`undefined（启用严格模式）`
+- 如果使用`对象.方法`调用，`this`指向对象本身
+- 如果是`DOM`事件的处理函数，`this`指向事件处理对象，即事件触发的`DOM`元素
+
+特殊情况：
+
+- 箭头函数`() => {}`没有`this`，使用的是箭头函数定义的语法环境中的`this`
+- 使用`bind`、`apply`、`call`手动绑定`this`对象
 
 
 
@@ -2619,7 +2636,7 @@ const p = {
 const d = p.test
 d() // undefined 因为 d 的调用者是 全局对象
 
-p.test_1() // true 因为 test_1 箭头函数，找外部 this 就是 全局对象
+p.test_1() // true 因为 test_1 箭头函数，找外部 this 就是 全局对象或者`undefined`
 ```
 
 
@@ -2740,157 +2757,5 @@ import info, { a, b } from './module.js'
 import * as obj from './module.js'
 // 5. 不导入任何东西，仅运行一次模块
 import './module.js'
-```
-
-
-
-# `HTML`补充😪
-
-## lorem
-
-乱数假文，用于生成测试得乱序文本
-
-```html
-<!-- 语法：在模板中输入lorem，按回车键，自动生成 -->
-
-<!-- 生成4个乱序文本词 -->
-lorem4
-Lorem ipsum dolor sit
-<!-- 生成2行且每行5个乱序文本词 -->
-lorem5*2
-Lorem ipsum dolor sit amet.
-Corrupti nobis animi doloribus eius.
-```
-
-
-
-## 文档片段
-
-在需频繁地创建DOM元素添加到DOM树中情况下，使用`document.createDocumentFragment()`来避免多次操作DOM树
-
-```js
-function createLrcElements() {
-  var frag = document.createDocumentFragment() // 创建文档片段
-  for (vari = 0; i < Data.length; i++) {
-    var li = document.createElement('li')
-    li.textContent = Data[i].words
-    frag.appendChild(li) // 此时文档片段还未挂载到DOM树上，不会影响DOM树
-    // ul.appendChild(li) // 频繁地修改DOM树
-  }
-  ul.appendChild(frag)
-}
-```
-
-
-
-## DOM 尺寸和位置
-
-![image-20250528163324028](./assets/image-20250528163324028.png)
-
-![image-20250528184005653](./assets/image-20250528184005653.png)
-
-
-
-# `CSS`补充😪
-
-## `label`标签
-
-```html
-<div class="container">
-  <!-- 通过 id 相关联 -->
-  <input type="radio" name="gender" id="male" value="male" />
-  <label for="male">Male</label>
-
-  <!-- 直接用 label 元素包裹，里面的元素则会自动关联 -->
-  <label>
-    <input type="radio" name="gender" id="female" value="female" />
-    <span>Female</span>
-  </label>
-</div>
-```
-
-
-
-## `vertical-align`
-
-在相邻的两个元素的`display`属性值为`inline`或者`inline-block`的前提下，如存在元素上下不对齐的情况
-使用`vertical-align`属性来调整
-
-```css
-vertical-align: 4px;
-```
-
-
-
-## `border`和`outline`
-
-`outline`不占用元素的盒尺寸，只有显示效果，但`border`会参与到盒尺寸的计算中
-
-
-
-## 属性值计算过程
-
-所有的HTML元素，任何一个元素必须要每一个CSS属性全部都要有值，浏览器才知道如何显示它
-没有书写的属性值，并不代表这个元素没有这个CSS属性和值，浏览器有默认的值
-
-![image-20250513095647264](./assets/image-20250513095647264.png)
-
-浏览器调试工具中的`Computed`可以看到选中元素的**最终计算样式**
-
-1. 确定声明值
-
-   参考样式表中没有冲突的声明，作为CSS属性值，这一步有冲突重复声明的属性不会处理确定最终值
-
-2. 层叠冲突
-
-   对样式表中有冲突的声明使用层叠规则，确定CSS属性值
-
-   - 比较重要性，用户书写样式大于浏览器默认样式
-   - 比较特殊性，权重比较
-   - 比较次序性，后面的会覆盖前面的样式
-
-3. 使用继承
-
-   对仍然没有值的属性，若可以继承，则继承复元素的值
-
-4. 使用默认值
-
-   对仍然没有值的属性，使用浏览器的默认值
-
-
-
-## 伪类选择器
-
-```css
-/* 没有访问过的超链接 */
-a: link {}
-/* 已访问过的超链接 */
-a: visited {}
-: hover {}
-/* 鼠标按下 */
-: active {}
-/* 聚焦的表单元素 */
-: focus {}
-/* 禁用的表单元素 */
-: disabled {}
-/* xaun'zhong */
-: checked {}
-: first-child {}
-: last-child {}
-/* 选中 an+b 个子元素，a、b是常量，n 的值从 0 开始递增*/
-: nth-child(an+b) {}
-```
-
-
-
-## 元素隐藏显示
-
-```css
-/* dom 元素盒子也会消失 */
-display: none;
-/* 不可见，有 dom 元素，但是不能触发事件 */
-visibility: visible;
-/* 透明度为0，有 dom 元素，可被触发事件 */
-opacity: 0;
 ```
 

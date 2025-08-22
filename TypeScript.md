@@ -525,7 +525,7 @@ const p = Permission.read | Permission.write // 0011
 
 # 联合类型`T | T`
 
-多个类型满足其中一个就行
+多个类型满足其中一个就好
 可以把`|`类比为`JavaScript`中的逻辑或 `||`，只不过前者表示的是类型
 
 ```typescript
@@ -563,52 +563,78 @@ zs = {
 
 # 接口`interface`
 
-通过 interface 接口来声明数据类型；
+接口`interface`是一种规范和约束，用于约束类、对象、函数的契约（标准）
 
-可以将内联类型抽离出来，从而实现类型可复用
+和类型别名一样，不会出现在编译后的代码中
+
+类型保护函数：通过调用该函数，会触发TS的类型保护，必须返回`boolean`类型的值
 
 ```ts
-// 接口的概念
-// 接口是一种类型，一种规范，一种约束
-// 用于约束类、对象、函数的契约(标准)
-// 和类型别名一样，不会出现在编译后的代码中
-
+/* 1. 约束对象 */
 interface User {
   name: string
   age: number
   sex: 'male' | 'female'
-  email?: string,
+  email?: string, // 缺省属性，可有可无
   // sayHello: () => void
   // 另一种写法
   sayHello(): void
 }
 
-// 使用接口约束一个函数和函数的参数和返回值
+/* 2. 约束函数和参数即返回值 */
 interface AddFn {
   (a: number, b: number): number
 }
-// 类型别名写法
-type AddFnType = {
-  (a: number, b: number): number
-}
 // 当大括号中没有具体属性字段时，大括号只是一个定界符，不是对象
-const add: AddFn = (a, b) => {
-  return a + b
+const add: AddFn = (a, b) => a + b
+
+/* 3. 约束数组 */
+interface ArrayNumber {
+  [key: number]: number
 }
+const arr: ArrayNumber = [1, 2, 3]
 
-
-const user: User = {
-  name: 'Kyle',
-  age: 25,
-  sex: 'male',
-  email: 'kein@example.com',
+/* 4. 约束类class */
+interface MyInterface {
+  sayHello(): void
+  walk(): void
+  gender: "male" | "female"
+}
+// 约束`MyClass`类中必须包含接口`MyInterface`中的成员
+class myClass implements MyInterface {
+  gender: "male" | "female"
+  constructor(public name: string, gender: "male" | "female") {
+    this.gender = gender
+  }
   sayHello() {
-    console.log(`hello, my name is ${this.name}`)
-  },
+    console.log("Hello !")
+  }
+  walk() {
+    console.log("walk !")
+  }
 }
 
-// 接口的继承，子接口可以继承父接口的所有属性和方法
-// 但要注意，子接口不能覆写父接口中的相同成员为不同的类型
+```
+
+> [!NOTE]
+>
+> 接口和类型别名的最大区别：接口可以被类实现，而类型名不可以
+
+
+
+## 接口继承
+
+接口继承，子接口可以继承父接口的所有属性和方法
+但要注意，子接口不能覆写父接口中的相同成员为不同的类型
+
+**如果继承的接口被继承的接口有相同的属性且类型不兼容，那么就会报错**
+
+```typescript
+interface User {
+  name: string
+  age: number
+  sex: 'male' | 'female'
+}
 // 例如，父接口中定义了`name: string`，子接口中定义了`name: number`，这是不允许的
 interface Student extends User {
   // 只读修饰符，只能在接口定义时或构造函数中赋值，不会出现在编译后的代码中
@@ -618,122 +644,73 @@ interface Student extends User {
 interface Child extends User, Student {
   skills: string[]
 }
-
-
 ```
 
-### 声明类型
-
-使用接口定义变量和函数参数的类型；
-
-```typescript
-// 定义对象的类型
-interface PersonInfo {
-name: string; // 不是类似对象般用 , 隔开，而是 ;
-age: number;
-}
-let zhangsan: PersonInfo = {
-name: "张三",
-age: 20
-}
-
-// 定义数组的类型
-interface ArrayNumber {
-[idx: number]: number;
-}
-let arr1: ArrayNumber = [1, 2, 3]
-
-// 定义函数的类型
-interface PersonFn {
-(p: PersonInfo): void;
-}
-let Person1: PersonFn = (obj: PersonInfo): void => {
-console.log(obj.name, obj.age);
-}
-
-// 定义 类Class 的成员及类型
-interface myInterface {
-// 接口中所有属性都不能有实际的值；
-// 接口中的方法都是抽象方法；
-name: string;
-age: number;
-sayHello(): void;
-};
-
-// 用接口去限制类的属性和方法
-// 用来定义一个类的结构，指定一个类中应该包含哪些属性和方法
-class myClass implements myInterface {
-name: string; // 声明 this.name 的数据类型
-age: number;
-constructor(name: string, age: number) {
-this.name = name;
-this.age = age;
-}
-sayHello = () => {
-console.log('Hello !');
-}
-}
-
-// 缺省和只读特性
-interface PersonInfo {
-name?: string; // 缺省
-readonly height: number; // 只读
-}
-
-// 不限制属性名和属性值
-interface AnyObj { [propname: string]: unknown }
-```
-
-[^Tip]:很少使用接口类型来定义函数的类型，更多使用内联类型或类型别名配合箭头函数语法来定义函数类型；
 
 
+## 接口合并
 
-### 继承接口
-
-多个不同接口之间是可以实现继承的，会组合成一个新的接口；
-
-但是如果继承的接口被继承的接口有相同的属性，并且类型不兼容，那么就会报错；
+重复定义的接口会进行类型合并，**即重复定义的接口类型，它的类型会叠加**
+一般用在扩展第三方库的接口类型
 
 ```typescript
-interface NameInfo {
-name: string;
+interface PersonInfo {
+  name: string
+  age: number
 }
-interface AgeInfo {
-age: number;
+interface PersonInfo {
+  name: string
+  height: number
+  age: string
 }
-interface PersonInfo extends NameInfo, AgeInfo {
-height: number;
-}
-let zs: PersonInfo = {
-name: "张三",
-age: 20,
-height: 177
+// 此时`PersonInfo`接口变成了
+interface PersonInfo {
+  name: string
+  age: number | string
+  height: number
 }
 ```
 
 
 
-### 接口合并
+# 索引器
 
-多个相同名字的接口，会进行合并，得到一个新的接口；
+索引器在JS中的叫法又叫：属性表达式，即不使用`.propName`来访问成员，而是使用`['propName']`来访问
 
-**即：重复定义的接口类型，它的属性会叠加**；
+在严格的检查下，可以实现为对象和类动态增加成员
 
-这个接口的特性一般用在扩展第三方库的接口类型；
-
-```typescript
-interface PersonInfo {
-name: string;
-age: number;
+```ts
+const info = {
+  name: '张三',
+  age: 18,
+  gender: 'male',
 }
-interface PersonInfo {
-name: string;
-height: number;
+// 在默认情况下，使用索引器访问不存在的属性，也不会报错
+// 针对索引器使用场景多数为需要动态确定属性名称的情况下，TS的校验规则没有那么严格
+// 允许隐式的`any`的类型存在
+info['sex']
+```
+
+如何避免这种情况
+
+```json
+{
+  "compilerOptions": {
+    "noImplicitAny": true // 不允许隐式的 any 类型
+  }
 }
-let zs: PersonInfo = {
-name: "张三",
-age: 20,
-height: 177
+```
+
+如果想在后续程序执行中动态增加对象和类的属性，怎么做？
+
+```ts
+interface User {
+  name: string
+  age: number
+  gender: "male" | "female"
+  // 增加一个索引器，表示执行该接口的对象或类中
+  // 除了必要的`name | age | gender`属性，其他任何键类型为`string`，类型为`unknown`
+  [prop: string]: unknown
 }
 ```
 
@@ -756,9 +733,18 @@ function getUserList(): User[] {
     { name: 'Kein', age: 26, gender: 'female' }
   ]
 }
+
+// 约束函数
+type AddFnType = {
+  (a: number, b: number): number
+} // // 当大括号中没有具体属性字段时，大括号只是一个定界符，不是对象
+// 或者
+type AddFnType = (a: number, b: number) => number
+const add: AddFnType = (a, b) => a + b
 ```
 
-类型别名通过交叉类型`&`实现接口的继承效果，但与接口继承不同的是，类型别名中相同成员的类型会被交叉类型`&`合并
+类型别名通过交叉类型`&`实现接口的继承效果
+但与接口继承不同的是，类型别名中相同成员的类型会被交叉类型`&`合并
 
 ```ts
 type UserType = {
@@ -924,8 +910,6 @@ console.log(arr) // [1, 2, 3, 'a', 'b', 'c']
 是一种告诉编译器，我知道我在干什么，你不要给我报错的方法
 
 ```ts
-/* 类型断言有两种写法 */
-
 // 1. 尖括号语法：<type>
 let str: string = 'hello'
 let strLen: number = (<string>str).length
@@ -933,6 +917,10 @@ let strLen: number = (<string>str).length
 // 2. as 语法：as type
 let str2: string = 'hello'
 let strLen2: number = (str2 as string).length
+
+// 3. 非空断言：!
+// 在数据之后加上感叹号`!`，告诉TS不用考虑该数据为空的情况，一定有值
+const element: HTMLElement = document.getElementById('map')!
 ```
 
 
@@ -944,7 +932,7 @@ let strLen2: number = (str2 as string).length
 只读修饰符不会出现在编译后的代码中
 
 ```ts
-// 1. 修饰变量
+// 1. 修饰变量-只读数组
 let arr: readonly number[] = [1, 2, 3]
 // 另一种写法
 const arr2: ReadonlyArray<number> = [1, 2, 3]
@@ -1020,44 +1008,81 @@ class Person {
 
 `private`：私有的，只能在类中访问，外面不行
 
-`static`：静态属性修饰符，只可以通过类本身访问，实例无法使用
+`protected`：只能在自身和继承的子类中访问，外面不行
 
-[^protected]:基类、子类可以访问，类外部不可以访问；
+`static`：静态属性修饰符，只可以通过类自身访问，实例无法使用
+
 ```typescript
-class Person {
-public readonly name: string = '张三'; // 公共属性，且只读
-protected age: number = 20;
-private height: string = '180';
-protected getPersonInfo():void {
- console.log(this.name, this.age, this.height); // 基类里面三个修饰符都可以访问
+// 类的单例模式
+class Board {
+  // 将类`Board`的构造函数私有化，不能通过`new`实例化，仅可在类中访问
+  private constructor() {}
+  
+  private static _board: Board // 静态、隐私属性
+  
+  static createBoard() { // 静态方法，只能通过类`Board.createBoard`调用
+    if (!this._board) {
+      this._board = new Board()
+    }
+    return this._board
+  }
 }
-static title: string = "个人信息";
+const b1 = Board.createBoard()
+const b2 = Board.createBoard()
+console.log(b1 === b2) // true
+```
+
+
+
+## 类继承
+
+子类成员不能改变父类成员的类型
+无论是属性还是方法，子类都可以对父类的相应成员进行重写，但是需要保证类型的匹配
+在继承关系中`this`的指向是动态的，调用方法时根据具体的调用者确定`this`指向
+
+- **单根性**：每个类最多只能扩展继承一个父类
+
+  ![image-20250819192746457](./assets/image-20250819192746457.png)
+
+- **传递性**：如果A是B的父类，B是C的父类，则可以认为A也是C的父类
+
+```ts
+class Tank {
+  position: { x: number; y: number } = { x: 0, y: 0 }
+  speed: number = 10
+  shoot() {
+    console.log('Tank shoot')
+  }
 }
 
-class Male extends Person {
-public getInfo():void {
- console.log(this.name, this.age); // 子类只能访问 public、protected 修饰符的属性
+class PlayerTank extends Tank {
+  constructor(x: number, y: number) {
+    super() // 在子类中必须使用`super`调用父类的的构造器
+    this.position.x = x
+    this.position.y = y
+  }
+  // 子类中`shoot`的方法和父类中同名，我既想调用本身的，也想同时调用父类的，怎么办？
+  // 使用`super`关键字，访问父类的方法
+  shoot() {
+    super.shoot()
+    console.log('PlayerTank shoot')
+  }
 }
-}
-
-let m = new Male()
-console.log(m.name) // 类外部只能访问 public 修饰的属性
-m.name = '李四' // name 属性使用只读修饰符，所以不能对name进行赋值修改操作
 ```
 
 
 
 ## 抽象类
 
-在类的前增加`abstrsct`修饰符，抽象类不能直接用`new`实例化对象，只能被当作父类继承
+在类的前增加`abstrsct`修饰符，抽象类不能直接用`new`实例化对象，只能被当作父类被继承
+抽象类就像是一个模板，子类都需要基于这个模板之上去扩展自己的规则
 
 ```ts
 // 抽象类不能被实例化，只能被继承
 abstract class Animal {
-  // 抽象属性，必须在子类中定义
-  abstract sex: string
-  // 抽象方法，必须在子类中实现
-  // 抽象方法只能定义在抽象类中，且子类必须对抽象类方法进行具体的实现
+  // 抽象属性：必须在子类中定义
+  abstract readonly name: string
+  // 抽象方法：只能定义在抽象类中，且子类必须对抽象类方法进行具体的实现
   abstract eat(): void
 
   // 抽象类的正常属性和方法
@@ -1070,18 +1095,41 @@ abstract class Animal {
 
 // 继承抽象父类
 class Dog extends Animal {
+  // 子类必须实现父类中的抽象属性
+  readonly name: string = 'Dog'
+  
   // 子类必须实现父类中的抽象方法
   eat() {
     console.log('吃')
   }
-  // 子类必须实现父类中的抽象属性
-  sex: string = 'male'
 }
 
 let dog = new Dog()
 dog.legs = 4
 console.log(dog.legs) // 4
 ```
+
+
+
+装饰器,
+能够带来额外的信息量,可以达到分离关注点的目的。
+全网课程都有
+信息书写位置的问题
+重复代码的问题
+上述两个问题产生的根源:某些信息,在定义时,能够附加的信息量有限
+装饰器的作用:为某些属性、类、参数、方法提供元数据信息(metadata
+元数据:描述数据的数据
+
+
+
+###装饰器的本
+
+在JS中,装饰器是一个函数。
+(装饰器是要参与运行的)
+装饰器可以修饰:
+类
+成员(属性+方法)
+参数
 
 
 
