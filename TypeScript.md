@@ -675,7 +675,8 @@ interface PersonInfo {
 
 # 索引器
 
-索引器在JS中的叫法又叫：属性表达式，即不使用`.propName`来访问成员，而是使用`['propName']`来访问
+索引器在JS中的叫法又叫：属性表达式
+即不使用`.propName`来访问成员，而是使用`['propName']`来访问
 
 在严格的检查下，可以实现为对象和类动态增加成员
 
@@ -1111,35 +1112,171 @@ console.log(dog.legs) // 4
 
 
 
-装饰器,
-能够带来额外的信息量,可以达到分离关注点的目的。
-全网课程都有
-信息书写位置的问题
-重复代码的问题
-上述两个问题产生的根源:某些信息,在定义时,能够附加的信息量有限
-装饰器的作用:为某些属性、类、参数、方法提供元数据信息(metadata
-元数据:描述数据的数据
+# 装饰器`Decorator`
+
+在`TS/JS`中，装饰器是一种特殊的语法结构，本质上是一个**函数**，并且参与代码执行
+**用于在不修改原有代码的前提下，动态地为类、方法、属性或参数添加额外功能**
+
+装饰器的作用：为某些属性、类、参数、方法提供元数据信息
+元数据`Meta Data`是描述数据的数据
+
+当多个装饰器应用于同一个对象时：会按照**后加入先调用（从右到左，自下而上）**的顺序进行调用
+
+```json
+{
+  // 需要在 tsconfig.json 配置
+  "compilerOptions": {
+    "experimentalDecorators": true,  // 启用装饰器
+  }
+}
+```
 
 
 
-###装饰器的本
+## 类装饰器
 
-在JS中,装饰器是一个函数。
-(装饰器是要参与运行的)
-装饰器可以修饰:
-类
-成员(属性+方法)
-参数
+作用于类声明，用于修改或扩展类的行为
+
+**运行时间**：在类定义后直接运行
+
+**装饰器参数**：
+
+- `target`：类本身
+
+**返回值**：
+
+- `void`：仅运行函数
+- `新的类`：会将新的类替换掉装饰目标
+
+```ts
+// 类的本质就是一个函数`Function`，但是这样约束太过广泛
+// 我们希望它只能是一个类，使用`new (...args: unknown[]) => object`约束
+function Decorator(target: new (...args: unknown[]) => object): void {
+  console.log(target)
+  // 添加静态属性
+  target.version = '1.0.0'
+  // 添加原型方法
+  target.prototype.log = function() {
+    console.log(`这是 ${target.name} 类的实例`)
+  }
+}
+
+@Decorator // 类装饰器
+class A {}
+```
 
 
 
-# 类型工具( Tools )
+## 属性装饰器
 
-使用一些特定的限定词，定义类型时更加灵活
+作用于类的属性（实例属性或静态属性），用于定义属性的行为（如默认值、读写限制等）
+
+**运行时间**：在属性定义后直接运行
+
+**装饰器参数**：
+
+- `target`：如果是静态`static`属性则为类本身；如果是实例属性则为类的原型对象`prototype`
+- `propertyKey`：属性名
+
+**返回值**：可选，返回一个属性描述符`{ value, writable, enumerable, configurable }`，用于定义属性行为
+
+```ts
+function prop(target: any, propertyKey: string) {
+  console.log(target === B.prototype, propertyKey)
+}
+class B {
+  @prop
+  name: string = "Kyle"
+
+  @prop
+  static age: number = 18
+}
+```
 
 
 
-### declare
+## 方法装饰器
+
+用于修改方法的行为（如添加日志、缓存、权限校验等）
+
+**运行时间**：在方法定义后直接运行
+
+**装饰器参数**：
+
+- `target`：如果是静态`static`方法则为类本身；如果是实例方法则为类的原型对象`prototype`
+- `propertyKey`：方法名
+- `descriptor`：方法的属性描述符
+
+**返回值**：可选，返回修改后的描述符替代原描述符
+
+```ts
+function MethodDecorator( target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  console.log(target === C.prototype, propertyKey, descriptor)
+
+  // 方法的属性描述符
+  // value：方法的函数体
+  // writable：是否可写
+  // enumerable：是否可枚举
+  // configurable：是否可配置
+  descriptor.enumerable = false // 默认是 false，因为类的方法在原型对象上
+
+  // 原方法
+  const originalMethod = descriptor.value
+  // 对方法进行修改
+  descriptor.value = function (...args: any[]) {
+    console.log('before')
+    originalMethod.apply(this, args)
+    console.log('after')
+  }
+  
+  return descriptor
+}
+
+class C {
+  @MethodDecorator
+  say() {
+    console.log('hello')
+  }
+}
+new C().say()
+```
+
+
+
+## 参数装饰器
+
+作用于方法的参数，用于记录参数信息（如参数验证、依赖注入等）
+
+**运行时间**：在方法定义后直接运行
+
+**装饰器参数**：
+
+- `target`：如果是静态`static`方法则为类本身；如果是实例方法则为类的原型对象`prototype`
+- `propertyKey`：方法名
+- `parameterIndex`：参数在参数列表中的索引
+
+```ts
+function Param(target: any, propertyKey: string, parameterIndex: number) {
+  console.log(target === D.prototype, propertyKey, parameterIndex) // true say 0
+}
+
+class D {
+  say(@Param name: string) {
+    console.log(name)
+  }
+}
+new D().say('Kyle')
+```
+
+
+
+# 类型演算
+
+指在没有明确指定类型的情况下，TS会根据上下文自动推断出类型
+
+
+
+## `declare`
 
 类型增强；
 
@@ -1165,22 +1302,9 @@ declare function fn(s?: string): void
 
 
 
-### extends
+## `infer`
 
-类、接口、类型继承；
-
-```typescript
-type TypeFn<P> = P extends string | number ? P[] : P
-let m: TypeFn<number> = [1, 2, 3]
-let m1: TypeFn<string> = ['1', '2', '3']
-let m2: TypeFn<boolean> = true
-```
-
-
-
-### infer
-
-类型推断；
+类型推断
 
 ```typescript
 type ObjType<T> = T extends { name: infer N; age: infer A } ? [N, A] : [T]
@@ -1190,70 +1314,287 @@ let p1: ObjType<{name: string}> = [{name: '张三'}]
 
 
 
-### keyof
+## `keyof`
 
-提取对象属性名、索引名、索引签名的类型；
+`keyof`类型运算符可以获取一个类、接口、类型别名的所有的成员名，返回一个联合类型`|`
 
-```typescript
-interface NumAndStr {
-name: string;
-age: number;
-[key: number]: string | number;
+```ts
+class User {
+  name: string = "Kyle"
+  age: number = 25
 }
-type TypeKey = keyof NumAndStr // number | 'name' | 'age'
-let t:TypeKey = 'name'
+type T = keyof User // 'name | 'age
+
+function printUserKey(obj: User, key: T) {
+  //key 的值如果不约束为 User 实例的字段联合类型，会报错具有隐式 any 类型
+  console.log(obj[key])
+}
+```
+
+
+
+## `in`
+
+用来遍历枚举类型，该关键字往往和`keyof`联用，限制某个索引类型的取值范围
+
+```ts
+interface T1 {
+  name: string
+  age: number
+  sex: boolean
+}
+
+// 遍历 T1 接口的所有属性，将属性值的类型赋值给新的属性
+// 并将属性名添加 readonly 修饰符和 ? 可选修饰符
+type ReadonlyT1 = {
+  readonly [prop in keyof T1]?: T1[prop]
+}
+// 等价于
+type T3 = {
+  readonly name?: string
+  readonly age?: number
+  readonly sex?: boolean
+}
+
+// 配合上泛型，传入一个泛型参数，实现一个通用的 MyReadonly 工具类型
+type MyReadonly<T> = {
+  readonly [prop in keyof T]: T[prop]
+}
+```
+
+> [!NOTE]
+>
+> `in`和`keyof`只能在类型别名定义中使用
+
+
+
+## `typeof`
+
+在类型上下文中推断一个变量或对象的类型
+
+```ts
+// 1. 推断变量的类型
+const k = 'hello'
+console.log(typeof k) // string
+
+// 2. 反推出对象的类型作为新的类型
+const person = {
+  name: '张三',
+  getName(name: string): void {
+    console.log(name)
+  }
+}
+console.log(typeof person) // { name: string; getName(name: string): void }
+
+// 3. 当`typeof`作用于类的时候，得到的类型是该类本身的类型
+// 类似于`new () => User`
+class User {
+  name: string = 'Kyle'
+  age: number = 25
+}
+const A = User // 此时 A 的类型：`typeof User`
+console.log(typeof User) // function
+// 需要约束为类才可以使用`new`关键字调用
+function createUser(clsss: typeof User): User {
+  return new clsss()
+}
 ```
 
 
 
-### in
+## 预设类型
 
-映射类型；
-
-```typescript
-type NumAndStr = number | string
-type TargetType = {
-[key in NumAndStr]: string | number;
+```ts
+interface T {
+  name: string
+  age: number
+  sex: boolean
+  email: string
 }
-let obj: TargetType = {
-1: '123',
-"name": 123
+interface U {
+  name: string
+  age: number
+}
+type None = undefined | null
+
+// 将参数 T 的所有成员都设置为可选类型
+type P = Partial<T>
+// 将参数 T 的所有成员都设置为必选类型
+type R = Required<T>
+// 将参数 T 的所有成员都设置为只读类型
+type O = Readonly<T>
+// 从 T 中排除 U 的类型
+type E = Exclude<T, U>
+// 从 T 中提取 U 的类型
+type X = Extract<T, U>
+// 从T中排除 null 和 undefined 的类型
+type N = NonNullable<T>
+
+class C {
+  name: string = "张三"
+  age: number = 18
+}
+// 从 T 中提取实例类型
+type I = InstanceType<typeof C>
+
+// 获取函数的返回值类型
+type Func = () => number
+type F = ReturnType<Func> // number
+```
+
+
+
+# 声明文件
+
+
+
+
+
+# 第三方库
+
+
+
+## `reflect-metadata`
+
+一个用于在`TS/JS`中实现元数据反射`Metadata Reflection`的库
+允许在类、方法、属性等声明上附加额外的元数据，并在运行时通过`Reflect API`读取这些元数据
+是许多`TS`框架（如`NestJS`）实现依赖注入、装饰器功能的核心基础
+
+```json
+{
+  // 需要在 tsconfig.json 配置
+  "compilerOptions": {
+    "experimentalDecorators": true,  // 启用装饰器
+    "emitDecoratorMetadata": true    // 生成元数据（配合 reflect-metadata）
+  }
 }
 ```
 
-[^Focus]:`in`和`keyof`只能在**类型别名( type )**定义中使用；	
+```ts
+import 'reflect-metadata' // 必须导入才能使用
 
-
-
-### typeof
-
-在类型上下文中获取变量或者属性的类型；
-
-```typescript
-// 推断变量的类型
-let strA = "2"
-type KeyOfType = typeof strA // string
-// 反推出对象的类型作为新的类型
-let person = {
-name: '张三',
-getName(name: string):void {
- console.log(name)
+class User {
+  name: string
 }
+// 为类添加元数据
+Reflect.defineMetadata('description', '用户数据模型', User)
+// 为类的属性添加元数据
+Reflect.defineMetadata('maxLength', 50, User.prototype, 'name')
+
+// 读取类的元数据
+const classMeta = Reflect.getMetadata('description', User)
+console.log(classMeta) // '用户数据模型'
+// 读取属性的元数据
+const propMeta = Reflect.getMetadata('maxLength', User.prototype, 'name')
+console.log(propMeta) // 50
+
+// 检查元数据是否存在
+const hasMeta = Reflect.hasMetadata('description', User)
+console.log(hasMeta) // true
+
+/* 与装饰器联用 */
+// 定义装饰器工厂函数
+function Role(role: string) {
+  return function (target: any) {
+    Reflect.defineMetadata('role', role, target) // 添加元数据
+  }
 }
-type Person = typeof person
+function FieldDescription(desc: string) {
+  return function (target: any, propertyKey: string) {
+    Reflect.defineMetadata('fieldDesc', desc, target, propertyKey)
+  }
+}
+
+@Role('admin') // 类装饰器
+class AdminUser {
+  @FieldDescription('管理员姓名') // 属性装饰器
+  name: string
+}
 ```
 
 
 
+## `class-validator`
+
+一个基于装饰器`Decorator`的`TS/JS`数据验证库，用于对类实例的属性进行验证
+
+```ts
+import 'reflect-metadata'
+import { IsString, IsInt, Min, Max, IsEmail } from 'class-validator'
+
+/** 1. 为属性添加验证规则 **/
+class User {
+  @IsString({ message: '姓名必须是字符串' })
+  name: string
+  
+  @IsInt({ message: '年龄必须是整数' })
+  @Min(18, { message: '年龄不能小于 18' })
+  @Max(120, { message: '年龄不能大于 120' })
+  age: number
+  
+  @IsEmail({}, { message: '请输入有效的邮箱' })
+  email: string
+}
 
 
-# 第三方库类型声明
+/** 2. 执行验证 **/
+import { validate, validateOrReject } from 'class-validator'
+const user = new User()
+user.name = 123 // 错误：不是字符串
+user.age = 17 // 错误：小于 18
+user.email = 'invalid-email' // 错误：邮箱格式无效
 
-在项目中使用第三方库，使用 TS 对其进行类型声明；
+// 方式一：返回错误数组
+validate(user).then(errors => {
+  if (errors.length > 0) {
+    console.log('验证失败：', errors)
+  } else {
+    console.log('验证成功')
+  }
+})
+// 方式二：验证失败时抛出异常（适合 async/await）
+async function checkUser() {
+  try {
+    await validateOrReject(user)
+    console.log('验证成功')
+  } catch (errors) {
+    console.log('验证失败：', errors)
+  }
+}
+```
 
 
 
-## jquery
+## `class-transformer`
+
+一个用于`TS/JS`的对象转换库，主要功能是在普通对象（如`JSON `数据）与类实例之间进行转换
+同时支持数据类型转换、嵌套对象处理、属性映射等高级功能
+
+```ts
+/* 1. 创建一个类作为数据模型 */
+class User {
+  id: number
+  name: string
+  birthDate: Date
+  isActive: boolean
+}
+
+/* 2. 将普通对象转换为类实例，自动处理类型转换 */
+import { plainToInstance } from 'class-transformer'
+const plainUser = {
+  id: '123', // 字符串 -> 数字
+  name: 'Alice',
+  birthDate: '1990-01-01', // 字符串 -> Date 对象
+  isActive: 'true' // 字符串 -> 布尔值
+}
+const userInstance = plainToInstance(User, plainUser)
+```
+
+
+
+## 类型声明
+
+在项目中使用第三方库，使用 TS 对其进行类型声明
 
 ```typescript
 console.log($("#app"))
@@ -1261,17 +1602,17 @@ $.ajax()
 // 此时没有在全局声明，会报错误
 ```
 
-新建全局类型声明文件夹`types`，在文件夹中新建`jquery.d.ts`文件对 jquery 进行类型声明；
+新建全局类型声明文件夹`types`，在文件夹中新建`jquery.d.ts`文件对`jquery`进行类型声明
 
 ```typescript
-declare function $(n: string):any
+declare function $(n: string): any
 /* declare let $: object; 重复声明会报红 */
 declare namespace $ {
-function ajax():void;
+  function ajax():void
 }
 ```
 
-namespace 的扩展；
+namespace 的扩展
 
 ```typescript
 // 全局变量的声明文件主要有以下几种语法: declare var 声明全局变量
@@ -1282,90 +1623,4 @@ declare namespace // 声明(含有某方法的)全局对象
 // interface 和 type 声明全局类型
 ```
 
-
-
-
-
-# 编译( Compile )
-
-配置自定义编译 TS 文件；
-
-项目根目录下创建 `tsconfig.json`  ts 编译器文件，将配置写在里面；
-
-
-
-#### include
-
-用来指定哪些 TS 文件在执行 `tsc` 命令时需要被编译；
-
-```json
-{
-"include":[
- "./code/**/*.ts"
-]
-}
-```
-
-[^/**]: 表示当前目录下的任意文件夹；
-[^/*]: 表示当前文件夹下的任意文件；
-
-
-
-#### exclude
-
-用来指定哪些 TS 文件不需要被编译；
-
-```json
-{
-"exclude": [
- "./code/**/*"
-]
-}
-```
-
-[^/**]: 表示当前目录下的任意文件夹；
-[^/*]: 表示当前文件夹下的任意文件；
-
-
-
-#### compilerOptions
-
-编译器选项；
-
-```json
-{
- "compilerOptions": {
-    // target 属性，用来指定 TS 被编译后的 JS 版本，默认是编译成 ES3 ；
-    "target": "ES5",
-    // module 属性，指定按照哪种模块化标准规范；
-    "module": "es2015",
-    // lib 属性，指定项目中要使用的库，一般不写；
-    "lib": [],
-    // outDir 属性，指定编译后的 JS 文件所在的目录；
-    "outDir": "./code/js",
-    // outFile 属性，将所有全局作用域的 JS 文件合并到一个文件中，一般不写；
-    "outFile": "./code/js/app.js",
-    // allowJs 属性，是否编译目录里的 JS 文件，默认是 false ；
-    "allowJs": false,
-    // checkJs 属性，是否检查 JS 代码语法是否符合规范，默认是 false ；
-    "checkJs": false,
-    // removeComments 属性，是否移除掉代码注释；
-    "removeComments": false,
-    // noEmit 属性，是否生成编译后的 JS 文件；
-    "noEmit": false,
-    // noEmitOnError 属性，当有错误时，不生成编译后的 JS 文件；
-    "noEmitOnError": true,
-    // strict 属性，所有严格检查的总开关；
-    "strict": true,
-    // alwaysStrict 属性，是否在编译后的 JS 文件里使用严格模式；
-    "alwaysStrict": false,
-    // noImplicitAny 属性，指定不允许隐式的 : any 数据类型；
-    "noImplicitAny": true,
-    // noImplicitThis 属性，指定不允许不明确指向的 this ；
-    "noImplicitThis": true,
-    // strictNullChecks 属性，指定是否严格的检查空值；
-    "strictNullChecks": true
- }
-}
-```
 
