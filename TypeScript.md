@@ -650,7 +650,7 @@ interface Child extends User, Student {
 
 ## 接口合并
 
-重复定义的接口会进行类型合并，**即重复定义的接口类型，它的类型会叠加**
+重复定义的接口会进行类型合并，**即重复定义的接口类型，它的类型会叠加联合**
 一般用在扩展第三方库的接口类型
 
 ```typescript
@@ -1402,7 +1402,7 @@ function createUser(clsss: typeof User): User {
 
 
 
-## 预设类型
+## `TS`预设类型
 
 ```ts
 interface T {
@@ -1446,7 +1446,207 @@ type F = ReturnType<Func> // number
 
 # 声明文件
 
+声明文件`Declaration files`是一种特殊的文件，用于为`JavaScript`代码提供类型信息
+使`TypeScript`能够理解这些代码的类型结构，从而提供类型检查、自动补全和代码提示等功能
 
+**声明文件的扩展名为`.d.ts`，它本身不包含具体的实现代码，只包含类型声明**
+
+**声明文件的作用**：
+
+- 为已有的`JavaScript`库提供类型信息，使其可以在`TypeScript`项目中被安全地使用，例如安装对应的`@types/`类型包
+
+  ```shell
+  npm install @types/lodash --save-dev
+  ```
+
+- 定义全局变量、函数、类等的类型，增强代码的可维护性和可读性
+
+- 解决不同模块之间的类型依赖问题
+
+**声明文件的查找规则**：
+
+- 在同目录下的，与模块同名的`.d.ts`文件（用`TypeScript`代码书写的工程发布包之后的格式）
+
+- 安装依赖`node_modules/@types`目录下的对应类型包
+
+- `tsconfig.json`手动书写`typeRoots`配置，指定类型声明文件的位置
+
+  ```json
+  {
+    "compilerOptions": {
+      "typeRoots": [
+        "./node_modules/@types",
+        "./src/types"
+      ]
+    }
+  }
+  ```
+
+**自动生成声明文件**：
+
+使用`TypeScript`开发的工程，发布的是编译之后的`JavaScript`文件
+如果发布的工程需要其他开发者使用，可以使用声明文件，来描述发布结果中的类型
+配置`tsconfig.json`中的`declaration: true`即可
+
+```json
+{
+  "compilerOptions": {
+    "sourceMap": true, // 生成 source map 文件
+    "declaration": true, // 编译后自动生成`.d.ts`类型声明文件
+    "declarationMap": true, // 生成声明文件的 source map 文件
+  }
+}
+```
+
+
+
+## 全局声明
+
+用于声明全局作用域中的变量、函数、类等
+
+```ts
+// global.d.ts
+declare var VERSION: string
+
+declare function greet(name: string): string
+declare function setTimeout(handler: () => void, time_ms: number): number 
+declare function clearTimeout(id: number): void
+
+declare class Person {
+  name: string;
+  readonly age: number;
+  constructor(name: string, age: number)
+  sayHello(): void;
+}
+
+declare var test: {
+  log(...args: any[]): void;
+  error: (...args: any[]) => void;
+  warn: (...args: any[]) => void;
+  name: string;
+}
+```
+
+
+
+## 模块声明
+
+当导入一个没有类型声明的`JavaScript`模块时，可以通过声明文件为其补充类型
+
+```ts
+/* lodash 类型声明 */
+declare module 'lodash' {
+  // 声明具名导出
+  export function chunk<T>(array: T[], size: number): T[][]
+  export function map<T, U>(array: T[], iteratee: (item: T) => U): U[]
+
+  // 其他 lodash 方法...
+
+  // 声明默认导出
+  export default {
+    chunk,
+    map
+  }
+}
+
+
+/* jquery 类型声明 */
+declare function $(n: string): any
+declare namespace $ {
+  function ajax():void
+}
+// `namespace`表示命名空间,可以将其认为是一个对象,命名空同中的内容必须通过命名空间访问成员
+```
+
+```ts
+// 使用模块，则可以获得类型提示
+import _ from 'lodash'
+
+const newArr = _.chunk([1, 2, 3, 4, 5], 2)
+console.log(newArr)
+```
+
+
+
+## `declare global`
+
+用于在**模块作用域内**扩展全局类型或声明全局成员，突破模块的封装限制
+
+当一个文件包含`import`或`export`语句时，`TypeScript`会将其视为**模块**（而非全局脚本）
+在模块中直接声明全局类型会无效，此时就需要使用`declare global`来显式指定全局作用域
+
+- **必须在模块中使用**：`declare global`只能在模块文件（包含 `import`/`export`）中使用，否则会报错
+- **声明与实现分离**：`declare global`仅用于类型声明，不能包含具体实现，实现逻辑需要单独编写
+- **避免全局污染**：过度使用`declare global`会导致全局类型混乱，建议只在必要时使用，并尽量将扩展限制在特定范围内
+- **与全局声明文件的区别**：如果在非模块文件（无`import`/`export`）中声明全局类型，不需要`declare global`，直接声明即可
+
+```ts
+export {} // 使文件成为模块
+
+declare global {
+  interface Window {
+    // 声明 window 上的自定义属性
+    viewer_map: Map<string, { viewer: object }>
+  }
+}
+
+// 扩展 Array 的自定义方法
+declare global {
+  interface Array<T> {
+    // 为所有数组添加一个随机排序方法
+    shuffle(): T[];
+  }
+}
+// 实现这个方法（注意：这是在模块内实现，而非声明文件）
+Array.prototype.shuffle = function<T>(this: T[]): T[] {
+  const newArray = [...this]
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]]
+  }
+  return newArray
+}
+// 使用
+const numbers = [1, 2, 3, 4, 5]
+numbers.shuffle()
+```
+
+
+
+## 声明合并
+
+借助`interface`接口重复定义会进行类型合并联合，可以扩展已有的类型
+
+```ts
+declare module "express" {
+  interface Request {
+    user?: {
+      id: string;
+      name: string;
+    };
+  }
+}
+// express中的`request`对象可以有了`user`属性的类型，不会报错（前提保证数据中真的有改数据，否则运行会出错）
+```
+
+> [!NOTE]
+>
+> 如果是扩展方法函数，则需要另外书写函数的具体实现
+
+
+
+## 三斜线指令
+
+用于声明文件之间的依赖关系
+
+```ts
+// 以`///`三个斜线开头
+/// <reference path="globals.d.ts" />
+/// <reference types="node" />
+
+// 这里可以使用 globals.d.ts 中声明的类型
+// 也可以使用 node 模块的类型
+```
 
 
 
@@ -1592,35 +1792,7 @@ const userInstance = plainToInstance(User, plainUser)
 
 
 
-## 类型声明
+## `typescript-eslint`
 
-在项目中使用第三方库，使用 TS 对其进行类型声明
-
-```typescript
-console.log($("#app"))
-$.ajax()
-// 此时没有在全局声明，会报错误
-```
-
-新建全局类型声明文件夹`types`，在文件夹中新建`jquery.d.ts`文件对`jquery`进行类型声明
-
-```typescript
-declare function $(n: string): any
-/* declare let $: object; 重复声明会报红 */
-declare namespace $ {
-  function ajax():void
-}
-```
-
-namespace 的扩展
-
-```typescript
-// 全局变量的声明文件主要有以下几种语法: declare var 声明全局变量
-declare function // 声明全局方法
-declare class // 声明全局类
-declare enum // 声明全局枚举类型
-declare namespace // 声明(含有某方法的)全局对象
-// interface 和 type 声明全局类型
-```
 
 
