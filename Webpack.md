@@ -1,131 +1,286 @@
 # `Webpack`?
 
-Webpack 是一种前端资源构建工具，一个静态模块打包器(module bundle)；
+`Webpack`是一种前端资源构建工具，一个静态模块打包器(module bundle)；
 
 前端项目工程化的具体解决方案；
+
+Webpack 的核心功能是**处理模块依赖并打包**，但它有一个基础限制：**默认只能识别和处理 JavaScript 与 JSON 文件**
 
 
 
 #### 处理流程
 
-> 1. Webpack 将前端的所有资源文件：`JavaScript`、`JSON`、`CSS`、`img`、`LESS` ...等做模块处理；
-> 2. 根据模块间的依赖关系进行静态分析，打包生成对应的静态资源(bundle)；
+Webpack 将前端的所有资源文件：`JavaScript`、`JSON`、`CSS`、`img`、`LESS` ...等做模块处理
+根据模块间的依赖关系进行静态分析，打包生成对应的静态资源(bundle)；
 
 
 
 #### 配置文件
 
-> 在项目根目录下创建 `webpack.config.js` 文件；将配置信息写在此文件中；
+在项目根目录下创建 `webpack.config.js` 文件；将配置信息写在此文件中
 
 
 
 #### Initialize
 
-> 下载 webpack 打包构建的模块；
->
-> ```shell
-> npm install webpack webpack-cli --save-dev
-> # 下载内存构建打包模块
-> npm install webpack-dev-server --save-dev
-> ```
+下载 webpack 打包构建的模块；
+
+```shell
+npm install webpack webpack-cli --save-dev
+# 下载内存构建打包模块
+npm install webpack-dev-server --save-dev
+```
+
+
+
+# 配置文件运行时机
+
+执行打包命令时是，`Node`会找到`webpack.config.js`配置文件（或自定义配置文件）在`Node`环境下运行
+所以文件中必须是有效无报错的`CommonJS`规范代码
+
+或者在`package.json`中设置`"type": "module"`，将默认模块化规范设置为`ES Module`规范
+则在`webpack.config.js`文件使用`ES Module`规范书写代码，但不建议
+
+但是被打包的项目代码文件，并不会在打包过程中主动运行
+**仅在模块解析时被动执行导入副作用（如顶层console.log）**
+`webpack`只是分析模块文件的导入导出语句
+构建“模块依赖树”，但不会执行代码中的业务逻辑
+
+这也是为什么需要eslint、babel等一些插件的原因
+
+
+
+# `Source-Map`
+
+源码地图，实际部署运行的代码是打包处理后的代码，对错误调试不友好
+我们更希望看到编写的源码中错误，而不是打包合并后的
+
+sourcemap应在开发环境中使用,作为一种调试手段
+不应该在生产环境中使用,source map的文件一般较庆大
+不仅会导致额外的网络传输,还容易暴露原始代码。即便要在生产环境中
+使用sourcemap,用于调试真实的代码运行问题,也要做出一些处理规
+避网络传输和代码暴露的问题。
+
+webpack通过`devtool`配置源码地图
+
+
+
+# 编译过程
+
+初始化
+此阶段,webpack会将CLI参数、配置文件、默认配置进行融合合,形成一个最终的配置对象。
+对配置的处理过程是依托一个第三方库yargs完成的
+目前,可以简单的理解为,初始化阶段主要用于产生一个最终的配置，为开始编译做准备
+
+编译
+
+1.创建chunk
+Chunk块，是webpack在内部构建过程中的一个概念，表示通过某个入口找到的所有依赖的统称
+可以理解为构建阶段的 “模块集合”
+
+根据入口模块(默认为./src/index.js)创建一个chunk
+
+每个chunk都有至少两个属性:
+name:默认为main
+id:唯一编号,开发环境和name相同,生产环境是一个数字,从9开始
+
+![image-20250828172803724](./assets/image-20250828172803724.png)
+
+![image-20250828173726511](./assets/image-20250828173726511.png)
+
+涉及术语
+1.module:模块,分割的代码单元,webpack中的模块可以是任何内容的
+文件,不仅限于JS
+2.chunk:webpack内部构建模块的块,一个chunk中包含多个模块,这些
+模块是从入口模块通过依赖分析得来的
+
+3. bundle
+构建好模块后会生成chunk的资源清单,清单中的每一项
+就是一个bundle,可以认为bundle就是最终生成的文件
+是最终输出到磁盘的文件（可以理解为构建完成后生成的物理文件）
+3. hash:最终的资源清单所有内容联合生成的hash值
+5.chunkhash:chunk生成的资源清单内容联合生成的hash值
+6.chunkname:chunk的名称,如果没有配置则使用main
+7.id:通常指chunk的唯一编号,如果在开发环境下构建和chunkname相
+同;如果是生产环境下构建,则使用一个从0开始的数字进行编号
+
+
+
+# `AST`抽象语法树
+
+
+
+# `compiler`
+
+
+
+事件类型
+这一部分使用的是Tapable API,这个小型的库是一个专门用于钩子函数监
+听的库。
+它提供了一些事件类型:
+tap:注册一个同步的钩子函数,函数运行完毕则表示事件处理结束
+tapAsync:z注册一个基于回调的异步的钩子函数,函数通过调用一个回调表示事件处理结束
+tapPromise:注册一个基于Promise的异步的钩子函数,函数通过返回的Promise进入已决状态表示事件处理结束
+
+处理函数
+处理函数有一个事件参数compilation
 
 
 
 
 
-## 核心概念
+# `loader-utils`
 
 
 
-#### Entry
-
-> 入口`Entry`指示 Webpack 以哪个文件为入口起点开始打包;
->
-> 分析构建内部依赖图；
+# `webpack-merge`
 
 
 
-###### 单入口
+# `Entry`
 
-> ```javascript
-> // 字符串形式；---> 打包后是一个文件；
-> entry = path.join(__dirname,'/public/js/index.js')
-> ```
+入口`Entry`指示 Webpack 以哪个文件为入口起点开始打包;
 
+分析构建内部依赖图
 
+```js
+module.export = {
+  entry: {
+    // 属性名：chunk 名称，属性值：入口模块文件
+    main: './src/mian.js'
+    test: './src/test.js'
+  },
+  
+  // 单入口时也可以直接简写成路径字面量
+  entry: './src/main.js',
+  
+  // 数组多启动模块，打包后依然是一个 chunk
+  entry: ['./src/mian.js', './src/test.js']
+}
+```
 
-###### 多入口
+在不手动或自动分割代码的默认情况下，一个`chunk`对应一个`bundle`
 
-> ```javascript
-> // 数组形式；---> 打包后依然是一个 chunk 文件；
-> entry = [
->      path.join(__dirname,'/public/js/index.js'),
->      path.join(__dirname,'/public/js/main.js')
-> ]
-> 
-> // 对象形式；---> 有几个入口文件，打包后就会有几个 chunk 文件；
-> entry = {
->      index: path.join(__dirname,'/public/js/index.js'),
->      main: path.join(__dirname,'/public/js/main.js')
-> }
-> 
-> 
-> // 输出；
-> output: {
->      filename: '[name].js',
->        path: path.join(__dirname,'/bundle')
-> }
-> ```
+但在实际场景中，往往不是对应的关系：
+
+- 例如`import()`动态导入语法，导入的模块单独分成一个`chunk`
+- 使用优化手段`splitChunks`进行代码分割
+- 公共依赖（如`lodash`）可能被提取为`vendor chunk`
 
 
 
-#### Output
+# `Output`
 
-> 输出`Output`指示 Webpack 打包后的资源`bundle`要输出到哪里去，以及如何命名；
->
-> ```javascript
-> output = {
->      // 入口文件打包后的文件名称；
->      filename: 'public/js/bundle_[name].js',
->      // 打包后的所有资源的输出路径；
->      path: path.join(__firname,'/bundle'),
->      // 所有公共资源引入公共路径前缀；
->      publicPath: '/',
->      // 非入口 chunk 文件打包后的名称； 
->      chunkFilename: 'public/js/chunk/[name].js'，
->      // 单独打包的库向外暴露时的文件名称；结合 dll 使用；
->      library: '[name]_[hash]'
-> }
-> ```
->
+输出`Output`指示 Webpack 打包后的资源`bundle`要输出到哪里去，以及如何命名；
+
+```js
+module.exports = {
+  output: {
+    /* 打包后所有资源的输出路径，必须是一个绝对路径 */
+    path: path.join(__firname, '/bundle'),
+    
+    /* 合并后的 bundle 文件名规则 */
+    // 1. 单文件入口的静态写法
+    filename: 'js/bundle.js',
+    // 2. 多入口的动态写法
+    // - [name]：对应了 entry 入口中配置的 chunk 名称
+    // - [hash]：总资源列表的 hash
+    // - [contenthash]：文件内容变化时哈希值变化，hash 可用于服务器的缓存控制
+    // - [chunkhash]：每个 chunk 块的 hash 值
+    // - [id]： chunk 块的 id 值
+    filename: 'js/[name]-[chunkhash:10].js',
+    
+    // 非入口 chunk 文件打包后的文件名规则
+    // 例如通过代码分割生成的 chunk（如路由懒加载、splitChunks 拆分的第三方库）
+    chunkFilename: 'js/[name]-[chunkhash:10].chunk.js',
+     
+    /* 静态资源（如图片）的输出路径 */
+    assetModuleFilename: 'assets/[hash][ext][query]',
+    
+    // 所有公共资源引入公共路径前缀
+    publicPath: '/',
+    
+    // 单独打包的库向外暴露时的文件名称；结合 dll 使用
+    library: '[name]_[hash]'
+  }
+}
+```
 
 
 
-#### Module
+# `Loader`
 
-> `Loader`可以让 Webpack 能够去处理那些非 JavaScript 文件；
->
-> Webpack 本身只能处理 JavaScript 和 JSON；
->
-> `Loader` 加载器可以协助 webpack 处理打包特定的文件模块；
->
-> [^Loader]:A loader is a node module exporting a function，是一个 node 导出的方法；
->
-> ```javascript
-> module: {
->   rules: [
->     // 文件类型检测规则；loader 配置;
->     {
->       test: /\.css$/,
->       use: ['css-loader','style-loader']
->     }
->     // ......
->   ],
->     oneOf: [
->       // 规则......
->     ]
-> }
-> ```
+
+
+**为什么需要`Loader`？**
+
+`Webpack`的核心功能是**处理模块依赖并打包**，但默认只能识别和处理`JavaScript`与`JSON`文件
+而实际开发中会用到大量非`JS`类型的文件（如`css/less/sass`、`TS`、`图片/媒体资源`、`Vue`组件等）
+这些文件无法被`Webpack`直接解析为可处理的模块
+因此需要一种 "中间转换工具"，将这些非`JS`文件转换为`Webpack`能理解的格式，这就是`loader`存在的必要性
+
+**`Loader`是什么？**
+
+loader 的本质是**一个遵循特定规范的 Node.js 模块**，它的核心是导出一个**转换函数**。
+
+```js
+// 一个简单的 Loader
+module.exports = function(source) {
+  // source 为输入的文件内容（字符串或 Buffer 缓冲区数据）
+  const result = source.toUpperCase()
+  // 返回处理后的内容
+  return result
+}
+```
+
+```js
+// 使用 loader 
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.txt$/,
+        use: './loaders/uppercase-loader' // 路径指向自定义 loader
+      }
+    ]
+  }
+}
+```
+
+
+
+函数的基本逻辑是：接收**源文件内容**作为参数，通过自定义逻辑处理后，返回**转换后的内容**（通常是 JavaScript 代码，或下一个 loader 可处理的内容）
+简单来说，loader 就是**文件转换器**，负责将一种格式的文件转换为另一种格式
+
+
+
+![image-20250829151529308](./assets/image-20250829151529308.png)
+
+```js
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.js$/, // 正则表达式，匹配 .js 文件
+        use: [
+          'loader_1',
+          {
+            loader: 'loader_2',
+            options: {}
+          }
+        ] // 处理该类型文件使用的 Loader
+      },
+      /* 其他规则 */
+    ]
+  }
+}
+```
+
+**`Loader`的处理流程？**
+
+![image-20250829153603875](./assets/image-20250829153603875.png)
+
+
 
 
 
@@ -139,374 +294,192 @@ Webpack 是一种前端资源构建工具，一个静态模块打包器(module b
 
 
 
-#### Plugins
+# `plugins`
 
-> 插件`Plugins`可以用于执行范围更广的任务；
->
-> 插件的范围包括：从打包优化和压缩，一直到重新定义环境中的变量；
+插件`Plugins`可以用于执行范围更广的任务；
 
+插件的范围包括：从打包优化和压缩，一直到重新定义环境中的变量
 
+```js
+// 插件 plugin 的本质就是一个又 apply 方法的对象或类
+module.exports = class MyPlugin {
+  // 该方法在初始化是就会执行
+  apply(compiler) {
+    console.log('插件开始运行了！')
+    
+    // 注册事件
+    compiler.hooks.事件名称.事件类型(name, function(compilation) {
+      // 
+    })
+  }
+}
+```
 
-#### Mode
+```js
+module.exports = {
+  // 在 plugins 配置数组中使用插件
+  plugins: [
+    new MyPlugin()
+  ]
+}
+```
 
-> 模式`Mode`指示 Webpack 使用相应模式的配置；
->
-> |  配置选项   |            特点            |
-> | :---------: | :------------------------: |
-> | Development | 能让代码本地调试运行的环境 |
-> | Production  | 能让代码优化上线运行的环境 |
-
-[^注意]:创建  `webpack.config.js` 文件，把配置配置都写在这个文件里；
-
-
-
-#### resolve
-
-> 解析模块配置；
->
-> ```javascript
-> resolve: {
->   // 配置解析模块路径别名：可以简写路径，但是输入没有提示；
->   alias: {
->     $css: path.join(__dirname,'/public/css'),
->     // 告诉 webapck ，路径中的中的 @ 表示当前文件目录下的 src 文件夹，简写路径；
->     '@': path.join(__dirname,'/src')
->   },
->   // 配置可以省略文件的后缀名；
->   extensions: [
->     '.js',
->     '.json',
->     '.css',
->   ],
->   // 告诉 webpack 解析模块去找哪个目录；
->   modules: [path.join(__dirname,'/node_modules'),'node_modules']
-> }
-> ```
+![image-20250829174844128](./assets/image-20250829174844128.png)
 
 
 
-#### devServer
+# `mode`
 
-> 用于开发环境中使用；
->
-> ```javascript
-> devServer: {
->      // 指定运行代码的目录，默认是打包后的文件目录；
->      contentBase: path.join(__dirname,'/bundle'),
->      // 监视 contentBase 目录下的所有文件，一旦文件发生变化就会重新打包；
->      watchContentBase: true,
->      // 忽视一些目录下的文件的变化；
->      watchOptions: {
->        ignored: /node_modules/
->      },
->      // 启动代码压缩；
->      compress: true,
->      // 端口号；
->      port: 8000,
->   	// 域名；
->   	host: 'localhost',
->   	// 自动打开浏览器
->   	open: true,
->   	// 开启 HMR 热模块替换
->   	hot: true,
->   	// 不要显示启动服务器的日志信息；
->   	clientLogLevel: 'none',
->   	// 除了一些基本启动信息之外，其他的内容都不要显示；
->   	quiet: true,
->   	// 如果出错了，不要全屏显示错误信息；
->   	overlay: false,
->   	// 服务器代理，解决开发环境时的跨域问题；
->   	proxy: {
->        '/api': {
->          // 把请求转发给 target ;
->          target: 'http://localhost:5000',
->          // 路径重写；
->          pathRewrite: {
->            '^/api': ''
->          }
->        }
->      }
-> }
-> ```
+模式`Mode`指示 Webpack 使用相应模式的配置；
+
+|  配置选项   |            特点            |
+| :---------: | :------------------------: |
+| Development | 能让代码本地调试运行的环境 |
+| Production  | 能让代码优化上线运行的环境 |
 
 
 
-#### optimization
+# `resolve`
 
-> production 生产环境时的代码**优化配置**；
->
-> ```javascript
-> optimization: {
->      // 分裂文件代码；
->      splitChunks: {
->        chunks: 'all',
->        minSize: 30*1024,
->        maxSize: 0,
->        minChunks: 1,
->        maxAsyncRequests: 5,
->      },
->      // 将当前模块中所记录的其他模块的 hash 值单独打包成一个文件：runtime ；
->      // 解决当修该文件 a 时导致文件 b 的 contenthash 值产生变化；
->      runtimeChunk: {
->        name: entrypoint => `runtime-${entrypoint.name}`
->      },
->      minimizer: [
->        // 配置生产环境时的 js 和 css 的压缩方案；
->        // npm install terser-webpack-plugin --save-dev
->        new TerserWebpackPlugin({
->          // 开启缓存；
->          cache: true,
->          // 开启多线程打包；
->          parallel: true,
->          // 启动 source-map 代码调试优化；
->          sourceMap: true
->        })
->      ]
->   }
-> ```
+解析模块配置；
+
+```javascript
+resolve: {
+// 配置解析模块路径别名：可以简写路径，但是输入没有提示；
+alias: {
+ $css: path.join(__dirname,'/public/css'),
+ // 告诉 webapck ，路径中的中的 @ 表示当前文件目录下的 src 文件夹，简写路径；
+ '@': path.join(__dirname,'/src')
+},
+// 配置可以省略文件的后缀名；
+extensions: [
+ '.js',
+ '.json',
+ '.css',
+],
+// 告诉 webpack 解析模块去找哪个目录；
+modules: [path.join(__dirname,'/node_modules'),'node_modules']
+}
+```
 
 
 
-#### externals
+# `devServer`
 
-> 禁止一些依赖模块被打包，而是在 html 页面中用 src 引入；
->
-> ```javascript
-> module.exports = {
->   externals: {
->     // npm包名: 引入时的名称
->     // 排除 three.js 依赖文件不进行打包，在 html 页面 CDN 引入
->     three: "THREE",
->     // 排除 jquery 不进行打包
->     jquery: 'jQuery'
->   }
-> }
-> ```
->
+用于开发环境中使用；
 
-
-
-#### devtool
-
-> 配置 `source-map` 属性，便于代码调试；
->
-> ```javascript
-> module.exports = {
->     devtool: 'source-map'
-> }
-> 
-> // development 开发环境下：devtool: 'eval-source-map'
-> // 快速，精准定位到源代码具体的错误行；
-> 
-> // production 生产环境下：devtool: 'nosources-source-map'
-> // 或者不开启 source-map；
-> // 防止源代码泄露，提高网站的安全性；
-> ```
-
-
-
-
-
-## 开发环境基本配置
-
-> ```javascript
-> // 开发环境配置：代码运行即可；
-> 
-> const path = require('path');
-> const HtmlWebpackPlugin = require('html-webpack-plugin');
-> 
-> module.exports = {
-> 	// 模式配置；
-> 	mode: 'development',
-> 	// 入口文件配置；
-> 	entry: path.join(__dirname, '/src/index.js'),
-> 	// 输出目录配置；
-> 	output: {
-> 		filename: 'bundle.js',
-> 		// 打包的所有资源都会输出到这个 bundle 目录下；
-> 		path: path.join(__dirname, '/bundle')
-> 	},
-> 	module: {
-> 		rules: [
-> 			// loader 的配置；
-> 			{
-> 				// 处理 less 文件资源；
-> 				test: /\.less$/,
-> 				use: ['style-loader', 'css-loader', 'less-loader']
-> 			},
-> 			{
-> 				// 处理 css 文件资源；
-> 				test: /\.css$/,
-> 				use: [
->           // 创建 <style> 标签，将编译好的样式放在里面；
->           'style-loader',
->           // 将 css 文件整合到 js 文件中；
->           'css-loader'
->         ]
->       },
->       {
->         // 处理样式文件中图片资源；
-> 				test: /\.(jpg|png|jpeg|gif)$/,
-> 				loader: 'url-loader',
-> 				options: {
->           // 规定 8KB 以下的图片做 base64 处理；
->           // base64 处理的图片的文件大小会增大，因此大图片不适合做 base64 处理；
->           // 限制图片在 8KB 一下才会进行 base64 处理；
-> 					limit: 8 * 1024,
-> 					// 给图片重新命名：用 hsah 值的前8位做图片名称；
-> 					name: '[hash:8].[ext]',
-> 					// 关闭 ES Module 模块化模式；避免与 CommonJS 产生冲突；
-> 					esModule: false,
-> 					outputPath: 'public/imgs'
-> 				}
-> 			},
-> 			{
-> 				// 处理 html 文件中的图片资源；
-> 				test: /\.html$/,
-> 				loader: 'html-loader'
-> 			},
-> 			{
-> 				// 处理其他类型的资源，例如字体文件；
-> 				// 排除其他的已经测试过的文件类型；
-> 				exclude: /\.(html|js|css|less|jpg|png|jpeg|gif)/,
-> 				loader: 'file-loader',
-> 				options: {
->           name: '[hash:8].[ext]',
-> 					outputPath: 'media'
-> 				}
-> 			}
-> 		]
-> 	},
-> 	plugins: [
-> 		// plugins 配置；
-> 		new HtmlWebpackPlugin({
-> 			template: path.join(__dirname, '/src/views/index.html'),
-> 			filename: 'views/index.html'
-> 		})
-> 	],
-> 	// 本地服务配置：保存文件后自动打包；
-> 	// 开启本地服务端口浏览；
-> 	devServer: {
->     contentBase: path.join(__dirname,'/bundle'),
-> 		compress: true,
-> 		open: true,
-> 		port: 8000
-> 	}
-> }
-> ```
-
-[^base 64]:网络上最常见的用于传输8Bit[字节码](https://baike.baidu.com/item/字节码/9953683)的编码方式之一，一种基于64个可打印字符来表示[二进制](https://baike.baidu.com/item/二进制/361457)数据的方法
+```javascript
+devServer: {
+  // 指定运行代码的目录，默认是打包后的文件目录；
+  contentBase: path.join(__dirname,'/bundle'),
+  // 监视 contentBase 目录下的所有文件，一旦文件发生变化就会重新打包；
+  watchContentBase: true,
+  // 忽视一些目录下的文件的变化；
+  watchOptions: {
+    ignored: /node_modules/
+  },
+  // 启动代码压缩；
+  compress: true,
+  // 端口号；
+  port: 8000,
+	// 域名；
+	host: 'localhost',
+	// 自动打开浏览器
+	open: true,
+	// 开启 HMR 热模块替换
+	hot: true,
+	// 不要显示启动服务器的日志信息；
+	clientLogLevel: 'none',
+	// 除了一些基本启动信息之外，其他的内容都不要显示；
+	quiet: true,
+	// 如果出错了，不要全屏显示错误信息；
+	overlay: false,
+	// 服务器代理，解决开发环境时的跨域问题；
+	proxy: {
+    '/api': {
+      // 把请求转发给 target ;
+      target: 'http://localhost:5000',
+      // 路径重写；
+      pathRewrite: {
+        '^/api': ''
+      }
+    }
+  }
+}
+```
 
 
 
+# `optimization`
+
+production 生产环境时的代码**优化配置**；
+
+```javascript
+optimization: {
+  // 分裂文件代码；
+  splitChunks: {
+    chunks: 'all',
+    minSize: 30*1024,
+    maxSize: 0,
+    minChunks: 1,
+    maxAsyncRequests: 5,
+  },
+  // 将当前模块中所记录的其他模块的 hash 值单独打包成一个文件：runtime ；
+  // 解决当修该文件 a 时导致文件 b 的 contenthash 值产生变化；
+  runtimeChunk: {
+    name: entrypoint => `runtime-${entrypoint.name}`
+  },
+  minimizer: [
+    // 配置生产环境时的 js 和 css 的压缩方案；
+    // npm install terser-webpack-plugin --save-dev
+    new TerserWebpackPlugin({
+      // 开启缓存；
+      cache: true,
+      // 开启多线程打包；
+      parallel: true,
+      // 启动 source-map 代码调试优化；
+      sourceMap: true
+    })
+  ]
+}
+```
 
 
-## 处理 css 文件
 
-> 默认是将 css 样式以 <style> 标签放在 html 文件中；
->
-> ```shell
-> # 提取依赖项：
-> npm install mini-css-extract-plugin --save-dev
-> ```
->
-> ```shell
-> # 兼容性依赖项：
-> npm install postcss-loader postcss-preset-env --save-dev
-> ```
->
-> ```shell
-> # 压缩依赖项：
-> npm install css-minimizer-webpack-plugin --save-dev
-> ```
->
-> ```javascript
-> const path = require('path');
-> // html 文件打包模块；
-> const HtmlWebpackPlugin = require('html-webpack-plugin');
-> // css 文件提取模块；
-> const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-> // css 文件压缩模块；
-> const CssMinimizerWebpackPlugin = require('css-minimizer-webpack-plugin');
-> 
-> module.exports = {
-> 	// 模式配置；
-> 	mode: 'development',
-> 	// 入口文件配置；
-> 	entry: path.join(__dirname, '/entry.js'),
-> 	// 输出目录配置；
-> 	output: {
-> 		filename: 'bundle.js',
-> 		// 打包的所有资源都会输出到这个 bundle 目录下；
-> 		path: path.join(__dirname, '/bundle')
-> 	},
-> 	module: {
-> 		rules: [{
-> 			// 处理 css 文件资源；
-> 			test: /\.css$/,
-> 			use: [
-> 				// 取代 'style-loader' ，不将 css 文件放到 <style> 标签中；
-> 				// 提取 js 文件中的 css 提取成单独文件；
-> 				MiniCssExtractPlugin.loader,
-> 				// 将 css 文件整合到 js 文件中；
-> 				'css-loader',
->                 // css 样式兼容性处理：postcss；
->    				{
-> 					loader: 'postcss-loader',
-> 					options: {
-> 						ident: 'postcss',
-> 						plugins: () => [
-> 							// postcss 插件;
-> 							require('postcss-preset-env')()
-> 						]
->           }
->    				}
-> 			]
-> 		}]
-> 	},
-> 	plugins: [
-> 		// plugins 配置；
-> // html 文件打包插件；
->  		new HtmlWebpackPlugin({
-> 			template: path.join(__dirname, '/views/index.html'),
-> 			filename: 'views/index.html'
-> 		}),
-> // css 文件提取插件；
->  		new MiniCssExtractPlugin({
-> 			filename: 'public/css/bundleStyle.css'
-> 		}),
-> // css 文件压缩插件；
->  new CssMinimizerWebpackPlugin()
->  	]
-> }
-> ```
-> 
->帮 postcss 找到 package.json 文件中的 browserslist 配置，通过配置加载制定的兼容性 css 样式；
-> 
->```json
-> "browserslist": {
->   // 开发环境；
->   "development": [
->     "last 1 chrome version",
->      "last 1 firefox version",
->      "last 1 safari version"
->    ],
->   // 生产环境；(默认是这个环境)
->   "production": [
->     ">0.2%",
->      "not dead",
->      "not op_mini all"
->    ]
-> }
-> ```
-> 
->将 browserslist 的默认环境更改为开发环境；
-> 
->```javascript
-> // 在 webpack 的入口文件中配置 node 环境变量；
-> process.env.NODE_ENV = development;
-> ```
-> 
+# `externals`
+
+禁止一些依赖模块被打包，而是在 html 页面中用 src 引入；
+
+```javascript
+module.exports = {
+externals: {
+ // npm包名: 引入时的名称
+ // 排除 three.js 依赖文件不进行打包，在 html 页面 CDN 引入
+ three: "THREE",
+ // 排除 jquery 不进行打包
+ jquery: 'jQuery'
+}
+}
+```
+
+
+
+# `devtool`
+
+配置 `source-map` 属性，便于代码调试；
+
+```javascript
+module.exports = {
+ devtool: 'source-map'
+}
+
+// development 开发环境下：devtool: 'eval-source-map'
+// 快速，精准定位到源代码具体的错误行；
+
+// production 生产环境下：devtool: 'nosources-source-map'
+// 或者不开启 source-map；
+// 防止源代码泄露，提高网站的安全性；
+```
 
 
 
@@ -643,155 +616,6 @@ Webpack 是一种前端资源构建工具，一个静态模块打包器(module b
 >     })
 > ]
 > ```
-
-
-
-
-
-## 生产环境基本配置
-
-> ```javascript
-> // 生产环境基本配置；
-> 
-> const path = require('path');
-> const HtmlWebpackPlugin = require('html-webpack-plugin');
-> // css 文件提取模块；
-> const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-> // css 文件压缩模块；
-> const CssMinimizerWebpackPlugin = require('css-minimizer-webpack-plugin');
-> 
-> const commonCssLoader = [
->     // 将 css 文件整合到 js 文件中；
->     MiniCssExtractPlugin.loader,
->     'css-loader',
->     // css 兼容性；
->     {
->        loader: 'postcss-loader',
->     options: {
->          ident: 'postcss',
->       plugins: () => [
->            // postcss 插件;
->         require('postcss-preset-env')()
->          ]
->        }
->     }
-> ]
-> 
-> module.exports = {
->     mode: 'production',
->   entry: path.join(__dirname, '/public/js/entry.js'),
->   output: {
->        filename: 'public/js/bundle.js',
->     path: path.join(__dirname, '/bundle')
->   },
->   module: {
->     rules: [{
->          test: /\.css$/,
->          use: [...commonCssLoader]
->        },
->                {
->                  test: /\.less$/,
->                  use: [...commonCssLoader, 'less-loader']
->                },
->                // JS 语法检查；
->                {
->                  test: /\.js$/,
->                  exclude: /node_modules/,
->                  // 优先执行；
->                  enforce: 'pre',
->                  loader: 'eslint-loader',
->                  options: {
->                    fix: true
->                  }
->                },
->                // JS 兼容性；
->                {
->                  test: /\.js$/,
->                  exclude: /node_modules/,
->                  loader: 'babel-loader',
->                  option: {
->                    presets: [
->                      [
->                        '@babel/preset-env',
->                        {
->                          // 按需加载；
->                          useBuiltIns: 'usage',
->                          // 指定 core-js 版本；
->                          corejs: {
->                            version: 3
->                          },
->                          // 指定兼容性做到哪个浏览器的版本；
->                          targets: {
->                            chrome: '60',
->                            firefox: '60',
->                            ie: '8',
->                            safari: '10',
->                            edge: '17'
->                          }
->                        }
->                      ]
->                    ],
->                    // 开启 babel 缓存；
->                    // 第二次构建时生效，会读取之前的缓存；
->                    // 没有发生改动的 JS 文件不会被再次打包，而是读取之前的缓存；
->                    cacheDirectory: true
->                  }
->                },
->                {
->                  // 处理样式文件中图片资源；
->                  test: /\.(jpg|png|jpeg|gif)$/,
->                  loader: 'url-loader',
->                  options: {
->                    // 规定 8KB 以下的图片做 base64 处理；
->                    limit: 8 * 1024,
->                    // 给图片重新命名：用 hsah 值的前8位做图片名称；
->                    name: '[hash:8].[ext]',
->                    // 关闭 ES Module 模块化模式；避免与 CommonJS 产生冲突；
->                    esModule: false,
->                    outputPath: 'public/imgs'
->                  }
->                },
->                {
->                  // 处理 html 文件中的图片资源；
->                  test: /\.html$/,
->                  loader: 'html-loader'
->                },
->                {
->                  // 处理其他类型的资源；
->                  // 排除其他的已经测试过的文件类型；
->                  exclude: /\.(html|js|css|less|jpg|png|jpeg|gif)/,
->                  loader: 'file-loader',
->                  options: {
->                    name: '[hash:8].[ext]',
->                    outputPath: 'public/media'
->                  }
->                }
->               ]
->     },
->   plugins: [
->        // 处理 html 文件；
->        new HtmlWebpackPlugin({
->          template: path.join(__dirname, '/views/index.html'),
->          filename: 'views/index.html',
->          // 压缩 html 文件；
->          minify: {
->            // 移除空格；
->            collapseWhitespace: true,
->         // 移除注释；
->         removeComments: true
->          }
->        }),
->        // css 文件提取插件；
->        new MiniCssExtractPlugin({
->          filename: 'public/css/bundleStyle.[contenthash:6].css'
->        }),
->        // css 文件压缩插件；
->        new CssMinimizerWebpackPlugin()
->     ]
-> }
-> ```
-
-
 
 
 
@@ -1394,10 +1218,3 @@ Webpack 是一种前端资源构建工具，一个静态模块打包器(module b
 >     mode: 'production'
 > };
 > ```
-
-
-
-
-
-## Webpack 5
-
