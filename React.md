@@ -71,7 +71,7 @@ const vDom = React.createElement('div', {
 
 
 
-#### 函数式( Function )
+函数式
 
 编译渲染流程
 
@@ -80,7 +80,6 @@ const vDom = React.createElement('div', {
 3. 将函数返回的 VDOM 转为 TDOM ，呈现在页面上；
 
 ```jsx
-// 创建函数式组件
 function MyComponent () {
   // this 是 undefined，因为 babel 编译后开启了严格模式；
   // 全局下的 this 不指向 window，而是 undefined；
@@ -93,7 +92,7 @@ function MyComponent () {
 
 
 
-#### 类式( Class )
+类式
 
 编译渲染流程
 
@@ -102,7 +101,6 @@ function MyComponent () {
 3. 通过实例找到原型对象上的 render 方法；
 4. 将 render 方法返回的 VDOM 转为 TDOM ，呈现在页面上；
 ```jsx
-// 创建类式组件；
 class ClassComponent extends React.Component {
   // render 在 ClassComponent 的原型对象上，供实例对象使用；
   render(){
@@ -2655,53 +2653,53 @@ export default App
 
 ## Hooks
 
-> 钩子（Hooks）；
->
-> React 16.8.0 版本新增加的特性/语法；
->
-> **可以使得在函数组件中使用 state 以及其他的 React 特性**；
+钩子（Hooks）；
+
+React 16.8.0 版本新增加的特性/语法；
+
+**可以使得在函数组件中使用 state 以及其他的 React 特性**；
 
 
 
 ### useState
 
-> `React.useState()`；
->
-> 让**函数组件**也可以拥有 state 状态数据，并进行状态数据的读写操作，是**异步**进行的；
->
-> 语法：`const [value, changeValue] = React.useState(initValue)`；
->
-> [^value]:当前状态数据的值；
-> [^changeValue]:更新状态数据的函数；
-> [^initValue]:第一次初始化时在内部缓存的值；
->
-> ```jsx
-> import React from "react";
-> 
-> export default function useState() {
->      // 使用 useState() 钩子
->      const [count, setCount] = React.useState(0);
-> 
->      // 点击 Add 的回调函数，直接赋值改变状态数据
->      function addCount() {
->        setCount(count + 1);
->      }
-> 
->      // 通过 函数改变，接收原本的值，返回新的状态值
->      function addCountByFunction() {
->        setCount((value) => {
->          // newValue
->          return value + 1
->        });
->      }
->      return (
->        <div>
->          <h3>当前的 Count 值：{count}</h3>
->          <button onClick={addCount}>Add</button>
->        </div>
->      );
-> }
-> ```
+`React.useState()`；
+
+让**函数组件**也可以拥有 state 状态数据，并进行状态数据的读写操作，是**异步**进行的；
+
+语法：`const [value, changeValue] = React.useState(initValue)`；
+
+[^value]:当前状态数据的值；
+[^changeValue]:更新状态数据的函数；
+[^initValue]:第一次初始化时在内部缓存的值；
+
+```jsx
+import React from "react";
+
+export default function useState() {
+  // 使用 useState() 钩子
+  const [count, setCount] = React.useState(0);
+
+  // 点击 Add 的回调函数，直接赋值改变状态数据
+  function addCount() {
+    setCount(count + 1);
+  }
+
+  // 通过 函数改变，接收原本的值，返回新的状态值
+  function addCountByFunction() {
+    setCount((value) => {
+      // newValue
+      return value + 1
+    });
+  }
+  return (
+    <div>
+      <h3>当前的 Count 值：{count}</h3>
+      <button onClick={addCount}>Add</button>
+    </div>
+  );
+}
+```
 
 [^Focus]:函数组件在每次渲染时都会形成**闭包**，拥有自己的 state 、props 和事件处理函数，每次渲染时会更新数据；
 
@@ -3066,33 +3064,34 @@ export default App
 
 ### 自定义 Hook
 
-> React 规定所有的 Hook 都要以`use`开头；
->
-> `Hook`就是一个函数，可以支持传参、返回值，也可以没有返回值；
->
-> 建议自定义的`Hooks`都放在`src/hooks`目录下，方便管理，使用时直接引入；
+React 规定所有的 Hook 都要以`use`开头；
+
+`Hook`就是一个函数，可以支持传参、返回值，也可以没有返回值；
+
+建议自定义的`Hooks`都放在`src/hooks`目录下，方便管理，使用时直接引入；
 
 
 
 #### useTitle
 
-> 自定义`Hook`：给网页设置标题；
->
-> ```tsx
-> import { useEffect } from 'react'
-> 
-> export default function useTitle(newTitle) {
->   const preTitle = document.title // 保存之前的标题
->   
->   // 生命周期
->   useEffect(() => {
->     document.title = newTitle // 组件挂载时执行
->     
->     return () => {
->       document.title = preTitle // 组件卸载时执行
->     }
->   })
-> }
+自定义`Hook`：给网页设置标题；
+
+```tsx
+import { useEffect } from 'react'
+
+export default function useTitle(newTitle) {
+const preTitle = document.title // 保存之前的标题
+
+// 生命周期
+useEffect(() => {
+ document.title = newTitle // 组件挂载时执行
+
+ return () => {
+   document.title = preTitle // 组件卸载时执行
+ }
+})
+}
+```
 
 
 
@@ -3100,50 +3099,50 @@ export default App
 
 ## Fragment
 
-> React 中的内置组件，作用相当于 Vue 中的`<template>`标签；
->
-> 在被编译的时候，会被去除该标签；
->
-> [^Important]:该标签允许且只有一个标签属性`key`；
->
-> ```jsx
-> import "./App.css";
-> 
-> // 引入组件
-> import UseState from './components/hooks/useState'
-> 
-> import React, { Component, Fragment } from "react";
-> 
-> export default class App extends Component {
->     render() {
->        return (
->          {/* Fragment 标签不会被渲染成 html 标签 */}
->          <Fragment>
->            <h1>Hooks</h1>
->            <br />
->            <UseState />
->          </Fragment>
->        )
->     }
-> }
-> ```
->
-> 可以利用`<>`空标签达到同样的效果；
->
-> ```jsx
-> export default class App extends Component {
->     render() {
->        return (
->          {/* 空标签不会被编译渲染 */}
->          <>
->          <h1>Hooks</h1>
->          <br />
->          <UseState />
->          </>
->        )
->     }
-> }
-> ```
+React 中的内置组件，作用相当于 Vue 中的`<template>`标签；
+
+在被编译的时候，会被去除该标签；
+
+[^Important]:该标签允许且只有一个标签属性`key`；
+
+```jsx
+import "./App.css";
+
+// 引入组件
+import UseState from './components/hooks/useState'
+
+import React, { Component, Fragment } from "react";
+
+export default class App extends Component {
+ render() {
+    return (
+      {/* Fragment 标签不会被渲染成 html 标签 */}
+      <Fragment>
+        <h1>Hooks</h1>
+        <br />
+        <UseState />
+      </Fragment>
+    )
+ }
+}
+```
+
+可以利用`<>`空标签达到同样的效果；
+
+```jsx
+export default class App extends Component {
+ render() {
+    return (
+      {/* 空标签不会被编译渲染 */}
+      <>
+      <h1>Hooks</h1>
+      <br />
+      <UseState />
+      </>
+    )
+ }
+}
+```
 
 
 
@@ -3151,39 +3150,39 @@ export default App
 
 ## 组件优化
 
-> [^问题]:组件 Component 中的`shouldComponentUpdate()`生命周期函数总是返回 true；
-> [^目的]:只有当组件的 state 或 props 数据发生改变时才重新`render()`；
->
-> ```jsx
-> // 方法一：重写 shouldComponentUpdate 声明周期函数；
-> // 比较新旧 state 或 props 数据，如果有变化才返回 true， 没有则返回 false；
-> 
-> // 方法二：使用 PureComponent
-> // PureComponent 重写了 shouldComponentUpdate()，只有 state 或 props 数据发生变化才返回 true；
-> 
-> // 注意：
-> // PureComponent 只会对 state 和 props 数据进行 浅比较， 如果只是 数据对象 内部数据发生改变了，返回 false；
-> // 不要直接修改 state 数据，而是要生成新数据， 和 react-redux 中的 reducer 纯函数类似；
-> // 例如：
-> // false
-> this.setState({name: 'LovelyKein'})
-> // true
-> const stateObj = this.state
-> stateObj.name = 'LovelyKein'
-> this.setState(stateObj)
-> 
-> 
-> // 使用方式
-> import React, { PureComponent } from "react";
-> 
-> export default class Ancestor extends PureComponent {
->   render() {
->     return (
->       <div>{/* 组件内容 */}</div>
->     );
->   }
-> }
-> ```
+[^问题]:组件 Component 中的`shouldComponentUpdate()`生命周期函数总是返回 true；
+[^目的]:只有当组件的 state 或 props 数据发生改变时才重新`render()`；
+
+```jsx
+// 方法一：重写 shouldComponentUpdate 声明周期函数；
+// 比较新旧 state 或 props 数据，如果有变化才返回 true， 没有则返回 false；
+
+// 方法二：使用 PureComponent
+// PureComponent 重写了 shouldComponentUpdate()，只有 state 或 props 数据发生变化才返回 true；
+
+// 注意：
+// PureComponent 只会对 state 和 props 数据进行 浅比较， 如果只是 数据对象 内部数据发生改变了，返回 false；
+// 不要直接修改 state 数据，而是要生成新数据， 和 react-redux 中的 reducer 纯函数类似；
+// 例如：
+// false
+this.setState({name: 'LovelyKein'})
+// true
+const stateObj = this.state
+stateObj.name = 'LovelyKein'
+this.setState(stateObj)
+
+
+// 使用方式
+import React, { PureComponent } from "react";
+
+export default class Ancestor extends PureComponent {
+render() {
+ return (
+   <div>{/* 组件内容 */}</div>
+ );
+}
+}
+```
 
 
 
