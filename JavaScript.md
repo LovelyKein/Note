@@ -686,13 +686,14 @@ async function method() {
 
 # 符号`Symbol`👌
 
-是ES6中新增的一种**原始数据类型**，表示**独一无二的值**，类似于字符串`String`数据类型
+是`ES6`中新增的一种**原始数据类型**，表示**独一无二的值**，类似于字符串`string`数据类型
 **符号设计的初衷，是为了给对象设置私有属性，避免被外部访问**
 
 - 没有字面量，只能用过`Symbol`创建
 
   ```js
   const symbol = Symbol() // Symbol()
+  const s_1 = Symbol.for('abc')
   ```
 
 - 使用`typeof`得到的类型是`symbol`
@@ -823,6 +824,24 @@ console.log(info.toString()) // '[object Custom]'，没有这个符号属性结�
 
 
 
+# 大整数`BigInt`😯
+
+`JavaScript`中新增的一种基本**类型数据**
+用于表示任意精度的整数，解决了传统`Number`类型无法精确表示过大整数的问题
+
+创建`BigInt`数据的两种方式
+
+```js
+// 1. 在整数后面添加 n 后缀
+const bigNum = 1234567890123456789012345678901234567890n
+
+// 2. 使用 BigInt() 构造函数
+const bigNum = BigInt('1234567890123456789012345678901234567890')
+const fromNumber = BigInt(123) // 将普通数字转换为 BigInt
+```
+
+
+
 # 迭代器`Iterator`🤔
 
 什么是迭代？
@@ -837,7 +856,7 @@ console.log(info.toString()) // '[object Custom]'，没有这个符号属性结�
 
 
 
-## 迭代协议
+## 迭代器协议
 
 一种设计模式，用于统一迭代过程，并规范了迭代器规格：
 
@@ -895,7 +914,7 @@ console.log(fibIterator.next()) // { value: 3, done: false }
 
 
 
-## 可迭代协议
+## 可迭代对象协议
 
 **ES6规定，如果一个对象具有知名符号属性`Symbol.iterator`，且属性值是一个迭代器创建函数，则该对象是可迭代的**
 
@@ -1021,10 +1040,13 @@ function *method() {
 const generator = method() // 此时函数内的代码并没有运行
 
 // 调用`next`方法让函数运行到下一个`yield`的位置
-console.log(generator.next()) // 输出：
+console.log(generator.next())
+// 输出：
 // 第一次运行
 // { value: 1, done: false } <-- 该数据是由`nxet`方法返回的数据 -->
-console.log(generator.next()) // 输出：
+
+console.log(generator.next())
+// 输出：
 // 第二次运行
 // { value: 2, done: false }
 ```
@@ -1078,7 +1100,7 @@ console.log(generator.next()) // { value: 1, done: false }
    ```
 
 2. **调用生成器的`next`方法时，可以传递参数，该参数值会交给上一次迭代的`yield`表达式的返回值**
-   **第一次调用`next`方法时传参没有任何意义**
+   **所以第一次调用`next`方法时传参没有任何意义**
 
    ```js
    function* method() {
@@ -1324,7 +1346,7 @@ const arr = Array.from(obj) // arr = ['a', 'b']
 
 
 
-# 解构
+# 解构赋值
 
 ```js
 /** 数组解构 **/
@@ -1361,6 +1383,173 @@ let name, gender
 
 
 
+# 类型转换🙄
+
+
+
+## 隐式转换
+
+每个运算符都有自己期望的数据格式，例如：
+`+  -  *  /`数学运算期望两边都是`number`类型，字符串拼接期望是`string`，条件判断是`boolean`
+一旦数据不符合运算符的期望，JS就会对数据进行隐式的转换（自动转换）：将数据变成期望的格式后再进行运算
+这种转换是临时的，并不会对原始数据造成影响
+
+```js
+// 利用`+`、`-`（一元运算符）将字符串转数字
+let a = '001'
++a // a = 1
+let b = '02'
+-b // -2
+
+// `+`的一边是字符串的情况下，则会进行字符串拼接
+let str = '10'
+let str_1 = '11'
+let number = 12
+0 + str // '010'
+number + '' // '12'
+str + str_1 // '1011'
+
+// 布尔
+if ("hello") {} // 字符串"hello"转为true
+0 || "default" // "default"（0转为false）
+
+// 比较
+1 == "1" // true（字符串"1"转为数字1）只比较值
+0 == false // true（false转为数字0）
+```
+
+
+
+## 显式转换
+
+通过特定函数或运算符主动进行的类型转换，意图明确
+
+```js
+/* 转字符串 */
+String(123) // "123"
+(true).toString() // "true"
+
+
+/* 转数字 */
+Number('123') // 123，
+// Number() 有非数字字符则为 NaN
+Number('123ad') // NaN
+
+// parseInt() 开头是数字即可转换成功，否则为 NaN
+parseInt() // NaN
+parseInt('') // NaN
+parseInt('a33') // NaN
+parseInt('123abc') // 123
+parseFloat('12.34') // 12.34
+
+
+/* 转布尔 */
+// 除了 null | 0 | false | '' | undefined | NaN，其余数据转换都为真
+Boolean(0) // false
+Boolean('') // false
+Boolean({}) // true
+```
+
+
+
+## 引用转基本类型
+
+引用类型（如对象、数组、函数、日期等）转换为基本类型（字符串、数字、布尔值）时，会遵循特定的转换规则
+
+1. 检查该对象是否有`[Symbol.toPrimitive]`方法，存在直接调用，**最高优先级**
+   该方法**必须返回一个基本类型值**，否则引擎无法完成转换，会直接报错
+
+   ```js
+   const obj = {
+     // hint 是被转换时的期待类型
+     [Symbol.toPrimitive](hint) {
+       if (hint === 'number') {
+         // return ...
+       }
+       if (hint === 'string') {
+         // return ...
+       }
+       if (hint === 'boolean') {
+         // return ...
+       }
+     }
+   }
+   ```
+
+   但注意：**普通对象本身没有这个方法，需要手动添加实现，自定义转换逻辑**
+
+2. 若没有`[Symbol.toPrimitive]`方法，则根据转换时的`hint`的类型，选择优先使用`valueOf`还是`toString`
+   即**转字符串先`toString()`，转数字先`valueOf()`**，`Date`对象是个例外，转换时会优先调用`toString`
+
+   若得到基本类型数据，则结束直接返回，否则继续调用另外一个方法
+   若最终还是没有得到基本类型，抛出错误
+
+   ```js
+   const obj = {
+     valueOf() { return {} },
+     toString() { return [] }
+   }
+   try {
+     Number(obj)
+   } catch (e) {
+     console.log(e)
+   }
+   // 最终都没有得到基本类型数据，抛出错误
+   // // TypeError: Cannot convert object to primitive value
+   
+   
+   const obj = { a: 1 }
+   String(obj) // "[object Object]"（先 toString()）
+   Number(obj) // NaN（valueOf() 返回对象，再 toString() 得到字符串[object Object]，转数字失败）
+   ```
+
+
+
+## `valueOf & toString`
+
+普通对象本身自带`valueOf()`和`toString()`方法，从`Object.prototype`继承而来的，所有对象都会默认拥有
+**如果直接在对象本身上书写，则直接使用自身的方法并得到返回值**
+
+`valueOf`方法的返回值，一般都是对象自身的引用，`Date | Number | String`对象中被重写，返回特定基本类型
+
+```js
+({a: 1}).valueOf() // { a: 1 }
+([1, 2]).valueOf() // [1, 2]
+([]).valueOf() // []
+(function test() {}).valueOf() // ƒ test(){}
+(new Map()).valueOf() // Map(0) {size: 0}
+(new Set()).valueOf() // Set(0) {size: 0}
+
+// Date 对象的 valueOf 方法被重写，得到时间戳
+(new Date()).valueOf() // 1756958287094
+
+// 使用 String | Number | Boolean 创建的包装对象，得到都是基本类型的自身值
+const strObj = new String('hello')
+strObj.valueOf() // 'hello'（基本类型字符串）
+```
+
+`toString`方法的返回值
+
+```js
+({a: 1}).toString() // '[object Object]'
+(new Map()).toString() // '[object Map]'
+(new Set()).toString() // '[object Set]'
+
+// 数组的 toString 方法返回 元素拼接的字符串，类似于 .join(',')
+([1, 2]).toString() // '1,2'
+([]).toString() // ''
+([1]).toString() // '1'
+Object.prototype.toString.call([]) // '[object Array]'，绑定内部类型标签`[Class]` 属性
+
+// 函数返回 源代码的字符串
+(function test() {}).toString() // 'function test() {}'
+
+// 日期对象返回 格林威治时间字符串
+(new Date()).toString() // 'Thu Sep 04 2025 11:58:12 GMT+0800 (中国标准时间)'
+```
+
+
+
 # 运算符👀
 
 
@@ -1383,47 +1572,7 @@ console.log(console.log()) // undefined <-- 因为`console.log()`函数返回的
 
 
 
-### 类型转换
-
-每个运算符都有自己期望的数据格式，例如`+`、`-`、`*`、`/`期望两边都是`number`类型
-一旦数据不符合运算符的期望，JS就会对数据进行隐式的转换（隐式转换）：将数据变成期望的格式后再进行运算
-这种转换是临时的，并不会对原始数据造成影响
-
-如果要对一个对象进行转换，实际上是先调用对象的`valueOf`方法，然后用该方法的返回结果调用`toString()`方法，得到结果
-但如果`valueOf`方法已经得到一个原始类型的值，则不会再调用`toString`
-
-```js
-// 利用`+`、`-`将字符串转数字
-let a = '001'
-+a // a = 1
-let b = '02'
--b // -2
-
-// `+`的一边是字符串的情况下，则会进行字符串拼接
-let str = '10'
-let str_1 = '11'
-let number = 12
-0 + str // '010'
-number + '' // '12'
-str + str_1 // '1011'
-
-// 转换对象
-({}.toString()) // '[object Object]'
-([1, 2].toString()) // '1,2'
-(function test() {}.toString()) // 'function test() {}'
-
-const obj = {
-  age: 26,
-  valueOf() {
-    return 123
-  }
-}
-console.log(obj + 1) // 124，而不是 '1231'
-```
-
-
-
-### 布尔判定
+## 布尔判定
 
 所有需要判断真假的地方都会使用以下规则
 
@@ -1460,9 +1609,11 @@ isFinite(NaN) // false
 -10 % -3 // -1
 /** 取余运算后结果的正负和被除数的正负相同 */
 
-// 幂运算，与 Math.pow() 效果一样 
+/*  幂运算，与 Math.pow() 效果一样  */
 5**2 // 25
 2**3 // 8
+// 注意：指数运算符是右结合，而不是左结合，即多个指数运算符连用时先进行最右边的计算
+2 ** 3 ** 2 // 2 ** 9 -> 512
 
 // 除加号`+`之外的算数运算符，原始类型会转为数字类型（自动完成转换），然后再运算
 // 对象类型会先转换为字符串类型，然后再将该字符串转换为数字类型
@@ -1474,8 +1625,12 @@ true + false // 1
 +'' // 0
 +'Infinity' // Infinity，可以正确转换为无穷大
 +NaN // NaN
+
 +undefined // NaN，undefined --> NaN
 +null // 0，null --> 0
+// 因为
+Number(undefined) // NaN
+Number(null) // 0
 
 // NaN虽然类型是number，但与任何数字运算结果都是NaN
 NaN + 1 // NaN
@@ -1508,7 +1663,7 @@ console.log(++x + 1) // 3，先自增，再参与运算
 大小比较`>`、`<`、`<=`、`>=`
 
 ```js
-// 两个字符串比较大小，比较的是字符串的字符编码，例如ASCII码或unicode码
+// 两个字符串比较大小，比较的是字符串的字符编码，例如 ASCII 码或 Unicode 码
 'A' > 'B' // false
 'AC' > 'AB' // true
 
@@ -1525,15 +1680,18 @@ NaN < Infinity // false，Infinity 无穷大，也是数字
 ```
 
 相等比较`相等==`、`不等于!=`、`严格相等===`、`严格不相等!==`，实际开发中建议使用严格比较
-严格相等要求两端的数据和类型必须相等，只要类型不同就一定不相等
+**严格相等要求两端的数据和类型必须相等，只要类型不同就一定不相等**
 
 ```js
 /** 同类型，直接比较两个数据本身是否相同（引用类型比较的是引用地址） **/
 'abc' === 'abc' // true
-// 非原始类型，比较地址
+// 非原始类型，比较内存空间地址是否相同
 let a = {}
 let b = {}
 a == b // false
+undefined === undefined // true
+null === null // true
+NaN === NaN // false，NaN 于任何数据比较都不相等
 
 
 /** 不同类型比较（该情况下，使用`===`一定不相等） **/
@@ -1558,6 +1716,7 @@ Infinity == 1 // false
 // 4. 不同类型下，有一个引用类型，则先转为原始类型后再比较
 {} == '[object Object]' // true，因为对象转原始类型就是'[object Object]'
 {} == '1' // false
+[] == '' // true
 ```
 
 
@@ -1602,12 +1761,13 @@ n = example || 1
 一定返回`boolean`布尔类型
 
 ```js
-!2 + 1 // 1，先运算非运算符
+!2 + 1 // 1（先运算非运算符）
+!(2 + 1) // false
 ```
 
 
 
-## 三目运算
+## 三元运算符
 
 语法：`表达式1 ? 表达式2 : 表达式3`
 对`表达式1`进行布尔`boolean`判定，为真返回`表达式2`的值，为假则返回`表达式3`的值
@@ -1630,7 +1790,7 @@ console.log(x) // 6
 ## 位运算符
 
 将一个**整数**的二进制格式进行运算
-在js中，对一个数据进行位运算，首先会将其转换成为一个整数，并以32位的二进制格式表示
+在JS中，对一个数据进行位运算，首先会将其转换成为一个整数，并以32位的二进制格式表示
 
 ```js
 // 将数字 2.7 进行位运算（非数字则先转换为数字格式）
@@ -1703,6 +1863,18 @@ console.log(t) // 21
 
 
 
+## `void`运算符
+
+作用是执行一个表达式，然后不返回任何值，或者说返回`undefined`
+
+```js
+void 0 // undefined
+void 13214 // undefined
+void(1 + 1) === undefined // true
+```
+
+
+
 ## `,`逗号运算符
 
 依次运行表达式，返回最后一个表达式的值
@@ -1719,7 +1891,7 @@ console.log(x) // 4
 
 # 数据传递
 
-JavaScript中基本数据类型（如数字、字符串、布尔值、null、undefined）是按值传递的，其他数据按引用传递
+`JavaScript`中数据都是值传递，基本类型传递的是自身的值，而引用类型传递的是地址
 
 - **函数内部的参数是新的局部变量，直接赋值修改它们不会影响外部的变量值**
 - **在函数里只要给形参直接重新赋值，形参就会和外部的值脱离关联，不会影响外部的值**
@@ -1748,98 +1920,10 @@ change(a, b) // a = { n: 2 }, b = [0, 2, { n: 2 }]
 
 
 
-# 作用域
+# 全局对象🤔
 
-js有三种作用域：全局作用域、函数作用域、块级作用域
-
-- 内部的作用域能访问外部，反之不行，访问时从内向外依次查找
-- **如果在函数内部访问了外部环境的变量，则会产生闭包这一现象**
-- **内部作用域能访问的外部环境，取决于函数定义的位置， 和函数调用无关**
-- 作用域内定义的变量（使用`var`声明）、函数声明会提升到作用域顶部（执行上下文的`VO`），初始值为`undefined`
-- 函数表达式不会被提升，在声明赋值之前调用会报错
-
-```js
-console.log(a, b, c) // 输出 undefined undefined [Function: c]
-var a = 1
-var b = function () {} // 函数表达式
-function c() {}
-
-// 相当于以下写法
-var a
-var b
-function c() {}
-console.log(a, b, c)
-// a 和 b 被提升到作用域顶部，但并未赋值，所以输出 undefined，而不是报错
-// c 是函数声明，同作用域下调用可以写在声明之前
-
-a = 1
-b = function () {}
-// 赋值并不会一起被提升，只提升变量的定义
-```
-
-
-
-## 全局作用域
-
-在全局作用域中声明的变量，能够在代码的任何地方被访问
-
-```js
-var globalVar = '我处于全局作用域'
-function checkScope() {
-  console.log(globalVar) // 可以访问全局变量
-}
-checkScope() // 输出: 我处于全局作用域
-console.log(globalVar) // 同样可以在函数外部访问
-```
-
-
-
-## 函数作用域
-
-函数作用域是指在函数内部声明的变量，只能在该函数内部被访问，函数外部无法访问
-
-```js
-function exampleFunction() {
-  var functionVar = '我处于函数作用域'
-  console.log(functionVar) // 能够在函数内部访问
-}
-exampleFunction() // 输出: 我处于函数作用域
-console.log(functionVar) // 会报错，因为在函数外部无法访问函数内部变量
-```
-
-## 
-
-## 块级作用域
-
-由`let`和`const`声明的变量所拥有块级作用域，`var`声明的不具备
-块级作用域是指由 `{}` 包裹的代码区域，像`if`语句、`for`、`while`循环等
-**代码执行时遇到花括号`{}`，会创建一个块级作用域，花括号结束，块级作用域销毁**
-
-```js
-{
-  let blockVar = '我处于块级作用域'
-  const constantVar = '我也是块级作用域'
-  var globalVar = '我是全局变量'
-  console.log(blockVar) // 可以在块内部访问
-}
-console.log(blockVar) // 会报错，在块外部无法访问
-console.log(constantVar) // 同样会报错
-console.log(globalVar) // 可以在外部访问
-```
-
-> [!IMPORTANT]
->
-> 在块级作用域内使用`var`声明变量，外部依然可以访问
->
-> **因为`var`并不具备块级作用域，它的作用域是函数作用域或者全局作用域**
-> 即使在块级作用域里使用`var`声明，它的作用域依然是整个函数或者全局环境
-
-
-
-# 全局对象
-
-无论是浏览器环境，还是 node 环境，都会有一个全局对象
-浏览器环境：`window`，node 环境：`global`
+无论是浏览器环境，还是`node`环境，都会有一个全局对象
+浏览器环境：`window`，NodeJs环境：`global`
 全局对象的特点：
 
 - 全局对象的属性可以直接被访问
@@ -1869,40 +1953,14 @@ console.log(globalVar) // 可以在外部访问
   ```
 
 - 所有的全局变量、全局函数，都会附加到全局对象身上，称之为**全局污染**
-
+  即在全局作用域下，使用`var`声明的变量和函数声明，会挂载到`window`对象上
+  
   ```js
   var a = 100
   conso.log(window.a) // 100
+  function test() { console.log('invoked') }
+  window.test() // invoked
   ```
-
-为了避免全局污染，在函数的函数作用域内声明变量，但为了避免更繁琐，就出现了**立即执行函数**
-立即执行函数称之为`IIFE`，全称是`Immediately Invoked Function Expression`
-**立即执行函数通常用于强行改变作用域**
-
-```js
-// 将函数声明用小括号`()`包括，函数就变为了函数表达式，然后立即调用这个表达式，即为 立即执行函数
-// 又因为函数表达式的函数名称没有实际意义，所以可以省略函数名称（匿名函数）
-var exposure = (function () {
-  // console.log(this) // 全局对象
-  const a = 1 // 处在函数作用域中，且没有返回暴露出去，所以不会污染全局
-  const b = 2
-  function sum(a, b) {
-    return a + b
-  }
-  return {
-    sum
-  }
-})()
-console.log(exposure) // { sum: [Function: sum] }
-// 因为 exposure 全局声明并接受了返回值，其他JS文件就可以访问到 exposure.sum 函数
-// 但是 a 和 b 在函数作用域中，且没有返回，函数之外访问不到，极大地降低了全局污染
-
-// 补充：全局环境下，函数表达式不会挂载在全局对象上
-const fuc = function () {
-  console.log('fuc call')
-}
-window.fuc // undefined
-```
 
 
 
@@ -2124,7 +2182,7 @@ console.log(obj.property) // 调用getter，输出: 获取属性值 0（经过�
 
 
 
-# 函数`Function`
+# 函数`Function`👍
 
 
 
@@ -2170,24 +2228,47 @@ sum.call(window, 2, 3)
 ```js
 function hello() {}
 hello.type = '构造函数' // 自定义属性
-hello.prototype
+hello.prototype // 空对象 {}
+hello.__proto__ === Function.prototype // true
 ```
 
-包装类：为了增强原始类型的功能，为布尔、字符串、数字分别创建了各自的构造函数：`Number`、`String`、`Boolean`
-在语法上，将原始类型当作对象使用时（使用属性时），形如：
+
+
+## 包装对象
+
+为了增强原始类型的功能，为布尔、字符串、数字分别创建了各自的构造函数：`Number`、`String`、`Boolean`
+
+在语法上，将原始类型当作对象使用时（使用属性时）
+会自动在该位置用对应的构造函数，临时创建对象来访问原始类型的属性和方法
+这也是原始类型能使用`.`来使用属性的原因
 
 ```js
 const a = 123.332
-a.toFixed(2) // '123.33'
+a.toFixed(2) // '123.33'，内部临时使用 new Number() 包装，结束后自动销毁
+console.log(a) // 读取时，也会创建
 // but
 const b = new Number(123.332)
-a === b // false
+a === b // false，类型不一致
 typeof b // 'object'
 typeof a // 'number'
 ```
 
-会自动在该位置利用对应的构造函数，临时创建对象来访问原始类型的属性和方法
-这也是原始类型能使用`.`来使用属性的原因
+直接在原始类型上添加属性，访问为`undefined`
+
+```js
+a.name = '123'
+console.log(a.name) // undefined
+// 但在包装对象上可以，因为其类型是一个对象
+b.name = '123'
+console.log(b.name) // 123
+```
+
+怎么让原始类型也可以访问属性呢？在对应的构造函数的原型对象上添加即可
+
+```js
+Number.prototype.name = '123'
+a.name // 123
+```
 
 
 
@@ -2262,13 +2343,46 @@ function curry(func, ...fixedArgs) {
       // 参数足够了
       return func(...totalArgs)
     } else {
-      // 参数任然不够，继续柯里化
+      // 参数仍然不够，继续柯里化
       return curry(func, ...totalArgs)
     }
   }
 }
 const curriedCalculate = curry(calculate, 2)
 console.log(curriedCalculate(3, 4)) // 20
+```
+
+
+
+## 立即执行函数`IIFE`
+
+为了避免全局污染，在函数的函数作用域内声明变量，但为了避免更繁琐，就出现了**立即执行函数**
+立即执行函数称之为`IIFE`，全称是`Immediately Invoked Function Expression`
+**常用于强行改变和约束作用域**
+
+```js
+// 将函数声明用小括号`()`包括，函数就变为了函数表达式，然后立即调用这个表达式，即为 立即执行函数
+// 又因为函数表达式的函数名称没有实际意义，所以可以省略函数名称（匿名函数）
+var exposure = (function () {
+  // console.log(this) // 全局对象
+  const a = 1 // 处在函数作用域中，且没有返回暴露出去，所以不会污染全局
+  const b = 2
+  function sum(a, b) {
+    return a + b
+  }
+  return {
+    sum
+  }
+})()
+console.log(exposure) // { sum: [Function: sum] }
+// 因为 exposure 全局声明并接受了返回值，其他JS文件就可以访问到 exposure.sum 函数
+// 但是 a 和 b 在函数作用域中，且没有返回，函数之外访问不到，极大地降低了全局污染
+
+// 补充：全局环境下，函数表达式不会挂载在全局对象上
+const fuc = function () {
+  console.log('fuc call')
+}
+window.fuc // undefined
 ```
 
 
@@ -2294,25 +2408,42 @@ console.log(curriedCalculate(3, 4)) // 20
 
 
 
-# 原型`prototype`
+# `call & bind & apply`😀
+
+call方法的参数,应该是对象obj,如果参数为空或null、undefind,!则默认传参全局对象
+如果call传参不是以上类型,则转化成对应的包装对象,然后传入方法
+
+apply和call基本上一模一样，区别仅仅是后面参数的区别
+call后面是参数列表，而apply后面是一个参数数组
+
+bind用于将函数体内的this绑定到某个对象，然后返回一个新函数
+
+
+
+# 原型`prototype`🤏
 
 **每个函数都会自动附带一个属性`prototype`**，这个属性的值是一个普通对象，称之为**原型对象**
 默认情况下，`prototype`中有一个`constructor`属性，他是一个对象，指向该构造函数本身
 
 ```js
 Object.prototype.constructor === Object // true
+const obj = {}
+obj.__proto__.constructor === Object // true
+obj.__proto__.constructor.name // 'Object'
+Array.__proto__ === Function.prototype // true
 ```
 
 ![image-20250516185831590](./assets/image-20250516185831590.png)
 
-原型的作用是什么？
+**原型`prototype`的作用是什么？**
+
 因为JS要实现面向对象，原型是面向对象的手段之一
 而面向对象的语言则必须做到：能判定一个实例的类型，在JS中，通过原型就可以某个对象从属于哪个类型
 **简单来说，原型就是避免了对象类型的丢失**
 
 
 
-# 隐式原型`__proto__`
+## 隐式原型`__proto__`
 
 所有对象都有一个特殊的属性`__proto__`，称之为**隐式原型**，它指向对象的构造函数的原型`prototype`
 
@@ -2338,9 +2469,9 @@ const p = new Person(26, 'Kyle')
 p.sayHello()
 ```
 
-## 
 
-# 原型链
+
+## 原型链
 
 ```js
 Object.prototype.__proto__ // null, 比较特殊，固定指向 null
@@ -2384,32 +2515,48 @@ Object.setPrototypeOf(a, null)
 
 
 
-# 执行上下文
+# 执行上下文💪
+
+当代码执行进入一个环境时，就会为该环境创建一个执行上下文，本质就是一块内存空间
+环境分为：全局环境、函数环境
 
 **全局执行上下文**：所有JS代码执行之前，都必须有该环境
+**函数执行上下文**：调用执行函数，进入函数执行环境，对应生成函数执行时的执行上下文
 **执行上下文栈**：`call stack`，所有执行上下文组成的内存空间，这个空间是有限的
 **栈**：一种数据结构，先进后出，后进先出
 
-**JS引擎始终执行的是栈顶的上下文**
+![image-20250905110413582](./assets/image-20250905110413582.png)
+
+**JavaScript始终执行的是栈顶的上下文**
+
+执行上下文可存在多个，虽没有明确的数量限制，但如果超出分配的空间则会造成堆栈溢出（常见于递归死循环）
+
+执行上下文的生命周期有两个阶段：
+
+1. **创建阶段（进入执行上下文）**
+
+   函数被调用时，进入函数环境，为其创建一个执行上下文，此时进入创建阶段
+
+2. **执行阶段（代码执行）**
+
+   执行函数中的代码时，此时执行上下文进入执行阶段
 
 一个函数运行之前，会创建一块内存空间（函数执行上下文）
 空间中包含有该函数执行所需要的数据，为该函数执行提供支持，函数调用结束，执行环境销毁
 
+**执行上下文的包含的内容**：
 
-
-## 执行上下文的内容
-
-- `this`，在执行之前，首先要先确定
+- `this`，在执行之前，首先要先确定（即`this`是执行时才能确定）
 
 - `VO`：`Variable Object`，记录了该环境中所有声明的参数、变量和函数
-  全局执行上下文中也可以叫做`GO(Global Object)`，正在执行中的上下文叫做`AO(Active Object)`
+  **全局执行上下文中也可以叫做`GO(Global Object)`，正在执行中的上下文叫做`AO(Active Object)`**
   所说的函数声明和变量提升，就是放在了`VO`中
   在代码执行之前会确定执行的环境：
 
   1. 确定所有形参值以及特殊变量`arguments`
-  2. 确定函数中通过`var`声明的变量，将它们的值设置为`undefined`
-     如果`VO`中已有该名称，则直接忽略，等待代码开始执行后赋值
-  3. 确定函数中声明的函数，将它们的值设置为指向函数对象，如果`VO`中已存在该名称，则直接覆盖
+  2. 确定函数中通过`var`声明的变量，如果`VO`中没有该名称变量，先将值初始化为`undefined`（变量提升）
+     如果`VO`中已存在该变量，则直接忽略啥也不变，等待代码开始执行后按表达式进行赋值
+  3. 确定函数中声明的函数，将它们的值设置为指向函数对象，如果`VO`中已存在该名称，则直接覆盖前者
 
   ```js
   function A(a, b) {
@@ -2422,18 +2569,113 @@ Object.setPrototypeOf(a, null)
   }
   A(1, 2)
   // 输出：
-  // 1 ƒ b() {}
-  // ƒ () {} 123
+  // 1 ƒb() 
+  // ƒ() 123
   ```
 
 
 
-## 作用域链
+# 作用域😎
 
-**`VO`中包含一个额外的属性，该属性指向创建该`VO`的函数本身**
+作用域决定了代码区块中变量和其他资源的可见性和访问性
+可以这样理解：作用域就是一个独立的内存空间，让变量不会外泄、暴露出去
+也就是说**作用域最大的用处就是隔离变量，不同作用域下的同名变量也不会有冲突**
 
-**每个函数在创建时，会有一个隐藏属性`[[scope]]`，它指向创建或声明该函数时的`VO`**
-即一个函数所能访问的外部环境在创建或声明函数时就已经确定
+JS有三种作用域：**全局作用域、函数作用域、块级作用域**
+
+- 内部的作用域能访问外部，反之不行，访问时从内向外依次查找
+- **如果在函数内部访问了外部环境的变量，就会产生闭包现象**
+- **内部作用域能访问的外部环境，取决于函数定义的位置（关联声明时的`VO环境`）， 和函数调用无关**
+- **作用域内定义的变量（使用`var`声明）会提升到作用域顶部（执行上下文的`VO`），初始值为`undefined`**
+- **函数声明也会被提升，初始值就是函数自身引用，所以函数可以先调用后声明**
+- 函数表达式不会被提升，在声明赋值之前调用会报错
+- 相同作用域内，`var`可以重复声明同一变量，后值覆盖前值，`let | const`不行，会报错
+- 所有未定义直接赋值的变量自动声明为拥有全局作用域，挂载到全局对象上
+
+```js
+console.log(a, b, c) // 输出 undefined undefined [Function: c]
+var a = 1
+var b = function () {} // 函数表达式
+function c() {}
+
+// 相当于以下写法
+var a
+var b
+function c() {}
+console.log(a, b, c)
+// a 和 b 被提升到作用域顶部，但并未赋值，所以输出 undefined，而不是报错
+// c 是函数声明，同作用域下调用可以写在声明之前
+
+a = 1
+b = function () {}
+// 赋值并不会一起被提升，只提升变量的定义
+```
+
+
+
+## 全局作用域
+
+在全局作用域中声明的变量，能够在代码的任何地方被访问
+
+```js
+var globalVar = '我处于全局作用域'
+function checkScope() {
+  console.log(globalVar) // 可以访问全局变量
+}
+checkScope() // 输出: 我处于全局作用域
+console.log(globalVar) // 同样可以在函数外部访问
+```
+
+
+
+## 函数作用域
+
+函数作用域是指在函数内部声明的变量，只能在该函数内部被访问，函数外部无法访问
+
+```js
+function exampleFunction() {
+  var functionVar = '我处于函数作用域'
+  console.log(functionVar) // 能够在函数内部访问
+}
+exampleFunction() // 输出: 我处于函数作用域
+console.log(functionVar) // 会报错，因为在函数外部无法访问函数内部变量
+```
+
+
+
+## 块级作用域
+
+由`let`和`const`声明的变量所拥有块级作用域，`var`声明的不具备
+块级作用域是指由 `{}` 包裹的代码区域，像`if`语句、`for`、`while`循环等
+**代码执行时遇到花括号`{}`，会创建一个块级作用域，花括号结束，块级作用域销毁**
+
+```js
+{
+  let blockVar = '我处于块级作用域'
+  const constantVar = '我也是块级作用域'
+  var globalVar = '我是全局变量'
+  console.log(blockVar) // 可以在块内部访问
+}
+console.log(blockVar) // 会报错，在块外部无法访问
+console.log(constantVar) // 同样会报错
+console.log(globalVar) // 可以在外部访问
+```
+
+> [!IMPORTANT]
+>
+> 在块级作用域内使用`var`声明变量，外部依然可以访问
+>
+> **因为`var`并不具备块级作用域，它的作用域是函数作用域或者全局作用域**
+> 即使在块级作用域里使用`var`声明，它的作用域依然是整个函数或者全局环境
+
+
+
+## 作用域链🔗
+
+**`VO`变量对象中包含一个额外的属性，该属性指向创建该`VO`的函数本身**
+
+**每个函数在创建或声明时，会有一个隐藏属性`[[scope]]`，它指向声明该函数时所处的的`VO`环境**
+即**一个函数所能访问的外部环境在创建或声明时就已经确定，和在哪、何时调用函数没有关系**
 
 **当访问一个变量时，会先查找自身`VO`中是否存在，如果不存在，则依次查找`[[scope]]`属性**
 这种沿着作用域链找东西的方式，就会产生闭包这一现象
@@ -2461,6 +2703,38 @@ var eat = function () {
   eat() // 输出：'eat rice'
   // eat 函数访问的VO环境在声明时就确定了，和什么时候执行、在哪执行无关
 })
+```
+
+
+
+## 闭包`Closure`😆
+
+闭包是一种现象，是指在定义函数时周围环境中的信息可以在函数中使用
+即**调用执行函数时，只要在函数中使用了外部的数据，就形成了闭包现象**
+
+而沿着作用域链查找变量和数据的方式，正是实现闭包的手段
+
+通过闭包现象可以让外部环境访问到函数内部的局部变量（变量污染问题）
+
+```js
+function eat() {
+  const food = 'noodle'
+  const food_1 = 'rice'
+  return function () {
+    console.log(`我吃了${food}`)
+  }
+}
+const m = eat()
+// 此时闭包中有: { food: 'noodle' }，food_1没有被使用，被回收
+m() // '我吃了noodle'
+
+// 通过闭包可以让局部变量持续保存下来，不随着它的上下文环境一起销毁
+// 根本原因是：局部变量通过返回的方式，让外部持有内部数据的访问性
+// 导致自动垃圾回收机制无法回收销毁数据
+
+m = null
+// 将函数引用重置为 null ，则后续无法访问 eat 函数内部的数据，丢失了访问性
+// 此时垃圾回收机制正常回收
 ```
 
 
@@ -2713,7 +2987,7 @@ method(1, 2) // 1, 2, []
 > [!NOTE]
 >
 > - 静态导入必须写在代码顶端，不可放入代码块中
-> - 静态导入的是常量，不可更改
+> - 静态导入的是常量，不可重新赋值
 > - 静态导入的变量是符号绑定，存在引用传递，共用一块内存空间
 > - 导入时，可以通过关键字`as`对导入的符号进行重命名
 > - 可以使用`*`号导入所有的基本导出，形成一个导出对象

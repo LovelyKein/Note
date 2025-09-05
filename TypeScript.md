@@ -673,7 +673,7 @@ interface PersonInfo {
 
 
 
-# 索引器
+# 索引器`[props]`
 
 索引器在JS中的叫法又叫：属性表达式
 即不使用`.propName`来访问成员，而是使用`['propName']`来访问
@@ -725,7 +725,8 @@ interface User {
 
 ```ts
 // 定义一个类型别名
-type User = { name: string; age: number; gender: 'male' | 'female' }
+type GenderType = 'male' | 'female'
+type User = { name: string; age: number; gender: GenderType }
 const user: User = { name: 'Kyle', age: 25, gender: 'male' }
 // 复用
 function getUserList(): User[] {
@@ -738,7 +739,7 @@ function getUserList(): User[] {
 // 约束函数
 type AddFnType = {
   (a: number, b: number): number
-} // // 当大括号中没有具体属性字段时，大括号只是一个定界符，不是对象
+} // 当大括号中没有具体属性字段时，大括号只是一个定界符，不是对象
 // 或者
 type AddFnType = (a: number, b: number) => number
 const add: AddFnType = (a, b) => a + b
@@ -761,34 +762,11 @@ type StudentType = {
 type ChildType = UserType & StudentType & Child
 ```
 
-某些情况下，接口`interface`接口和`type`类型别名没有太大区别
-
-类型别名可以针对接口没法覆盖的场景，例如组合类型、交叉类型等
+使用索引器访问类型
 
 ```typescript
-// 1. 联合类型
-type NumAndString = number | string
-let age: NumAndString = 22
-age ='23'
-
-// 2. 交叉类型
-type SectionType = { name: string; age: number } & {
- height: number;
- name: string;
-}
-let zs: SectionType = {
- name: "张三",
- age: 20,
- height: 180
-}
-
-// 3. 提取接口中属性的类型
-interface PersonInfo {
- name: string;
- height: number;
-}
-type PersonHeight = PersonInfo["height"]
-let altitude: PersonHeight = 8848
+type User = { profile: { name: string; age: number } }
+type NameType = User['profile']['name'] // string
 ```
 
 
@@ -903,6 +881,27 @@ console.log(arr) // [1, 2, 3, 'a', 'b', 'c']
 ```
 
 ![image-20250818194553247](./assets/image-20250818194553247.png)
+
+
+
+# 模板字面量类型
+
+允许将业务规则直接编码进字符串类型中，用于强约束字符串模式
+
+```ts
+// 控制 API 命名规范、文件路径、CSS 类名等格式
+type Route = `/${'home' | 'login' | 'settings'}`
+const valid: Route = '/home' // ✅
+const invalid: Route = 'home' // ❌ Error
+```
+
+```ts
+// 用于 CSS Modules 或类似 Tailwind 的系统
+type ButtonVariant = `btn-${'primary' | 'danger' | 'ghost'}`
+function renderBtn(variant: ButtonVariant) {
+  return `<button class="${variant}">Click</button>`
+}
+```
 
 
 
