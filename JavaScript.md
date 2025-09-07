@@ -2,8 +2,7 @@
 
 # 属性描述符`Object.defineProperty`😺
 
-是一个普通对象，用于描述或修改对象属性的相关特性
-vue2中使用`Object.defineProperty`来做到数据的响应式
+是一个普通对象，用于描述或修改对象属性的相关特性，Vue2中使用`Object.defineProperty`来做到数据的响应式
 
 ```js
 const obj = {
@@ -2420,6 +2419,37 @@ bind用于将函数体内的this绑定到某个对象，然后返回一个新函
 
 
 
+# 严格模式`use strict`
+
+严格模式是从`ES5`开始新增的一种方式，是采用具有限制性`JavasScript`变体的一种方式从而使代码隐式地脱离"马虎模式`sloppy`"
+
+设立"严格模式"的目的，主要有以下几个：
+
+- 消除`JavaScript`的语法歧义，减少错误
+- 消除代码运行的一些不安全之处，保证代码运行的安全
+- 某些语法被限制，使引擎能更好地优化代码，提升执行效率
+- 为未来新版本的`JavasSript`做好铺垫
+
+在"严格模式下"，同样的代码可能会有不一样的运行结果，一些在"正常模式"下可以运行的语句，在"严格模式"下也可能不能运行
+
+```js
+// 1. 给整个脚本文件开启严格模式，第一行书写
+"use strict"
+
+// 2. 给某个函数开启
+function test() {
+  "use strict"
+  // ...
+}
+```
+
+- 没有声明的变量不能使用，也不可重复声明变量
+- 全局调用的函数内部的`this`不是全局对象，而是`undefined`
+- 函数中相同的形参名会报错
+- `eval()`将不会污染外部作用域
+
+
+
 # 原型`prototype`🤏
 
 **每个函数都会自动附带一个属性`prototype`**，这个属性的值是一个普通对象，称之为**原型对象**
@@ -2712,9 +2742,7 @@ var eat = function () {
 闭包是一种现象，是指在定义函数时周围环境中的信息可以在函数中使用
 即**调用执行函数时，只要在函数中使用了外部的数据，就形成了闭包现象**
 
-而沿着作用域链查找变量和数据的方式，正是实现闭包的手段
-
-通过闭包现象可以让外部环境访问到函数内部的局部变量（变量污染问题）
+而沿着作用域链查找变量和数据的方式，正是实现闭包的手段，通过闭包可以让外部访问到函数内部的局部变量
 
 ```js
 function eat() {
@@ -2730,7 +2758,7 @@ m() // '我吃了noodle'
 
 // 通过闭包可以让局部变量持续保存下来，不随着它的上下文环境一起销毁
 // 根本原因是：局部变量通过返回的方式，让外部持有内部数据的访问性
-// 导致自动垃圾回收机制无法回收销毁数据
+// 导致自动垃圾回收机制GC无法回收自动销毁数据
 
 m = null
 // 将函数引用重置为 null ，则后续无法访问 eat 函数内部的数据，丢失了访问性
@@ -2739,102 +2767,18 @@ m = null
 
 
 
-# `Web API`
+# 垃圾回收&内存泄漏
 
-和标准库不同，`WebAPI`是浏览器提供的一套API，用于操作浏览器窗口和界面
+程序的运行需要内存。只要程序提出要求,操作系统或者运行行时(runtime)就必须供给内存。
+对于持续运行的服务进程(daemon),必须及时释放不再用到的内存。否则,内存占用越来越高,轻则影响系统性能,重则导致进程崩溃。
+也就是说,不再用到的内存,如果没有及时释放,就叫做内存泄漏(memory leak)。
 
-![image-20250527153633805](./assets/image-20250527153633805.png)
-
-
-
-## `BOM`
-
-是`Browser Object Model`的缩写，简称浏览器对象模型
-主要处理浏览器窗口`window`和框架`iframe`，描述了与浏览器进行交互的方法和接口，提供和浏览器相关的操作
-
-```js
-// 在浏览器环境中，则有一个 window 的全局对象
-window.open() // 打开一个新的浏览器窗口，返回新窗口的 window 全局对象
-window.close() // 关闭由 open 方法打开的浏览器窗口
-setTimeout(callback, time) // 设置一个延时定时器，time[ms]后执行callback，返回计时器的 id
-clearTimeout() // 根据 id 清除延时定时器
-setInterval(callback, time) // 设置一个循环定时器，每隔time[ms]执行一次callback，返回计时器的 id
-clearInterval() // 根据 id 清除循环定时器
-alert() // 弹出提示框
-confirm() // 确认框
-... ...
-
-// window.location
-// 提供和地址栏相关的操作
-location.href = 'www.baidu.com' // 可以读取当前地址栏地址，也可以赋值，则本窗口跳转到新地址
-location.protocol // 获取或设置地址栏中的协议部分，如`http`或`https`
-location.host // 获取或设置地址中的主机及端口号，如`localhost:3000`
-location.port // 获取或设置地址中的端口号，如 `3000`
-location.pathname // 获取或设置地址中的路径部分，如`www.bilibili.com/history`中的`/history`部分
-location.hash // 获取或设置地址中的hash部分，如`http://localhost:18090/#/home`中的`#/home`部分
-location.reload() // 重载刷新页面
-... ...
-
-// window.history
-// 提供当前窗口历史记录相关的操作
-history.back() // 后退
-history.forward() // 前进
-history.go(offset_number) // 根据相对于当前页面的偏移量，进入历史记录中指定页面
-history.pushState() // 在历史记录中添加一条记录，页面不刷新
-history.replaceState() // 替换当前的记录，页面不刷新
-```
-
-
-
-## `DOM`
-
-`Document Object Model`，文档模型，提供和页面相关的操作，标准化组织是W3C
-它是一个对象，对应着 html 中的节点和标签
-
-![image-20250527164809196](./assets/image-20250527164809196.png)
-
-```js
-[document | dom].querySelector('.container') // 通过css选择器获取一个匹配的dom对象
-[document | dom].querySelectorAll('.div') // 得到所有匹配的dom伪数组
-
-// 更改 dom 结构
-dom.remove() // 从dom树种移除自身
-dom.removeChild(node) // 删除dom的子节点
-dom.insertBefore(node) // 在dom的子节点中，添加一个新的子节点到另一个子节点之前
-dom.appendChild(node) // 添加一个新的子节点在dom的子节点末尾
-
-// 监听 dom 的事件
-dom.onclick = function() {} // 点击事件
-dom.oncontextmenu // 右键菜单显示前触发回调
-dom.onmouseenter // 鼠标进入元素时触发（不冒泡）
-dom.onmouseleave // 鼠标离开元素时触发（不冒泡）
-dom.onmouseover // 鼠标进入元素时触发（冒泡）
-dom.onmouseout // 鼠标离开元素时触发（不冒泡）
-window.onwheel // 鼠标滚轮滚动时触发
-
-// 键盘事件
-window.keydown // 键盘按下时触发
-window.keyup // 键盘抬起时触发
-```
-
-事件传播机制
-
-![image-20250528190331804](./assets/image-20250528190331804.png)
-
-事件委托
-
-```js
-// 获取父元素
-const container = document.querySelector('.container')
-// 直接将事件注册在父元素上，通过冒泡机制
-container.onclick = function(e) {
-  if (e.target.tagName === 'BUTTON') {
-    console.log('click')
-  }
-}
-// 1. 避免有大量子元素时，需要依次在子元素上注册事件，提升效率和性能
-// 2. 避免动态的子元素添加进来时，需要再次为新的子元素注册事件
-```
+浏览器的Javascript具有自动垃圾回收机制(GC:Garbage Collecation),也就是说,执行环境会负责管理代码执
+行过程中使用的内存。其原理是:垃圾收集器会定期(周期性)找出那些不在继续使用的变量,然后释放其内存。
+但是这个过程不是实时的,因为其开销比较大并且GC时停止响应其他操作,所以垃圾回收器会按照固定的时间间隔周期性的执行。
+不再使用的变量也就是生命周期结束的变量,当然只可能是局部变量,全局变量的生命周期直至浏览器卸载页面才会结束。
+局部变量只在函数的执行过程中存在,而在这个过程程中会为局部变量在栈或堆上分配相应的空间,以存储它们的值
+然后在函数中使用这些变量,直至函数结束,而闭包中由于内部函数的原因,外部函数并不能算是结束。
 
 
 
@@ -2862,8 +2806,7 @@ for (let i = 0; i < 3; i++) {
 /**
 * 解决方案一： 使用 let
 * 1. let 会在每次循环创建新的块级作用域
-* 2. 每个 setTimeout 回调都会捕获当前循环的独立 i
-* 3. 即使延迟执行，也能保持正确的值
+* 2. 每个 setTimeout 回调都会捕获当前循环的独立 i，即使延迟执行，也能保持正确的值
 **/
 
 for (var i = 0; i < 3; i++) {
@@ -2980,7 +2923,7 @@ method(1, 2) // 1, 2, []
 
 # `ES Module`模块化
 
-官方标准的js模块化，支持`NodeJs`和浏览器环境，支持静态导入和动态导入
+官方标准的JS模块化规范，支持`NodeJs`和浏览器环境，支持静态导入和动态导入
 `ES Module`分为两种导出方式：具名导出（普通导出，可以导出多个）、默认导出（只能导出一个）
 **一个模块可以同时存在两种导出方式，最终都会合并为一个模块对象导出**
 
@@ -3019,8 +2962,6 @@ export { age, gender } // 特殊语法
 ```
 
 ```js
-// 导入模块
-
 // 1. 仅导入 default
 import info from './module.js'
 // 2. 仅导入 a 和 b
