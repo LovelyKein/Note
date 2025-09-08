@@ -451,20 +451,24 @@ throw new ReferenceError('找不到对应的成员')
 
   ```js
   const promise = new Promise((resolve, reject) => {
-    console.log('同步执行') // 会马上输出
-    resolve('成功')
+    console.log('同步执行') // 同步代码会马上输出
+    resolve('成功') // 同步代码
   })
   ```
 
-- **`Promise`中调用`resolve`或`reject`后，它们的回调函数才会被添加到微队列等待执行，是异步函数**
+- **`Promise`中`resolve`或`reject`后，只是改变了该`Promise`的状态，并不是立刻将回调函数添加到微队列**
+  **而是代码运行到`.then`处后才将对应的回调函数添加到微队列等待执行**
 
   ```js
   new Promise((resolve) => {
     console.log('同步代码')
-    resolve() // 把成功回调加入微任务队列
-  }).then(() => {
-    console.log('异步回调') // 会在同步代码之后执行
-  })
+    resolve() // 仅改 Promise 变状态
+  }).then(
+    // 将成功的回调加入微队列等待执行
+    () => {
+      console.log('异步回调')
+    }
+  )
   console.log('后续同步代码')
   // 输出顺序：同步代码 → 后续同步代码 → 异步回调
   ```
@@ -1341,6 +1345,34 @@ const obj = {
   length: 2
 }
 const arr = Array.from(obj) // arr = ['a', 'b']
+```
+
+
+
+# `WeakMap & WeakSet`
+
+
+
+
+
+# `eval`
+
+首先我们来看一下eval()函数的基本用法。
+eval()函数接收一个字符串作为参数,该字符串一个表示JavaScript表达式、语句或一系列语句的字符串。表达式
+可以包含变量与已存在对象的属性。
+
+eval作用域
+eval里面的代码在当前词法环境中执行,因此它可以看到外部变量
+
+```js
+const a = 1
+function test() {
+  let b = 2
+  eval('console.log(a + b)') // 3
+  eval('b = 10')
+  console.log(b) // 10
+}
+test()
 ```
 
 
